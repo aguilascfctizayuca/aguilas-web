@@ -65,7 +65,7 @@ function Navbar({ logoVisible }) {
             letterSpacing: '0.05em',
             whiteSpace: 'nowrap',
           }}>
-            AGUILAS CFC
+            ÁGUILAS CFC · TIZAYUCA
           </span>
         </div>
 
