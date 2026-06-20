@@ -236,3 +236,50 @@ body::before {
     animation: gradientShift 8s ease infinite;
   }
 }
+
+@keyframes parpadeo {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ===== NAVBAR PILLS ===== */
+.nav-pill {
+  fontFamily: 'Inter, sans-serif';
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: inherit;
+  text-decoration: none;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.85);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.nav-pill:hover {
+  background-color: var(--verde);
+  color: #000000;
+}
+
+.nav-pill-movil {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--texto-suave);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.nav-pill-movil:hover {
+  background-color: var(--verde);
+  color: #000000;
+}
+
+/* cuando hay scroll, los pills se oscurecen */
+.scrolled .nav-pill {
+  color: var(--texto-suave);
+}
+
+.scrolled .nav-pill {
+  color: var(--texto-suave);
+}

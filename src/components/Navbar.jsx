@@ -10,14 +10,6 @@ function Navbar({ logoVisible }) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const linkStyle = {
-    fontFamily: 'Inter, sans-serif',
-    fontSize: '0.85rem',
-    fontWeight: '500',
-    color: 'var(--texto-suave)',
-    textDecoration: 'none',
-  }
-
   const handleNavClick = (href) => {
     setMenuAbierto(false)
     const target = document.querySelector(href)
@@ -31,7 +23,7 @@ function Navbar({ logoVisible }) {
 
   return (
     <>
-      <nav style={{
+      <nav className={scrolled ? 'scrolled' : ''} style={{
         position: 'fixed',
         top: 0,
         left: 0,
@@ -49,7 +41,7 @@ function Navbar({ logoVisible }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <img
             src="/ACFC.png"
-            alt="Aguilas CFC"
+            alt="Águilas CFC"
             style={{
               width: '36px',
               height: '36px',
@@ -61,19 +53,19 @@ function Navbar({ logoVisible }) {
             fontFamily: 'Montserrat, sans-serif',
             fontWeight: '700',
             fontSize: '0.95rem',
-            color: 'var(--texto)',
+            color: scrolled ? 'var(--texto)' : '#ffffff',
             letterSpacing: '0.05em',
             whiteSpace: 'nowrap',
           }}>
-            ÁGUILAS CFC · TIZAYUCA
+            ÁGUILAS CFC TIZAYUCA
           </span>
         </div>
 
-        <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }} className="nav-desktop">
-          <a href="#nosotros" onClick={() => handleNavClick('#nosotros')} style={linkStyle}>Nosotros</a>
-          <a href="#servicios" onClick={() => handleNavClick('#servicios')} style={linkStyle}>Servicios</a>
-          <a href="#valores" onClick={() => handleNavClick('#valores')} style={linkStyle}>Valores</a>
-          <a href="#contacto" onClick={() => handleNavClick('#contacto')} style={linkStyle}>Contacto</a>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }} className="nav-desktop">
+          <a href="#nosotros" onClick={() => handleNavClick('#nosotros')} className="nav-pill">Nosotros</a>
+          <a href="#servicios" onClick={() => handleNavClick('#servicios')} className="nav-pill">Servicios</a>
+          <a href="#valores" onClick={() => handleNavClick('#valores')} className="nav-pill">Valores</a>
+          <a href="#contacto" onClick={() => handleNavClick('#contacto')} className="nav-pill">Contacto</a>
         </div>
 
         <button
@@ -89,9 +81,9 @@ function Navbar({ logoVisible }) {
             gap: '5px',
           }}
         >
-          <span style={{ display: 'block', width: '22px', height: '2px', backgroundColor: 'var(--texto)', transition: 'all 0.3s', transform: menuAbierto ? 'rotate(45deg) translate(5px, 5px)' : 'none' }} />
-          <span style={{ display: 'block', width: '22px', height: '2px', backgroundColor: 'var(--texto)', transition: 'all 0.3s', opacity: menuAbierto ? 0 : 1 }} />
-          <span style={{ display: 'block', width: '22px', height: '2px', backgroundColor: 'var(--texto)', transition: 'all 0.3s', transform: menuAbierto ? 'rotate(-45deg) translate(5px, -5px)' : 'none' }} />
+          <span style={{ display: 'block', width: '22px', height: '2px', backgroundColor: scrolled ? 'var(--texto)' : '#ffffff', transition: 'all 0.3s', transform: menuAbierto ? 'rotate(45deg) translate(5px, 5px)' : 'none' }} />
+          <span style={{ display: 'block', width: '22px', height: '2px', backgroundColor: scrolled ? 'var(--texto)' : '#ffffff', transition: 'all 0.3s', opacity: menuAbierto ? 0 : 1 }} />
+          <span style={{ display: 'block', width: '22px', height: '2px', backgroundColor: scrolled ? 'var(--texto)' : '#ffffff', transition: 'all 0.3s', transform: menuAbierto ? 'rotate(-45deg) translate(5px, -5px)' : 'none' }} />
         </button>
 
       </nav>
@@ -110,12 +102,12 @@ function Navbar({ logoVisible }) {
         transition: 'all 0.3s ease',
         display: 'flex',
         flexDirection: 'column',
-        gap: '1.5rem',
+        gap: '0.5rem',
       }}>
-        <a href="#nosotros" onClick={() => handleNavClick('#nosotros')} style={{ ...linkStyle, fontSize: '1.1rem' }}>Nosotros</a>
-        <a href="#servicios" onClick={() => handleNavClick('#servicios')} style={{ ...linkStyle, fontSize: '1.1rem' }}>Servicios</a>
-        <a href="#valores" onClick={() => handleNavClick('#valores')} style={{ ...linkStyle, fontSize: '1.1rem' }}>Valores</a>
-        <a href="#contacto" onClick={() => handleNavClick('#contacto')} style={{ ...linkStyle, fontSize: '1.1rem' }}>Contacto</a>
+        <a href="#nosotros" onClick={() => handleNavClick('#nosotros')} className="nav-pill-movil">Nosotros</a>
+        <a href="#servicios" onClick={() => handleNavClick('#servicios')} className="nav-pill-movil">Servicios</a>
+        <a href="#valores" onClick={() => handleNavClick('#valores')} className="nav-pill-movil">Valores</a>
+        <a href="#contacto" onClick={() => handleNavClick('#contacto')} className="nav-pill-movil">Contacto</a>
       </div>
     </>
   )

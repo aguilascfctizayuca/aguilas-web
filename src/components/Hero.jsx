@@ -6,16 +6,34 @@ const fotos = [
   '/foto-servicio2.jpg',
 ]
 
+const TEXTO_COMPLETO = 'Ven como eres. Sal diferente.'
+
 function Hero() {
   const [animado, setAnimado] = useState(false)
   const [hover, setHover] = useState(false)
   const [fotoActual, setFotoActual] = useState(0)
   const [fadeIn, setFadeIn] = useState(true)
+  const [textoVisible, setTextoVisible] = useState('')
 
   useEffect(() => {
     const timer = setTimeout(() => setAnimado(true), 1500)
     return () => clearTimeout(timer)
   }, [])
+
+  // Typewriter — arranca cuando animado se activa
+  useEffect(() => {
+    if (!animado) return
+    let i = 0
+    const delay = setTimeout(() => {
+      const interval = setInterval(() => {
+        setTextoVisible(TEXTO_COMPLETO.slice(0, i + 1))
+        i++
+        if (i >= TEXTO_COMPLETO.length) clearInterval(interval)
+      }, 45)
+      return () => clearInterval(interval)
+    }, 800) // espera un poco después de que aparece el h1
+    return () => clearTimeout(delay)
+  }, [animado])
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -97,6 +115,7 @@ function Hero() {
           <span style={{ color: '#3DDC04', fontStyle: 'italic' }}>para ti</span>
         </h1>
 
+        {/* Typewriter */}
         <p style={{
           fontFamily: 'Inter, sans-serif',
           fontWeight: '300',
@@ -105,14 +124,21 @@ function Hero() {
           maxWidth: '460px',
           lineHeight: '2',
           marginBottom: '4rem',
-          opacity: animado ? 1 : 0,
-          transition: 'opacity 0.8s ease 0.6s',
+          minHeight: '2em',
         }}>
-          Conoce a Dios. Vive en libertad. Descubre tu propósito.
+          {textoVisible}
+          <span style={{
+            display: 'inline-block',
+            width: '2px',
+            height: '1.1em',
+            backgroundColor: 'var(--verde)',
+            marginLeft: '3px',
+            verticalAlign: 'middle',
+            animation: 'parpadeo 0.8s step-end infinite',
+          }} />
         </p>
 
-        
-          <a href="https://wa.me/527711107903?text=Hola,%20me%20gustar%C3%ADa%20saber%20m%C3%A1s%20sobre%20%C3%81guilas%20CFC"
+        <a href="https://wa.me/527711107903?text=Hola,%20me%20gustar%C3%ADa%20saber%20m%C3%A1s%20sobre%20%C3%81guilas%20CFC"
           target="_blank"
           rel="noreferrer"
           onMouseEnter={() => setHover(true)}
