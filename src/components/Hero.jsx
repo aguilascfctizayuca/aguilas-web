@@ -187,6 +187,7 @@ function Hero() {
           {fotos.map((_, i) => (
             <button
               key={i}
+              aria-label={"Ver foto " + (i + 1)}
               onClick={() => setFotoActual(i)}
               style={{
                 width: i === fotoActual ? '24px' : '8px',
