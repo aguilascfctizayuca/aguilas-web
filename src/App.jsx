@@ -7,6 +7,7 @@ import Valores from './components/Valores'
 import Contacto from './components/Contacto'
 import Footer from './components/Footer'
 import LogoAnimado from './components/LogoAnimado'
+import RedesSociales from './components/RedesSociales'
 
 function App() {
   const [logoVisible, setLogoVisible] = useState(false)
@@ -20,6 +21,7 @@ function App() {
       <Nosotros />
       <Valores />
       <Contacto />
+      <RedesSociales />
       <Footer />
     </>
   )
