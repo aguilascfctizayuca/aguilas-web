@@ -66,6 +66,7 @@ function Galeria() {
             <img
               key={i}
               src={foto}
+              alt={`Momento Aguilas CFC ${i + 1}`}
               style={{
                 position: 'absolute',
                 top: 0, left: 0,
@@ -79,25 +80,33 @@ function Galeria() {
           ))}
 
           {/* Botones */}
-          <button onClick={anterior} style={{
-            position: 'absolute', left: '1rem', top: '50%',
-            transform: 'translateY(-50%)',
-            background: 'rgba(0,0,0,0.4)', border: 'none',
-            color: '#fff', fontSize: '1.5rem', width: '44px', height: '44px',
-            borderRadius: '50%', cursor: 'pointer', zIndex: 2,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            ‹
+          <button
+            aria-label="Foto anterior"
+            onClick={anterior}
+            style={{
+              position: 'absolute', left: '1rem', top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'rgba(0,0,0,0.5)', border: 'none',
+              color: '#fff', fontSize: '1.5rem', width: '44px', height: '44px',
+              borderRadius: '50%', cursor: 'pointer', zIndex: 2,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            &#8249;
           </button>
-          <button onClick={siguiente} style={{
-            position: 'absolute', right: '1rem', top: '50%',
-            transform: 'translateY(-50%)',
-            background: 'rgba(0,0,0,0.4)', border: 'none',
-            color: '#fff', fontSize: '1.5rem', width: '44px', height: '44px',
-            borderRadius: '50%', cursor: 'pointer', zIndex: 2,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            ›
+          <button
+            aria-label="Foto siguiente"
+            onClick={siguiente}
+            style={{
+              position: 'absolute', right: '1rem', top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'rgba(0,0,0,0.5)', border: 'none',
+              color: '#fff', fontSize: '1.5rem', width: '44px', height: '44px',
+              borderRadius: '50%', cursor: 'pointer', zIndex: 2,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            &#8250;
           </button>
         </div>
 
@@ -111,6 +120,7 @@ function Galeria() {
           {fotos.map((foto, i) => (
             <button
               key={i}
+              aria-label={`Ver foto ${i + 1}`}
               onClick={() => setActual(i)}
               style={{
                 width: '60px',
@@ -124,7 +134,11 @@ function Galeria() {
                 flexShrink: 0,
               }}
             >
-              <img src={foto} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img
+                src={foto}
+                alt={`Miniatura ${i + 1}`}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
             </button>
           ))}
         </div>
