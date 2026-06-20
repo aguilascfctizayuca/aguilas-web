@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react'
 import useReveal from '../hooks/useReveal'
 
 const fotos = [
-  '/galeria-1.jpg',
-  '/galeria-2.jpg',
-  '/galeria-3.jpg',
-  '/galeria-4.jpg',
-  '/galeria-5.jpg',
-  '/galeria-6.jpg',
+  '/galeria-1.webp',
+  '/galeria-2.webp',
+  '/galeria-3.webp',
+  '/galeria-4.webp',
+  '/galeria-5.webp',
+  '/galeria-6.webp',
 ]
 
 function Galeria() {

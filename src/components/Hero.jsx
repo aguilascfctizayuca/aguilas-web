@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 
 const fotos = [
-  '/foto-worship.jpg',
-  '/foto-servicio1.jpg',
-  '/foto-servicio2.jpg',
+  '/foto-worship.webp',
+  '/foto-servicio1.webp',
+  '/foto-servicio2.webp',
 ]
 
 const TEXTO_COMPLETO = 'Ven como eres. Sal diferente.'
