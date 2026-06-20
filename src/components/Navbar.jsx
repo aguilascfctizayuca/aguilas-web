@@ -40,7 +40,7 @@ function Navbar({ logoVisible }) {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <img
-            src="/ACFC.png"
+            src="/ACFC.webp"
             alt="Águilas CFC"
             style={{
               width: '36px',
@@ -81,7 +81,7 @@ function Navbar({ logoVisible }) {
             flexDirection: 'column',
             gap: '5px',
           }}
-          
+
         >
           <span style={{ display: 'block', width: '22px', height: '2px', backgroundColor: scrolled ? 'var(--texto)' : '#ffffff', transition: 'all 0.3s', transform: menuAbierto ? 'rotate(45deg) translate(5px, 5px)' : 'none' }} />
           <span style={{ display: 'block', width: '22px', height: '2px', backgroundColor: scrolled ? 'var(--texto)' : '#ffffff', transition: 'all 0.3s', opacity: menuAbierto ? 0 : 1 }} />

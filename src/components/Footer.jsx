@@ -28,7 +28,7 @@ function Footer() {
         marginBottom: '4rem',
       }}>
         <div style={{ flex: '1 1 200px' }}>
-          <img src="/ACFC.png" alt="Águilas CFC" style={{ width: '56px', height: '56px', marginBottom: '1rem' }} />
+          <img src="/ACFC.webp" alt="Águilas CFC" style={{ width: '56px', height: '56px', marginBottom: '1rem' }} />
           <p style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: '900', fontSize: '1rem', color: '#ffffff', marginBottom: '0.5rem' }}>
             ÁGUILAS CFC
           </p>
