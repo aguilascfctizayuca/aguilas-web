@@ -2,7 +2,7 @@ function Footer() {
   return (
     <footer style={{
       backgroundColor: 'var(--fondo)',
-      borderTop: '1px solid #e0e0e0',
+      borderTop: '1px solid var(--borde)',
       padding: '5rem 2rem 3rem',
     }}>
 

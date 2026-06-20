@@ -18,8 +18,9 @@
   :root {
     --fondo: #0a0a0a;
     --texto: #f5f5f5;
-    --texto-suave: #555555;
-    --borde: #1a1a1a;
+    --texto-suave: #777777;
+    --borde: #2a2a2a;
+    --verde: #3DDC04;
   }
 }
 

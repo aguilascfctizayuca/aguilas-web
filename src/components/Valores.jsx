@@ -53,7 +53,7 @@ function Valores() {
         {valores.map((valor) => (
           <div key={valor.titulo} style={{
             padding: '2rem 1.5rem',
-            border: '1px solid #e5e5e5',
+            border: '1px solid var(--borde)',
           }}>
             <p style={{
               fontFamily: 'Montserrat, sans-serif',

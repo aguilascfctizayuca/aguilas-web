@@ -9,7 +9,7 @@ function CardServicio({ dia, subtitulo, horarios }) {
       onMouseLeave={() => setHover(false)}
       style={{
         flex: '1 1 240px',
-        border: '1px solid #e0e0e0',
+        border: '1px solid var(--borde)',
         padding: '3rem 2rem',
         textAlign: 'center',
         cursor: 'default',
