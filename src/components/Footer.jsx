@@ -9,8 +9,8 @@ function Footer() {
   const horarios = [
     'Domingo 9:45 AM',
     'Domingo 11:45 AM',
-    'Miercoles 7:00 PM',
-    'Lunes 7:30 PM - Tabernaculo',
+    'Miércoles 7:00 PM',
+    'Lunes 7:30 PM - Tabernáculo',
   ]
 
   return (
@@ -28,15 +28,15 @@ function Footer() {
         marginBottom: '4rem',
       }}>
         <div style={{ flex: '1 1 200px' }}>
-          <img src="/ACFC.png" alt="Aguilas CFC" style={{ width: '56px', height: '56px', marginBottom: '1rem' }} />
+          <img src="/ACFC.png" alt="Águilas CFC" style={{ width: '56px', height: '56px', marginBottom: '1rem' }} />
           <p style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: '900', fontSize: '1rem', color: '#ffffff', marginBottom: '0.5rem' }}>
-            AGUILAS CFC
+            ÁGUILAS CFC
           </p>
           <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.85rem', color: '#666666', lineHeight: '1.7', marginBottom: '1rem' }}>
-            Tizayuca, Hidalgo, Mexico
+            Tizayuca, Hidalgo, México
           </p>
           <p style={{ fontFamily: 'Montserrat, sans-serif', fontStyle: 'italic', fontWeight: '700', fontSize: '0.9rem', color: '#3DDC04' }}>
-            Hay un lugar para ti.
+            Hay un lugar para ti
           </p>
         </div>
         <div style={{ flex: '1 1 150px' }}>
@@ -66,7 +66,7 @@ function Footer() {
           <a href="https://wa.me/527711107903" target="_blank" rel="noreferrer" style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: '0.85rem', color: '#666666', textDecoration: 'none', marginBottom: '0.75rem' }}>
             WhatsApp
           </a>
-          <a href="https://www.facebook.com/aguilascentrofamiliarcristianotizayuca" target="_blank" rel="noreferrer" style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: '0.85rem', color: '#666666', textDecoration: 'none', marginBottom: '0.75rem' }}>
+          <a href="https://www.facebook.com/share/1DtXzksGaU/?mibextid=wwXIfr" target="_blank" rel="noreferrer" style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: '0.85rem', color: '#666666', textDecoration: 'none', marginBottom: '0.75rem' }}>
             Facebook
           </a>
           <a href="https://www.instagram.com/aguilascfctizayuca" target="_blank" rel="noreferrer" style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: '0.85rem', color: '#666666', textDecoration: 'none', marginBottom: '0.75rem' }}>
@@ -86,10 +86,10 @@ function Footer() {
         gap: '1rem',
       }}>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: '#444444' }}>
-          2026 Aguilas Centro Familiar Cristiano Tizayuca
+          2026 Águilas Centro Familiar Cristiano Tizayuca
         </p>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.75rem', color: '#444444' }}>
-          Tizayuca, Hidalgo, Mexico
+          Tizayuca, Hidalgo, México
         </p>
       </div>
     </footer>

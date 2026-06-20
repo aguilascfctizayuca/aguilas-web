@@ -70,7 +70,7 @@ section {
 }
 
 .redes-container {
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
   opacity: 0;
   transform: translateY(40px);
@@ -102,7 +102,7 @@ section {
 
 .redes-cards {
   display: flex;
-  gap: 24px;
+  gap: 16px;
   justify-content: center;
   flex-wrap: wrap;
 }
@@ -110,13 +110,13 @@ section {
 .red-card {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 28px 32px;
+  gap: 16px;
+  padding: 24px 20px;
   border-radius: 16px;
   text-decoration: none;
   flex: 1;
-  min-width: 280px;
-  max-width: 400px;
+  min-width: 260px;
+  max-width: 320px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border: 1px solid rgba(255,255,255,0.08);
 }
@@ -135,8 +135,8 @@ section {
 }
 
 .red-icon {
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
   color: #3DDC04;
 }
@@ -151,24 +151,29 @@ section {
   flex-direction: column;
   gap: 4px;
   flex: 1;
+  min-width: 0;
 }
 
 .red-nombre {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #ffffff;
 }
 
 .red-handle {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #888888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .red-cta {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: #3DDC04;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* ===== CURSOR GLOW ===== */
@@ -244,10 +249,9 @@ body::before {
 
 /* ===== NAVBAR PILLS ===== */
 .nav-pill {
-  fontFamily: 'Inter, sans-serif';
+  font-family: 'Inter', sans-serif;
   font-size: 0.85rem;
   font-weight: 500;
-  color: inherit;
   text-decoration: none;
   padding: 0.4rem 1rem;
   border-radius: 999px;
@@ -275,11 +279,23 @@ body::before {
   color: #000000;
 }
 
-/* cuando hay scroll, los pills se oscurecen */
 .scrolled .nav-pill {
   color: var(--texto-suave);
 }
 
-.scrolled .nav-pill {
-  color: var(--texto-suave);
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+  .valores-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .redes-cards {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .red-card {
+    width: 100%;
+    max-width: 100%;
+  }
 }

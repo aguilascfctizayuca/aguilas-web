@@ -1,19 +1,6 @@
 import { useState } from 'react'
 import useReveal from '../hooks/useReveal'
 
-const iconos = {
-  'Jesus': '✝️',
-  'Familia': '🏠',
-  'Fe en las personas': '🤝',
-  'Unidad': '🔗',
-  'Comunidad': '👥',
-  'Legado': '🌱',
-  'Crecimiento': '📈',
-  'Proposito': '🎯',
-  'Generosidad': '🎁',
-  'Excelencia': '⭐',
-}
-
 function Valores() {
   const refTitulo = useReveal()
   const refGrid = useReveal()
@@ -60,7 +47,7 @@ function Valores() {
         </h2>
       </div>
 
-      <div ref={refGrid} className="reveal" style={{
+      <div ref={refGrid} className="reveal valores-grid" style={{
         maxWidth: '900px',
         margin: '0 auto',
         display: 'grid',
