@@ -46,11 +46,10 @@ function Navbar({ logoVisible }) {
         transition: 'background-color 0.4s ease',
       }}>
 
-        {/* Logo + Nombre */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <img
             src="/ACFC.png"
-            alt="Águilas CFC"
+            alt="Aguilas CFC"
             style={{
               width: '36px',
               height: '36px',
@@ -66,23 +65,17 @@ function Navbar({ logoVisible }) {
             letterSpacing: '0.05em',
             whiteSpace: 'nowrap',
           }}>
-            ÁGUILAS CFC
+            AGUILAS CFC
           </span>
         </div>
 
-        {/* Links desktop */}
-        <div style={{
-          display: 'flex',
-          gap: '2rem',
-          alignItems: 'center',
-        }} className="nav-desktop">
+        <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }} className="nav-desktop">
           <a href="#nosotros" onClick={() => handleNavClick('#nosotros')} style={linkStyle}>Nosotros</a>
           <a href="#servicios" onClick={() => handleNavClick('#servicios')} style={linkStyle}>Servicios</a>
-          <a href="#grupos" onClick={() => handleNavClick('#grupos')} style={linkStyle}>Grupos</a>
-          <a href="#dar" onClick={() => handleNavClick('#dar')} style={linkStyle}>Dar</a>
+          <a href="#valores" onClick={() => handleNavClick('#valores')} style={linkStyle}>Valores</a>
+          <a href="#contacto" onClick={() => handleNavClick('#contacto')} style={linkStyle}>Contacto</a>
         </div>
 
-        {/* Botón hamburguesa */}
         <button
           onClick={() => setMenuAbierto(!menuAbierto)}
           className="nav-hamburger"
@@ -103,7 +96,6 @@ function Navbar({ logoVisible }) {
 
       </nav>
 
-      {/* Menú móvil */}
       <div style={{
         position: 'fixed',
         top: '64px',
@@ -122,8 +114,8 @@ function Navbar({ logoVisible }) {
       }}>
         <a href="#nosotros" onClick={() => handleNavClick('#nosotros')} style={{ ...linkStyle, fontSize: '1.1rem' }}>Nosotros</a>
         <a href="#servicios" onClick={() => handleNavClick('#servicios')} style={{ ...linkStyle, fontSize: '1.1rem' }}>Servicios</a>
-        <a href="#grupos" onClick={() => handleNavClick('#grupos')} style={{ ...linkStyle, fontSize: '1.1rem' }}>Grupos</a>
-        <a href="#dar" onClick={() => handleNavClick('#dar')} style={{ ...linkStyle, fontSize: '1.1rem' }}>Dar</a>
+        <a href="#valores" onClick={() => handleNavClick('#valores')} style={{ ...linkStyle, fontSize: '1.1rem' }}>Valores</a>
+        <a href="#contacto" onClick={() => handleNavClick('#contacto')} style={{ ...linkStyle, fontSize: '1.1rem' }}>Contacto</a>
       </div>
     </>
   )

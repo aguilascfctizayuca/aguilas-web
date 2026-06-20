@@ -4,11 +4,11 @@ const RedesSociales = () => {
   const ref = useReveal();
 
   return (
-    <section className="redes-section" ref={ref}>
-      <div className="redes-container visible">
+    <section className="redes-section">
+      <div className="redes-container reveal" ref={ref}>
         <div className="redes-header">
           <h2>Únete a nuestra comunidad</h2>
-          <p>Síguenos y mantente conectado con todo lo que Dios esta haciendo en Águilas CFC</p>
+          <p>Síguenos y mantente conectado con todo lo que Dios está haciendo en Águilas CFC</p>
         </div>
         <div className="redes-cards">
           <a href="https://www.instagram.com/aguilascfctizayuca" target="_blank" rel="noopener noreferrer" className="red-card instagram">
@@ -21,7 +21,7 @@ const RedesSociales = () => {
               <span className="red-nombre">Instagram</span>
               <span className="red-handle">@aguilascfctizayuca</span>
             </div>
-            <div className="red-cta">Siguenos</div>
+            <div className="red-cta">Síguenos</div>
           </a>
           <a href="https://www.facebook.com/aguilascentrofamiliarcristianotizayuca" target="_blank" rel="noopener noreferrer" className="red-card facebook">
             <div className="red-icon">
@@ -31,9 +31,9 @@ const RedesSociales = () => {
             </div>
             <div className="red-info">
               <span className="red-nombre">Facebook</span>
-              <span className="red-handle">Aguilas Centro Familiar Cristiano Tizayuca</span>
+              <span className="red-handle">Águilas Centro Familiar Cristiano Tizayuca</span>
             </div>
-            <div className="red-cta">Siguenos</div>
+            <div className="red-cta">Síguenos</div>
           </a>
         </div>
       </div>

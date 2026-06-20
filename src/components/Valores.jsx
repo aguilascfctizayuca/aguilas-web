@@ -1,7 +1,10 @@
 import { useState } from 'react'
+import useReveal from '../hooks/useReveal'
 
 function Valores() {
   const [abierto, setAbierto] = useState(null)
+  const refTitulo = useReveal()
+  const refLista = useReveal()
 
   const valores = [
     { titulo: 'Jesús', descripcion: 'El centro de todo lo que hacemos.' },
@@ -27,7 +30,7 @@ function Valores() {
       borderTop: '1px solid #e5e5e5',
     }}>
 
-      <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+      <div ref={refTitulo} className="reveal" style={{ textAlign: 'center', marginBottom: '4rem' }}>
         <p style={{
           color: 'var(--verde)',
           fontFamily: 'Inter, sans-serif',
@@ -45,11 +48,11 @@ function Valores() {
           fontSize: 'clamp(1.8rem, 4vw, 3rem)',
           color: 'var(--texto)',
         }}>
-          Nuestros valores
+          Nuestros Valores
         </h2>
       </div>
 
-      <div style={{ maxWidth: '700px', margin: '0 auto' }}>
+      <div ref={refLista} className="reveal" style={{ maxWidth: '700px', margin: '0 auto' }}>
         {valores.map((valor, index) => (
           <div
             key={valor.titulo}
@@ -92,7 +95,6 @@ function Valores() {
                 +
               </span>
             </button>
-
             <div style={{
               overflow: 'hidden',
               maxHeight: abierto === valor.titulo ? '200px' : '0',

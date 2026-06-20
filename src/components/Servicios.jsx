@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import useReveal from '../hooks/useReveal'
 
 function CardServicio({ dia, subtitulo, horarios }) {
   const [hover, setHover] = useState(false)
@@ -21,19 +22,15 @@ function CardServicio({ dia, subtitulo, horarios }) {
         boxShadow: hover ? '0 0 30px rgba(61,220,4,0.25)' : '0 0 0px rgba(61,220,4,0)',
       }}
     >
-      {/* Fondo que se llena de izquierda a derecha */}
       <div style={{
         position: 'absolute',
-        top: 0,
-        left: 0,
+        top: 0, left: 0,
         width: hover ? '100%' : '0%',
         height: '100%',
         backgroundColor: '#2BAF1E',
         transition: 'width 0.4s ease',
         zIndex: 0,
       }} />
-
-      {/* Contenido encima del fondo */}
       <div style={{ position: 'relative', zIndex: 1 }}>
         <p style={{
           fontFamily: 'Montserrat, sans-serif',
@@ -45,7 +42,6 @@ function CardServicio({ dia, subtitulo, horarios }) {
         }}>
           {dia}
         </p>
-
         {subtitulo && (
           <p style={{
             fontFamily: 'Inter, sans-serif',
@@ -60,7 +56,6 @@ function CardServicio({ dia, subtitulo, horarios }) {
             {subtitulo}
           </p>
         )}
-
         {horarios.map((h) => (
           <p key={h} style={{
             fontFamily: 'Inter, sans-serif',
@@ -79,6 +74,9 @@ function CardServicio({ dia, subtitulo, horarios }) {
 }
 
 function Servicios() {
+  const refTitulo = useReveal()
+  const refCards = useReveal()
+
   return (
     <section id="servicios" style={{
       backgroundColor: 'var(--fondo)',
@@ -86,7 +84,7 @@ function Servicios() {
       borderTop: '1px solid var(--borde)',
     }}>
 
-      <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
+      <div ref={refTitulo} className="reveal" style={{ textAlign: 'center', marginBottom: '5rem' }}>
         <p style={{
           color: 'var(--verde)',
           fontFamily: 'Inter, sans-serif',
@@ -108,7 +106,7 @@ function Servicios() {
         </h2>
       </div>
 
-      <div style={{
+      <div ref={refCards} className="reveal" style={{
         display: 'flex',
         gap: '1.5rem',
         justifyContent: 'center',
