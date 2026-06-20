@@ -39,13 +39,25 @@ function Contacto() {
         Tizayuca, Hidalgo, México
       </p>
 
-      <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
-        <a href="https://www.facebook.com/aguilascentrofamiliarcristianotizayuca" target="_blank" rel="noreferrer" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.85rem', fontWeight: '600', color: 'var(--verde)', textDecoration: 'none', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-          Facebook
-        </a>
-        <a href="https://www.instagram.com/aguilascfctizayuca" target="_blank" rel="noreferrer" style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.85rem', fontWeight: '600', color: 'var(--verde)', textDecoration: 'none', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-          Instagram
-        </a>
+      {/* Mapa */}
+      <div style={{
+        width: '100%',
+        maxWidth: '800px',
+        margin: '0 auto 3rem auto',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        boxShadow: '0 8px 30px rgba(0,0,0,0.1)',
+      }}>
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3733.5!2d-98.9736736!3d19.8445632!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85d19164776bf50b%3A0x1c5afbc0776cadef!2s%C3%81guilas%20Centro%20Familiar%20Cristiano%20Tizayuca!5e0!3m2!1ses!2smx!4v1234567890!5m2!1ses!2smx"
+          width="100%"
+          height="400"
+          style={{ border: 0, display: 'block' }}
+          allowFullScreen=""
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          title="Ubicación Águilas CFC"
+        />
       </div>
 
     </section>

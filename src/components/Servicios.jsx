@@ -8,55 +8,72 @@ function CardServicio({ dia, subtitulo, horarios }) {
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       style={{
-        flex: '1 1 240px',
-        border: '1px solid var(--borde)',
-        padding: '3rem 2rem',
+        flex: '1 1 220px',
+        padding: '2.5rem 2rem',
         textAlign: 'center',
         cursor: 'default',
-        backgroundColor: hover ? '#2BAF1E' : 'transparent',
-        transform: hover ? 'translateY(-8px)' : 'translateY(0)',
-        transition: 'all 0.3s ease',
+        borderRadius: '12px',
+        border: '1.5px solid var(--verde)',
+        position: 'relative',
+        overflow: 'hidden',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        transform: hover ? 'translateY(-6px)' : 'translateY(0)',
+        boxShadow: hover ? '0 0 30px rgba(61,220,4,0.25)' : '0 0 0px rgba(61,220,4,0)',
       }}
     >
-      <p style={{
-        fontFamily: 'Montserrat, sans-serif',
-        fontWeight: '900',
-        fontSize: '1.5rem',
-        color: hover ? '#ffffff' : 'var(--texto)',
-        marginBottom: '0.75rem',
-        transition: 'color 0.3s ease',
-        fontWeight: '900',
-      }}>
-        {dia}
-      </p>
+      {/* Fondo que se llena de izquierda a derecha */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: hover ? '100%' : '0%',
+        height: '100%',
+        backgroundColor: '#2BAF1E',
+        transition: 'width 0.4s ease',
+        zIndex: 0,
+      }} />
 
-      {subtitulo && (
+      {/* Contenido encima del fondo */}
+      <div style={{ position: 'relative', zIndex: 1 }}>
         <p style={{
-          fontFamily: 'Inter, sans-serif',
-          fontSize: '0.75rem',
-          fontWeight: '500',
-          letterSpacing: '0.15em',
-          textTransform: 'uppercase',
-          color: hover ? 'rgba(255,255,255,0.7)' : 'var(--texto-suave)',
+          fontFamily: 'Montserrat, sans-serif',
+          fontWeight: '900',
+          fontSize: '1.5rem',
+          color: hover ? '#ffffff' : 'var(--texto)',
           marginBottom: '0.75rem',
           transition: 'color 0.3s ease',
         }}>
-          {subtitulo}
+          {dia}
         </p>
-      )}
 
-      {horarios.map((h) => (
-        <p key={h} style={{
-          fontFamily: 'Inter, sans-serif',
-          fontSize: '1.1rem',
-          fontWeight: '300',
-          color: hover ? '#ffffff' : 'var(--texto)',
-          lineHeight: '1.8',
-          transition: 'color 0.3s ease',
-        }}>
-          {h}
-        </p>
-      ))}
+        {subtitulo && (
+          <p style={{
+            fontFamily: 'Inter, sans-serif',
+            fontSize: '0.75rem',
+            fontWeight: '500',
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+            color: hover ? 'rgba(255,255,255,0.8)' : 'var(--texto-suave)',
+            marginBottom: '0.75rem',
+            transition: 'color 0.3s ease',
+          }}>
+            {subtitulo}
+          </p>
+        )}
+
+        {horarios.map((h) => (
+          <p key={h} style={{
+            fontFamily: 'Inter, sans-serif',
+            fontSize: '1.1rem',
+            fontWeight: '300',
+            color: hover ? '#ffffff' : 'var(--texto)',
+            lineHeight: '1.8',
+            transition: 'color 0.3s ease',
+          }}>
+            {h}
+          </p>
+        ))}
+      </div>
     </div>
   )
 }

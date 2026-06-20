@@ -52,9 +52,24 @@ function Nosotros() {
           </p>
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3rem' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
 
-          <div ref={ref2} className="reveal" style={{ flex: '1 1 260px' }}>
+          <div ref={ref2} className="reveal" style={{
+            flex: '1 1 260px',
+            padding: '2rem',
+            borderRadius: '12px',
+            borderLeft: '4px solid var(--verde)',
+            backgroundColor: 'rgba(61, 220, 4, 0.05)',
+          }}>
+            <p style={{
+              fontFamily: 'Montserrat, sans-serif',
+              fontWeight: '900',
+              fontSize: '1.5rem',
+              color: 'var(--verde)',
+              marginBottom: '0.25rem',
+            }}>
+              ◎
+            </p>
             <p style={{
               fontFamily: 'Montserrat, sans-serif',
               fontWeight: '700',
@@ -62,13 +77,13 @@ function Nosotros() {
               letterSpacing: '0.2em',
               textTransform: 'uppercase',
               color: 'var(--verde)',
-              marginBottom: '0.75rem',
+              marginBottom: '1rem',
             }}>
               Visión
             </p>
             <p style={{
               fontFamily: 'Inter, sans-serif',
-              fontSize: '0.95rem',
+              fontSize: '1rem',
               color: 'var(--texto)',
               lineHeight: '1.8',
             }}>
@@ -78,7 +93,22 @@ function Nosotros() {
             </p>
           </div>
 
-          <div ref={ref3} className="reveal" style={{ flex: '1 1 260px' }}>
+          <div ref={ref3} className="reveal" style={{
+            flex: '1 1 260px',
+            padding: '2rem',
+            borderRadius: '12px',
+            borderLeft: '4px solid var(--verde)',
+            backgroundColor: 'rgba(61, 220, 4, 0.05)',
+          }}>
+            <p style={{
+              fontFamily: 'Montserrat, sans-serif',
+              fontWeight: '900',
+              fontSize: '1.5rem',
+              color: 'var(--verde)',
+              marginBottom: '0.25rem',
+            }}>
+              ◉
+            </p>
             <p style={{
               fontFamily: 'Montserrat, sans-serif',
               fontWeight: '700',
@@ -86,13 +116,13 @@ function Nosotros() {
               letterSpacing: '0.2em',
               textTransform: 'uppercase',
               color: 'var(--verde)',
-              marginBottom: '0.75rem',
+              marginBottom: '1rem',
             }}>
               Misión
             </p>
             <p style={{
               fontFamily: 'Inter, sans-serif',
-              fontSize: '0.95rem',
+              fontSize: '1rem',
               color: 'var(--texto)',
               lineHeight: '1.8',
             }}>

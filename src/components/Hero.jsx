@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 
 function Hero() {
   const [animado, setAnimado] = useState(false)
+  const [hover, setHover] = useState(false)
 
   useEffect(() => {
     const timer = setTimeout(() => setAnimado(true), 1500)
@@ -65,20 +66,45 @@ function Hero() {
         Conoce a Dios. Vive en libertad. Descubre tu propósito.
       </p>
 
-      <a href="#servicios" style={{
-        backgroundColor: 'transparent',
-        color: 'var(--texto)',
-        fontFamily: 'Inter, sans-serif',
-        fontWeight: '500',
-        fontSize: '0.75rem',
-        padding: '1rem 3rem',
-        border: '1px solid var(--texto)',
-        textDecoration: 'none',
-        letterSpacing: '0.2em',
-        textTransform: 'uppercase',
-        opacity: animado ? 1 : 0,
-        transition: 'opacity 0.8s ease 0.8s',
-      }}>
+      {/* Botón con efecto fill */}
+      
+        <a href="https://wa.me/527711107903?text=Hola,%20me%20gustar%C3%ADa%20saber%20m%C3%A1s%20sobre%20%C3%81guilas%20CFC"
+        target="_blank"
+        rel="noreferrer"
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        style={{
+          position: 'relative',
+          overflow: 'hidden',
+          display: 'inline-block',
+          backgroundColor: 'transparent',
+          color: hover ? '#ffffff' : 'var(--texto)',
+          fontFamily: 'Inter, sans-serif',
+          fontWeight: '500',
+          fontSize: '0.75rem',
+          padding: '1rem 3rem',
+          border: '1.5px solid var(--verde)',
+          borderRadius: '4px',
+          textDecoration: 'none',
+          letterSpacing: '0.2em',
+          textTransform: 'uppercase',
+          opacity: animado ? 1 : 0,
+          transition: 'opacity 0.8s ease 0.8s, color 0.3s ease, box-shadow 0.3s ease',
+          boxShadow: hover ? '0 0 20px rgba(61,220,4,0.3)' : 'none',
+          zIndex: 1,
+        }}
+      >
+        {/* Fondo que se llena */}
+        <span style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: hover ? '100%' : '0%',
+          height: '100%',
+          backgroundColor: '#2BAF1E',
+          transition: 'width 0.4s ease',
+          zIndex: -1,
+        }} />
         Visítanos este domingo
       </a>
 

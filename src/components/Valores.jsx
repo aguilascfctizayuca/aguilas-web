@@ -1,4 +1,8 @@
+import { useState } from 'react'
+
 function Valores() {
+  const [abierto, setAbierto] = useState(null)
+
   const valores = [
     { titulo: 'Jesús', descripcion: 'El centro de todo lo que hacemos.' },
     { titulo: 'Familia', descripcion: 'Es nuestra responsabilidad y nuestra mayor bendición.' },
@@ -12,6 +16,10 @@ function Valores() {
     { titulo: 'Excelencia', descripcion: 'Todo lo que hacemos, lo hacemos bien.' },
   ]
 
+  const toggle = (titulo) => {
+    setAbierto(abierto === titulo ? null : titulo)
+  }
+
   return (
     <section id="valores" style={{
       backgroundColor: 'var(--fondo)',
@@ -19,7 +27,6 @@ function Valores() {
       borderTop: '1px solid #e5e5e5',
     }}>
 
-      {/* Encabezado */}
       <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
         <p style={{
           color: 'var(--verde)',
@@ -42,36 +49,65 @@ function Valores() {
         </h2>
       </div>
 
-      {/* Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '1.5rem',
-        maxWidth: '900px',
-        margin: '0 auto',
-      }}>
-        {valores.map((valor) => (
-          <div key={valor.titulo} style={{
-            padding: '2rem 1.5rem',
-            border: '1px solid var(--borde)',
-          }}>
-            <p style={{
-              fontFamily: 'Montserrat, sans-serif',
-              fontWeight: '700',
-              fontSize: '1rem',
-              color: 'var(--verde)',
-              marginBottom: '0.5rem',
+      <div style={{ maxWidth: '700px', margin: '0 auto' }}>
+        {valores.map((valor, index) => (
+          <div
+            key={valor.titulo}
+            style={{
+              borderBottom: '1px solid var(--borde)',
+              borderTop: index === 0 ? '1px solid var(--borde)' : 'none',
+            }}
+          >
+            <button
+              onClick={() => toggle(valor.titulo)}
+              style={{
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '1.25rem 0',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                textAlign: 'left',
+              }}
+            >
+              <span style={{
+                fontFamily: 'Montserrat, sans-serif',
+                fontWeight: '700',
+                fontSize: '1rem',
+                color: abierto === valor.titulo ? 'var(--verde)' : 'var(--texto)',
+                transition: 'color 0.2s ease',
+              }}>
+                {valor.titulo}
+              </span>
+              <span style={{
+                color: 'var(--verde)',
+                fontSize: '1.25rem',
+                fontWeight: '300',
+                transition: 'transform 0.3s ease',
+                transform: abierto === valor.titulo ? 'rotate(45deg)' : 'rotate(0deg)',
+                display: 'inline-block',
+              }}>
+                +
+              </span>
+            </button>
+
+            <div style={{
+              overflow: 'hidden',
+              maxHeight: abierto === valor.titulo ? '200px' : '0',
+              transition: 'max-height 0.3s ease',
             }}>
-              {valor.titulo}
-            </p>
-            <p style={{
-              fontFamily: 'Inter, sans-serif',
-              fontSize: '0.875rem',
-              color: 'var(--texto-suave)',
-              lineHeight: '1.7',
-            }}>
-              {valor.descripcion}
-            </p>
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '0.9rem',
+                color: 'var(--texto-suave)',
+                lineHeight: '1.7',
+                paddingBottom: '1.25rem',
+              }}>
+                {valor.descripcion}
+              </p>
+            </div>
           </div>
         ))}
       </div>
