@@ -18,7 +18,7 @@
   :root {
     --fondo: #0a0a0a;
     --texto: #f5f5f5;
-    --texto-suave: #777777;
+    --texto-suave: #ffffff;
     --borde: #2a2a2a;
     --verde: #3DDC04;
   }
@@ -50,4 +50,13 @@ section {
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+  .nav-desktop {
+    display: none !important;
+  }
+  .nav-hamburger {
+    display: flex !important;
+  }
 }
