@@ -69,6 +69,7 @@ function Navbar({ logoVisible }) {
         </div>
 
         <button
+          aria-label={menuAbierto ? 'Cerrar menu' : 'Abrir menu'}
           onClick={() => setMenuAbierto(!menuAbierto)}
           className="nav-hamburger"
           style={{
@@ -80,6 +81,7 @@ function Navbar({ logoVisible }) {
             flexDirection: 'column',
             gap: '5px',
           }}
+          
         >
           <span style={{ display: 'block', width: '22px', height: '2px', backgroundColor: scrolled ? 'var(--texto)' : '#ffffff', transition: 'all 0.3s', transform: menuAbierto ? 'rotate(45deg) translate(5px, 5px)' : 'none' }} />
           <span style={{ display: 'block', width: '22px', height: '2px', backgroundColor: scrolled ? 'var(--texto)' : '#ffffff', transition: 'all 0.3s', opacity: menuAbierto ? 0 : 1 }} />
