@@ -25,7 +25,7 @@ function LogoAnimado({ onComplete }) {
       pointerEvents: 'none',
     }}>
       <img
-        src="/ACFC.png"
+        src="/ACFC.webp"
         alt="Águilas CFC"
         style={{
           width: fase === 'moviendose' ? '36px' : '140px',
