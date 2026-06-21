@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
 import useReveal from '../hooks/useReveal'
+import flyer from '../assets/flyer-aun-hay-mas.webp'
 
 function Contador() {
   const eventoFecha = new Date('2026-07-17T19:00:00')
   const refTitulo = useReveal()
+  const refFlyer = useReveal()
   const refCards = useReveal()
+  const refBoton = useReveal()
 
   const calcular = () => {
     const ahora = new Date()
@@ -54,8 +57,31 @@ function Contador() {
           color: 'var(--texto)',
           marginBottom: '0.5rem',
         }}>
-          Algo grande se acerca
+          Aún hay más
         </h2>
+        <p style={{
+          fontFamily: 'Inter, sans-serif',
+          fontSize: '0.85rem',
+          color: 'var(--verde)',
+          letterSpacing: '0.05em',
+          marginBottom: '2.5rem',
+        }}>
+          Efesios 3:20
+        </p>
+      </div>
+
+      <div ref={refFlyer} className="reveal">
+        <img
+          src={flyer}
+          alt="Flyer Aún hay más - Viernes 17 de julio 7PM"
+          style={{
+            width: '100%',
+            maxWidth: '360px',
+            borderRadius: '16px',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.15)',
+            marginBottom: '3rem',
+          }}
+        />
         <p style={{
           fontFamily: 'Inter, sans-serif',
           fontSize: '0.95rem',
@@ -64,7 +90,7 @@ function Contador() {
           margin: '0 auto 1rem auto',
           lineHeight: '1.8',
         }}>
-          No te pierdas este 17 de julio — este domingo te enterarás de qué trata nuestro próximo evento.
+          Esto apenas está comenzando. Una noche especial para creer que lo mejor está por venir.
         </p>
         <p style={{
           fontFamily: 'Inter, sans-serif',
@@ -72,7 +98,7 @@ function Contador() {
           color: 'var(--texto-suave)',
           marginBottom: '3.5rem',
         }}>
-          17 de julio · 7:00 PM · Tizayuca, Hidalgo
+          Viernes 17 de julio · 7:00 PM · Tizayuca, Hidalgo
         </p>
       </div>
 
@@ -81,6 +107,7 @@ function Contador() {
         justifyContent: 'center',
         gap: '1rem',
         flexWrap: 'wrap',
+        marginBottom: '3rem',
       }}>
         {[
           { valor: pad(tiempo.dias), label: 'Días' },
@@ -119,6 +146,32 @@ function Contador() {
             </span>
           </div>
         ))}
+      </div>
+
+      <div ref={refBoton} className="reveal">
+        
+          <a href="https://wa.me/527711107903?text=Hola%21%20Quisiera%20recibir%20informaci%C3%B3n%20sobre%20el%20evento%20%22A%C3%BAn%20hay%20m%C3%A1s%22%20del%20viernes%2017%20de%20julio.%20%C2%A1Gracias%21"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'inline-block',
+            backgroundColor: 'var(--verde)',
+            color: '#000',
+            fontFamily: 'Montserrat, sans-serif',
+            fontWeight: '700',
+            fontSize: '0.85rem',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            padding: '1rem 2.5rem',
+            borderRadius: '999px',
+            textDecoration: 'none',
+            transition: 'background-color 0.2s ease',
+          }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--verde-hover)'}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--verde)'}
+        >
+          Envíame información
+        </a>
       </div>
 
     </section>
