@@ -6,6 +6,7 @@ function Contador() {
   const eventoFecha = new Date('2026-07-17T19:00:00')
   const refTitulo = useReveal()
   const refFlyer = useReveal()
+  const refMapa = useReveal()
   const refCards = useReveal()
   const refBoton = useReveal()
 
@@ -96,9 +97,44 @@ function Contador() {
           fontFamily: 'Inter, sans-serif',
           fontSize: '0.95rem',
           color: 'var(--texto-suave)',
-          marginBottom: '3.5rem',
+          marginBottom: '0',
         }}>
           Viernes 17 de julio · 7:00 PM · Tizayuca, Hidalgo
+        </p>
+      </div>
+
+      <div ref={refMapa} className="reveal" style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        marginTop: '2rem',
+        marginBottom: '3.5rem',
+      }}>
+        <div style={{
+          width: '100%',
+          maxWidth: '476px',
+          borderRadius: '16px',
+          overflow: 'hidden',
+          border: '1.5px solid var(--verde)',
+        }}>
+          <iframe
+            title="Ubicación del evento - Jardín las Flores"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3765.0!2d-98.9830247!3d19.846099!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85d191a8596a8321:0xd9153a1c7bc5c03d!2sJard%C3%ADn%20las%20flores!5e0!3m2!1ses!2smx!4v1234567890"
+            width="100%"
+            height="320"
+            style={{ border: 0, display: 'block' }}
+            allowFullScreen=""
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
+        <p style={{
+          fontFamily: 'Inter, sans-serif',
+          fontSize: '0.8rem',
+          color: 'var(--texto-suave)',
+          marginTop: '0.75rem',
+        }}>
+          Jardín las Flores
         </p>
       </div>
 
