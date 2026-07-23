@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import Hero from '../components/Hero'
+import ProximosEventos from '../components/ProximosEventos'
+import Anuncios from '../components/Anuncios'
 import Servicios from '../components/Servicios'
 import Nosotros from '../components/Nosotros'
 import Valores from '../components/Valores'
@@ -43,6 +45,8 @@ function PaginaPrincipal() {
       <LogoAnimado onComplete={() => setLogoVisible(true)} />
       <Navbar logoVisible={logoVisible} />
       <Hero />
+      <ProximosEventos />
+      <Anuncios />
       <Servicios />
       <Nosotros />
       <Valores />
