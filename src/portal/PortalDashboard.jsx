@@ -12,26 +12,55 @@ export default function PortalDashboard() {
   const navigate = useNavigate()
   const { userData, user, logout } = usePortalAuth()
   const [eventos, setEventos] = useState([])
+  const [ministerios, setMinisterios] = useState({})
   const [cargando, setCargando] = useState(true)
 
   useEffect(() => {
-    async function cargarEventos() {
-      const q = query(collection(db, 'eventos_internos'), orderBy('fecha', 'asc'))
-      const snap = await getDocs(q)
-      const todos = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+    async function cargarDatos() {
+      const [eventosSnap, ministeriosSnap] = await Promise.all([
+        getDocs(query(collection(db, 'eventos_internos'), orderBy('fecha', 'asc'))),
+        getDocs(collection(db, 'ministerios')),
+      ])
+
+      const mapaMinisterios = {}
+      ministeriosSnap.docs.forEach((d) => {
+        mapaMinisterios[d.id] = d.data()
+      })
+      setMinisterios(mapaMinisterios)
+
+      const todos = eventosSnap.docs.map((d) => ({ id: d.id, ...d.data() }))
       setEventos(todos)
       setCargando(false)
     }
-    cargarEventos()
+    cargarDatos()
   }, [])
 
   const hoyStr = new Date().toISOString().split('T')[0]
   const primerDiaMes = hoyStr.slice(0, 7)
 
+  const esLiderConMinisterio = userData?.rol === 'lider' && !!userData?.ministerio
+
   const proximosEventos = useMemo(
-    () => eventos.filter((e) => e.fecha >= hoyStr).slice(0, 6),
+    () => eventos.filter((e) => e.fecha >= hoyStr),
     [eventos, hoyStr]
   )
+
+  const misEventos = useMemo(() => {
+    if (!esLiderConMinisterio) return []
+    return proximosEventos
+      .filter(
+        (e) =>
+          e.ministerioOrganizador === userData.ministerio ||
+          (Array.isArray(e.ministeriosRequeridos) && e.ministeriosRequeridos.includes(userData.ministerio))
+      )
+      .slice(0, 8)
+  }, [proximosEventos, esLiderConMinisterio, userData])
+
+  const otrosEventos = useMemo(() => {
+    if (!esLiderConMinisterio) return proximosEventos.slice(0, 6)
+    const misIds = new Set(misEventos.map((e) => e.id))
+    return proximosEventos.filter((e) => !misIds.has(e.id)).slice(0, 6)
+  }, [proximosEventos, esLiderConMinisterio, misEventos])
 
   const eventosEsteMes = useMemo(
     () => eventos.filter((e) => e.fecha && e.fecha.startsWith(primerDiaMes)).length,
@@ -39,20 +68,117 @@ export default function PortalDashboard() {
   )
 
   const ADMINS_TEMPORALES = ['schottalfredo@gmail.com']
-    const puedeVerAgendaPastoral = userData?.rol === 'pastor' || ADMINS_TEMPORALES.includes(user?.email)
+  const puedeVerAgendaPastoral = userData?.rol === 'pastor' || userData?.rol === 'administrativo' || ADMINS_TEMPORALES.includes(user?.email)
+
+  const colorMinisterioPropio = userData?.rol === 'lider' && userData?.ministerio ? ministerios[userData.ministerio]?.color : null
+  const esRolDirectivo = userData?.rol === 'pastor' || userData?.rol === 'administrativo' || userData?.rol === 'primera_mesa'
+  const accentColor = colorMinisterioPropio || (esRolDirectivo ? '#D4AF37' : '#3DDC04')
+
+  function BadgesMinisterios({ ids }) {
+    if (!Array.isArray(ids) || ids.length === 0) return null
+    return (
+      <div style={styles.badgesRow}>
+        {ids.map((id) => {
+          const m = ministerios[id]
+          if (!m) return null
+          return (
+            <span key={id} style={{ ...styles.ministerioBadge, background: `${m.color}22`, color: m.color, border: `1px solid ${m.color}55` }}>
+              {m.nombre}
+            </span>
+          )
+        })}
+      </div>
+    )
+  }
+
+  function ProgresoMinisterios({ ev }) {
+    const requeridos = Array.isArray(ev.ministeriosRequeridos) ? ev.ministeriosRequeridos : []
+    const total = requeridos.length
+
+    if (total === 0) {
+      return <span style={styles.badge}>{ev.estado || 'pendiente'}</span>
+    }
+
+    const estados = ev.estadosPorMinisterio || {}
+    const listos = requeridos.filter((id) => estados[id] === 'listo').length
+    const porcentaje = Math.round((listos / total) * 100)
+    const completo = listos === total
+
+    return (
+      <div style={styles.progresoContainer}>
+        <span style={{ ...styles.progresoTexto, color: completo ? '#3DDC04' : 'var(--portal-muted)' }}>
+          {listos}/{total} listos
+        </span>
+        <div style={styles.progresoBarraFondo}>
+          <div
+            style={{
+              ...styles.progresoBarraRelleno,
+              width: `${porcentaje}%`,
+              background: completo ? '#3DDC04' : '#D4AF37',
+            }}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  function tienePermisoSobreEvento(ev) {
+    if (esRolDirectivo) return true
+    if (userData?.rol !== 'lider') return false
+    if (!user?.email) return false
+    if (ev.creadoPor === user.email) return true
+    if (userData?.ministerio && ev.ministerioOrganizador === userData.ministerio) return true
+    if (userData?.ministerio && Array.isArray(ev.ministeriosRequeridos) && ev.ministeriosRequeridos.includes(userData.ministerio)) return true
+    return false
+  }
+
+  function TarjetaEvento({ ev, delay }) {
+    const colorMinisterio = ministerios[ev.ministerioOrganizador]?.color || '#999'
+    const puedeEditar = tienePermisoSobreEvento(ev)
+    return (
+      <div
+        key={ev.id}
+        className={puedeEditar ? 'portal-hover-card portal-fade-in' : 'portal-fade-in'}
+        onClick={() => { if (puedeEditar) navigate(`/lideres/eventos/${ev.id}/editar`) }}
+        style={{
+          ...styles.card,
+          borderLeft: `4px solid ${colorMinisterio}`,
+          animationDelay: `${delay}s`,
+          cursor: puedeEditar ? 'pointer' : 'default',
+          opacity: puedeEditar ? 1 : 0.75,
+        }}
+      >
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <strong style={styles.cardTitle}>{ev.titulo}</strong>
+          <p style={styles.cardMeta}>
+            {ev.fecha} · {ev.horaInicio}{ev.horaFin ? ` - ${ev.horaFin}` : ''}
+            {ev.ubicacion ? ` · ${ev.ubicacion}` : ''}
+            {ministerios[ev.ministerioOrganizador]?.nombre ? ` · ${ministerios[ev.ministerioOrganizador].nombre}` : ''}
+          </p>
+          <BadgesMinisterios ids={ev.ministeriosRequeridos} />
+        </div>
+        <ProgresoMinisterios ev={ev} />
+      </div>
+    )
+  }
 
   return (
     <div className="portal-dashboard-page" style={styles.page}>
+      <div className="portal-fade-in" style={{ ...styles.accentBar, background: accentColor }} />
       <div className="portal-fade-in portal-dashboard-header" style={styles.header}>
-        <div>
-          <h1 style={styles.h1}>
-            Hola, {userData?.nombre?.split(' ')[0] || 'líder'}
-          </h1>
-          <p style={styles.subtitle}>
-            {userData?.rol === 'pastor' && 'Pastor'}
-            {userData?.rol === 'primera_mesa' && 'Primera Mesa'}
-            {userData?.rol === 'lider' && `Líder de ${userData?.ministerio || 'ministerio'}`}
-          </p>
+        <div style={styles.headerLeft}>
+          <img src="/ACFC.png" alt="Águilas Centro Familiar Cristiano" style={styles.logo} />
+          <div>
+            <h1 style={styles.h1}>
+              Hola, {userData?.nombre?.split(' ')[0] || 'líder'}
+            </h1>
+            <p style={styles.subtitle}>
+              {userData?.rol === 'pastor' && 'Pastor'}
+              {userData?.rol === 'primera_mesa' && 'Primera Mesa'}
+              {userData?.rol === 'administrativo' && 'Administrativo'}
+              {userData?.rol === 'lider' && `Líder de ${ministerios[userData?.ministerio]?.nombre || userData?.ministerio || 'ministerio'}`}
+            </p>
+          </div>
         </div>
         <div className="portal-dashboard-actions" style={{ display: 'flex', gap: '12px' }}>
           {puedeVerAgendaPastoral && (
@@ -73,7 +199,7 @@ export default function PortalDashboard() {
 
       <div className="portal-fade-in portal-dashboard-stats" style={{ ...styles.statsRow, animationDelay: '0.06s' }}>
         <div className="portal-stat-card" style={styles.statCard}>
-          <span style={styles.statNumber}>{proximosEventos.length}</span>
+          <span style={{ ...styles.statNumber, color: accentColor }}>{proximosEventos.length}</span>
           <span style={styles.statLabel}>Próximos eventos</span>
         </div>
         <div className="portal-stat-card" style={styles.statCard}>
@@ -86,34 +212,51 @@ export default function PortalDashboard() {
         <PortalCalendario embedded />
       </div>
 
-      <h2 className="portal-fade-in" style={{ ...styles.h2, animationDelay: '0.18s' }}>
-        Próximos eventos
-      </h2>
-
       {cargando && <p style={styles.muted}>Cargando...</p>}
-      {!cargando && proximosEventos.length === 0 && (
-        <p style={styles.muted}>No hay eventos próximos registrados.</p>
+
+      {!cargando && esLiderConMinisterio && (
+        <>
+          <h2 className="portal-fade-in" style={{ ...styles.h2, color: accentColor, animationDelay: '0.18s' }}>
+            Eventos donde te necesitan
+          </h2>
+          {misEventos.length === 0 && (
+            <p style={styles.muted}>No hay eventos próximos que requieran tu ministerio.</p>
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
+            {misEventos.map((ev, i) => (
+              <TarjetaEvento key={ev.id} ev={ev} delay={0.22 + i * 0.05} />
+            ))}
+          </div>
+
+          <h2 className="portal-fade-in" style={styles.h2}>
+            Otros eventos próximos
+          </h2>
+          {otrosEventos.length === 0 && (
+            <p style={styles.muted}>No hay más eventos próximos registrados.</p>
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
+            {otrosEventos.map((ev, i) => (
+              <TarjetaEvento key={ev.id} ev={ev} delay={0.3 + i * 0.05} />
+            ))}
+          </div>
+        </>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
-        {proximosEventos.map((ev, i) => (
-          <div
-            key={ev.id}
-            className="portal-hover-card portal-fade-in"
-            onClick={() => navigate(`/lideres/eventos/${ev.id}/editar`)}
-            style={{ ...styles.card, animationDelay: `${0.22 + i * 0.05}s` }}
-          >
-            <div>
-              <strong style={styles.cardTitle}>{ev.titulo}</strong>
-              <p style={styles.cardMeta}>
-                {ev.fecha} · {ev.horaInicio}{ev.horaFin ? ` - ${ev.horaFin}` : ''}
-                {ev.ubicacion ? ` · ${ev.ubicacion}` : ''}
-              </p>
-            </div>
-            <span style={styles.badge}>{ev.estado}</span>
+      {!cargando && !esLiderConMinisterio && (
+        <>
+          <h2 className="portal-fade-in" style={{ ...styles.h2, animationDelay: '0.18s' }}>
+            Próximos eventos
+          </h2>
+          {otrosEventos.length === 0 && (
+            <p style={styles.muted}>No hay eventos próximos registrados.</p>
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
+            {otrosEventos.map((ev, i) => (
+              <TarjetaEvento key={ev.id} ev={ev} delay={0.22 + i * 0.05} />
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
 
       <ActividadReciente />
     </div>
@@ -128,7 +271,10 @@ const styles = {
     background: 'var(--portal-bg)',
     color: 'var(--portal-text)',
   },
+  accentBar: { height: '4px', borderRadius: '4px', marginBottom: '20px', transition: 'background 0.3s ease' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '16px', flexWrap: 'wrap' },
+  headerLeft: { display: 'flex', alignItems: 'center', gap: '14px' },
+  logo: { width: '48px', height: '48px', flexShrink: 0 },
   h1: { fontFamily: 'Montserrat, sans-serif', fontWeight: 900, margin: 0, color: 'var(--portal-text)' },
   h2: { fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: '18px', color: 'var(--portal-text)', margin: '0 0 12px' },
   subtitle: { color: 'var(--portal-muted)', margin: '4px 0 0' },
@@ -155,14 +301,23 @@ const styles = {
     whiteSpace: 'nowrap', textDecoration: 'none',
   },
   card: {
-    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+    display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px',
     padding: '14px 16px', borderRadius: '10px',
     border: '1px solid var(--portal-card-border)', background: 'var(--portal-card-bg)',
   },
   cardTitle: { color: 'var(--portal-text)' },
   cardMeta: { margin: '4px 0 0', color: 'var(--portal-muted)', fontSize: '14px' },
+  badgesRow: { display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' },
+  ministerioBadge: {
+    fontSize: '11px', fontWeight: 600, padding: '3px 9px', borderRadius: '20px',
+  },
   badge: {
     fontSize: '12px', fontWeight: 600, textTransform: 'capitalize',
     padding: '4px 10px', borderRadius: '20px', background: 'var(--portal-badge-bg)', color: 'var(--portal-badge-text)',
+    flexShrink: 0,
   },
+  progresoContainer: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px', flexShrink: 0, minWidth: '84px' },
+  progresoTexto: { fontSize: '12px', fontWeight: 700, whiteSpace: 'nowrap' },
+  progresoBarraFondo: { width: '80px', height: '5px', borderRadius: '10px', background: 'var(--portal-card-border)', overflow: 'hidden' },
+  progresoBarraRelleno: { height: '100%', borderRadius: '10px', transition: 'width 0.3s ease' },
 }

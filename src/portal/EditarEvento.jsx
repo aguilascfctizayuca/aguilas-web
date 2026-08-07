@@ -7,7 +7,21 @@ import { buscarConflictos } from './conflictos'
 import { registrarActividad } from './actividad'
 import './portal.css'
 
-const UBICACIONES = ['Templo principal', 'Salón de niños', 'Estacionamiento', 'Virtual', 'Otro']
+const UBICACIONES = ['Águilas CFC Tizayuca', 'Salón de niños', 'Oficina pastoral', 'Virtual', 'Otro']
+
+const ESTADOS = [
+  { valor: 'pendiente', etiqueta: 'Pendiente' },
+  { valor: 'en_proceso', etiqueta: 'En proceso' },
+  { valor: 'listo', etiqueta: 'Listo' },
+]
+
+function estadosConDefaults(estadosGuardados, ministeriosRequeridos) {
+  const mapa = { ...(estadosGuardados || {}) }
+  ministeriosRequeridos.forEach((mid) => {
+    if (!mapa[mid]) mapa[mid] = 'pendiente'
+  })
+  return mapa
+}
 
 export default function EditarEvento() {
   const { id } = useParams()
@@ -35,7 +49,28 @@ export default function EditarEvento() {
     responsable: '',
     ministerioOrganizador: '',
     ministeriosRequeridos: [],
+    estadosPorMinisterio: {},
   })
+
+  const esPrimeraMesaOPastor = userData?.rol === 'pastor' || userData?.rol === 'primera_mesa' || userData?.rol === 'administrativo'
+
+  function puedeEditarEstadoDe(ministerioId) {
+    if (esPrimeraMesaOPastor) return true
+    return userData?.rol === 'lider' && userData?.ministerio === ministerioId
+  }
+
+  const [creadoPor, setCreadoPor] = useState(null)
+  const [sinPermiso, setSinPermiso] = useState(false)
+
+  function tienePermisoSobreEvento(data) {
+    if (esPrimeraMesaOPastor) return true
+    if (userData?.rol !== 'lider') return false
+    if (!user?.email) return false
+    if (data.creadoPor === user.email) return true
+    if (userData?.ministerio && data.ministerioOrganizador === userData.ministerio) return true
+    if (userData?.ministerio && Array.isArray(data.ministeriosRequeridos) && data.ministeriosRequeridos.includes(userData.ministerio)) return true
+    return false
+  }
 
   useEffect(() => {
     async function cargar() {
@@ -52,6 +87,10 @@ export default function EditarEvento() {
         const data = eventoSnap.data()
         const ubicacionGuardada = data.ubicacion || ''
         const esConocida = UBICACIONES.includes(ubicacionGuardada)
+        const ministeriosRequeridos = data.ministeriosRequeridos || []
+
+        setCreadoPor(data.creadoPor || null)
+        setSinPermiso(!tienePermisoSobreEvento(data))
 
         setForm({
           titulo: data.titulo || '',
@@ -63,7 +102,8 @@ export default function EditarEvento() {
           ubicacionOtro: esConocida ? '' : ubicacionGuardada,
           responsable: data.responsable || '',
           ministerioOrganizador: data.ministerioOrganizador || '',
-          ministeriosRequeridos: data.ministeriosRequeridos || [],
+          ministeriosRequeridos,
+          estadosPorMinisterio: estadosConDefaults(data.estadosPorMinisterio, ministeriosRequeridos),
         })
         setGoogleEventId(data.googleEventId || null)
       } else {
@@ -83,13 +123,24 @@ export default function EditarEvento() {
   function toggleMinisterioRequerido(mid) {
     setForm((prev) => {
       const yaEsta = prev.ministeriosRequeridos.includes(mid)
+      const nuevosRequeridos = yaEsta
+        ? prev.ministeriosRequeridos.filter((m) => m !== mid)
+        : [...prev.ministeriosRequeridos, mid]
+      const nuevosEstados = { ...prev.estadosPorMinisterio }
+      if (!yaEsta && !nuevosEstados[mid]) nuevosEstados[mid] = 'pendiente'
       return {
         ...prev,
-        ministeriosRequeridos: yaEsta
-          ? prev.ministeriosRequeridos.filter((m) => m !== mid)
-          : [...prev.ministeriosRequeridos, mid],
+        ministeriosRequeridos: nuevosRequeridos,
+        estadosPorMinisterio: nuevosEstados,
       }
     })
+  }
+
+  function actualizarEstadoMinisterio(mid, nuevoEstado) {
+    setForm((prev) => ({
+      ...prev,
+      estadosPorMinisterio: { ...prev.estadosPorMinisterio, [mid]: nuevoEstado },
+    }))
   }
 
   function ubicacionFinal() {
@@ -110,6 +161,7 @@ export default function EditarEvento() {
         responsable: form.responsable,
         ministerioOrganizador: form.ministerioOrganizador,
         ministeriosRequeridos: form.ministeriosRequeridos,
+        estadosPorMinisterio: form.estadosPorMinisterio,
       })
 
       try {
@@ -216,6 +268,21 @@ export default function EditarEvento() {
     return (
       <div style={styles.page}>
         <p style={{ color: 'var(--portal-muted-2)' }}>Cargando...</p>
+      </div>
+    )
+  }
+
+  if (sinPermiso) {
+    return (
+      <div style={styles.page}>
+        <div style={styles.container}>
+          <Link to="/lideres/dashboard" style={styles.backLink}>← Volver al dashboard</Link>
+          <div style={{ ...styles.confirmacionBox, marginTop: '20px' }}>
+            <p style={styles.confirmacionTexto}>
+              No tienes permiso para editar este evento — solo quien lo creó, un ministerio involucrado, o Pastor/Administrativo pueden hacerlo.
+            </p>
+          </div>
+        </div>
       </div>
     )
   }
@@ -328,6 +395,45 @@ export default function EditarEvento() {
             </div>
           </div>
 
+          {form.ministeriosRequeridos.length > 0 && (
+            <div style={styles.label}>
+              Estado por ministerio
+              <p style={styles.estadoAyuda}>
+                Cada líder solo puede actualizar el estado de su propio ministerio. Pastor y Administrativo pueden actualizar cualquiera.
+              </p>
+              <div style={styles.estadosLista}>
+                {form.ministeriosRequeridos.map((mid) => {
+                  const m = ministerios.find((min) => min.id === mid)
+                  if (!m) return null
+                  const puedeEditar = puedeEditarEstadoDe(mid)
+                  const estadoActual = form.estadosPorMinisterio[mid] || 'pendiente'
+                  return (
+                    <div key={mid} style={styles.estadoFila}>
+                      <span style={styles.estadoNombre}>
+                        <span style={{ ...styles.colorDot, background: m.color }} />
+                        {m.nombre}
+                      </span>
+                      <select
+                        value={estadoActual}
+                        onChange={(e) => actualizarEstadoMinisterio(mid, e.target.value)}
+                        disabled={!puedeEditar}
+                        style={{
+                          ...styles.estadoSelect,
+                          opacity: puedeEditar ? 1 : 0.5,
+                          cursor: puedeEditar ? 'pointer' : 'not-allowed',
+                        }}
+                      >
+                        {ESTADOS.map((es) => (
+                          <option key={es.valor} value={es.valor}>{es.etiqueta}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
           <button type="submit" disabled={guardando} className="portal-button-primary" style={styles.button}>
             {guardando ? 'Guardando...' : 'Guardar cambios'}
           </button>
@@ -389,7 +495,18 @@ const styles = {
   row: { display: 'flex', gap: '12px' },
   checklist: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '8px' },
   checkboxLabel: { display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 400, fontSize: '14px', color: 'var(--portal-text)' },
-  colorDot: { width: '10px', height: '10px', borderRadius: '50%', display: 'inline-block' },
+  colorDot: { width: '10px', height: '10px', borderRadius: '50%', display: 'inline-block', flexShrink: 0 },
+  estadoAyuda: { fontWeight: 400, fontSize: '12px', color: 'var(--portal-muted)', margin: '0 0 8px' },
+  estadosLista: { display: 'flex', flexDirection: 'column', gap: '8px' },
+  estadoFila: {
+    display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px',
+    padding: '10px 12px', borderRadius: '8px', background: 'var(--portal-card-bg)', border: '1px solid var(--portal-card-border)',
+  },
+  estadoNombre: { display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 400, fontSize: '14px', color: 'var(--portal-text)' },
+  estadoSelect: {
+    padding: '6px 10px', borderRadius: '7px', border: '1px solid var(--portal-input-border)', fontSize: '13px',
+    fontFamily: 'Inter, sans-serif', background: 'var(--portal-input-bg)', color: 'var(--portal-input-text)',
+  },
   button: {
     padding: '14px 24px', borderRadius: '10px', border: 'none', background: '#3DDC04',
     color: '#0F0F12', fontWeight: 700, fontSize: '16px', cursor: 'pointer', marginTop: '8px',

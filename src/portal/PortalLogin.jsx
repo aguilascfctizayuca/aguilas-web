@@ -1,22 +1,18 @@
 import { Navigate } from 'react-router-dom'
 import { usePortalAuth } from './PortalAuthContext'
 import './portal.css'
-
 export default function PortalLogin() {
   const { user, userData, loading, error, loginConGoogle } = usePortalAuth()
-
   if (!loading && user && userData) {
     return <Navigate to="/lideres/dashboard" replace />
   }
-
   return (
     <div style={styles.container}>
       <div style={styles.card}>
+        <img src="/ACFC.png" alt="Águilas Centro Familiar Cristiano" style={styles.logo} />
         <h1 style={styles.title}>Portal de Líderes</h1>
         <p style={styles.subtitle}>Águilas Centro Familiar Cristiano Tizayuca</p>
-
         {error && <p style={styles.error}>{error}</p>}
-
         <button onClick={loginConGoogle} disabled={loading} style={styles.button}>
           {loading ? 'Verificando...' : 'Iniciar sesión con Google'}
         </button>
@@ -24,7 +20,6 @@ export default function PortalLogin() {
     </div>
   )
 }
-
 const styles = {
   container: {
     minHeight: '100vh',
@@ -44,6 +39,11 @@ const styles = {
     width: '100%',
     textAlign: 'center',
     boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+  },
+  logo: {
+    width: '84px',
+    height: '84px',
+    marginBottom: '20px',
   },
   title: {
     fontFamily: 'Montserrat, sans-serif',

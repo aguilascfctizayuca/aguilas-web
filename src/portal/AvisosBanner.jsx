@@ -7,6 +7,7 @@ import './portal.css'
 export default function AvisosBanner() {
   const { userData, user } = usePortalAuth()
   const [avisos, setAvisos] = useState([])
+  const [ministerios, setMinisterios] = useState({})
   const [cargando, setCargando] = useState(true)
   const [mostrarForm, setMostrarForm] = useState(false)
   const [texto, setTexto] = useState('')
@@ -27,7 +28,20 @@ export default function AvisosBanner() {
     setCargando(false)
   }
 
-  useEffect(() => { cargarAvisos() }, [])
+  useEffect(() => {
+    async function cargarMinisterios() {
+      try {
+        const snap = await getDocs(collection(db, 'ministerios'))
+        const mapa = {}
+        snap.docs.forEach((d) => { mapa[d.id] = d.data() })
+        setMinisterios(mapa)
+      } catch (err) {
+        console.warn('No se pudieron cargar los ministerios:', err)
+      }
+    }
+    cargarMinisterios()
+    cargarAvisos()
+  }, [])
 
   async function handlePublicar(e) {
     e.preventDefault()
@@ -38,6 +52,8 @@ export default function AvisosBanner() {
         texto: texto.trim(),
         activo: true,
         creadoPor: userData?.nombre || user?.email,
+        creadoPorEmail: user?.email || null,
+        creadoPorMinisterio: userData?.ministerio || null,
         createdAt: serverTimestamp(),
       })
       setTexto('')
@@ -58,16 +74,38 @@ export default function AvisosBanner() {
     }
   }
 
+  function puedeCerrar(aviso) {
+    if (userData?.rol === 'pastor' || userData?.rol === 'administrativo') return true
+    return !!user?.email && user.email === aviso.creadoPorEmail
+  }
+
   if (cargando) return null
 
   return (
     <div style={{ marginBottom: '20px' }}>
-      {avisos.map((aviso) => (
-        <div key={aviso.id} className="portal-fade-in" style={styles.aviso}>
-          <p style={styles.avisoTexto}>{aviso.texto}</p>
-          <button onClick={() => handleCerrar(aviso.id)} style={styles.avisoCerrar}>×</button>
-        </div>
-      ))}
+      {avisos.map((aviso) => {
+        const colorMinisterio = ministerios[aviso.creadoPorMinisterio]?.color || '#3DDC04'
+        return (
+          <div
+            key={aviso.id}
+            className="portal-fade-in"
+            style={{ ...styles.aviso, borderColor: colorMinisterio, background: `${colorMinisterio}1F` }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1, minWidth: 0 }}>
+              <p style={styles.avisoTexto}>{aviso.texto}</p>
+              {aviso.creadoPor && (
+                <span style={{ ...styles.avisoAutor, color: colorMinisterio }}>
+                  {aviso.creadoPor}
+                  {ministerios[aviso.creadoPorMinisterio]?.nombre ? ` · ${ministerios[aviso.creadoPorMinisterio].nombre}` : ''}
+                </span>
+              )}
+            </div>
+            {puedeCerrar(aviso) && (
+              <button onClick={() => handleCerrar(aviso.id)} style={styles.avisoCerrar}>×</button>
+            )}
+          </div>
+        )
+      })}
 
       {!mostrarForm ? (
         <button onClick={() => setMostrarForm(true)} style={styles.botonNuevoAviso}>
@@ -96,14 +134,15 @@ export default function AvisosBanner() {
 
 const styles = {
   aviso: {
-    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-    padding: '12px 16px', borderRadius: '10px', background: 'rgba(61,220,4,0.12)',
-    border: '1px solid #3DDC04', marginBottom: '8px',
+    display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px',
+    padding: '12px 16px', borderRadius: '10px', border: '1px solid',
+    marginBottom: '8px',
   },
   avisoTexto: { margin: 0, fontSize: '14px', color: 'var(--portal-text)', fontWeight: 500 },
+  avisoAutor: { fontSize: '11px', fontWeight: 700 },
   avisoCerrar: {
     background: 'none', border: 'none', fontSize: '18px', color: 'var(--portal-muted)',
-    cursor: 'pointer', lineHeight: 1, padding: '0 4px',
+    cursor: 'pointer', lineHeight: 1, padding: '0 4px', flexShrink: 0,
   },
   botonNuevoAviso: {
     padding: '8px 14px', borderRadius: '8px', border: '1px dashed var(--portal-card-border)',

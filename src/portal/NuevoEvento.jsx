@@ -7,7 +7,7 @@ import { buscarConflictos } from './conflictos'
 import { registrarActividad } from './actividad'
 import './portal.css'
 
-const UBICACIONES = ['Templo principal', 'Salón de niños', 'Estacionamiento', 'Virtual', 'Otro']
+const UBICACIONES = ['Águilas CFC Tizayuca', 'Salón de niños', 'Oficina pastoral', 'Virtual', 'Otro']
 
 function eventoVacio() {
   return {
@@ -28,6 +28,14 @@ function eventoVacio() {
 
 function ubicacionFinal(ev) {
   return ev.ubicacion === 'Otro' ? (ev.ubicacionOtro.trim() || 'Otro') : ev.ubicacion
+}
+
+function estadosIniciales(ministeriosRequeridos) {
+  const mapa = {}
+  ministeriosRequeridos.forEach((id) => {
+    mapa[id] = 'pendiente'
+  })
+  return mapa
 }
 
 export default function NuevoEvento() {
@@ -118,6 +126,7 @@ export default function NuevoEvento() {
           responsable: ev.responsable,
           ministerioOrganizador: ev.ministerioOrganizador,
           ministeriosRequeridos: ev.ministeriosRequeridos,
+          estadosPorMinisterio: estadosIniciales(ev.ministeriosRequeridos),
           estado: 'pendiente',
           googleEventId: null,
           creadoPor: user.email,
