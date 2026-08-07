@@ -7,6 +7,8 @@ import { buscarConflictos } from './conflictos'
 import { registrarActividad } from './actividad'
 import './portal.css'
 
+const UBICACIONES = ['Templo principal', 'Salón de niños', 'Estacionamiento', 'Virtual', 'Otro']
+
 export default function EditarEvento() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -29,6 +31,7 @@ export default function EditarEvento() {
     horaInicio: '',
     horaFin: '',
     ubicacion: '',
+    ubicacionOtro: '',
     responsable: '',
     ministerioOrganizador: '',
     ministeriosRequeridos: [],
@@ -47,13 +50,17 @@ export default function EditarEvento() {
 
       if (eventoSnap.exists()) {
         const data = eventoSnap.data()
+        const ubicacionGuardada = data.ubicacion || ''
+        const esConocida = UBICACIONES.includes(ubicacionGuardada)
+
         setForm({
           titulo: data.titulo || '',
           descripcion: data.descripcion || '',
           fecha: data.fecha || '',
           horaInicio: data.horaInicio || '',
           horaFin: data.horaFin || '',
-          ubicacion: data.ubicacion || '',
+          ubicacion: esConocida ? ubicacionGuardada : (ubicacionGuardada ? 'Otro' : ''),
+          ubicacionOtro: esConocida ? '' : ubicacionGuardada,
           responsable: data.responsable || '',
           ministerioOrganizador: data.ministerioOrganizador || '',
           ministeriosRequeridos: data.ministeriosRequeridos || [],
@@ -85,10 +92,25 @@ export default function EditarEvento() {
     })
   }
 
+  function ubicacionFinal() {
+    return form.ubicacion === 'Otro' ? (form.ubicacionOtro.trim() || 'Otro') : form.ubicacion
+  }
+
   async function guardarCambios() {
     setGuardando(true)
+    const ubicacion = ubicacionFinal()
     try {
-      await updateDoc(doc(db, 'eventos_internos', id), { ...form })
+      await updateDoc(doc(db, 'eventos_internos', id), {
+        titulo: form.titulo,
+        descripcion: form.descripcion,
+        fecha: form.fecha,
+        horaInicio: form.horaInicio,
+        horaFin: form.horaFin,
+        ubicacion,
+        responsable: form.responsable,
+        ministerioOrganizador: form.ministerioOrganizador,
+        ministeriosRequeridos: form.ministeriosRequeridos,
+      })
 
       try {
         const respuesta = await fetch('/api/actualizar-evento-calendario', {
@@ -101,7 +123,7 @@ export default function EditarEvento() {
             fecha: form.fecha,
             horaInicio: form.horaInicio,
             horaFin: form.horaFin,
-            ubicacion: form.ubicacion,
+            ubicacion,
           }),
         })
         if (respuesta.ok) {
@@ -144,7 +166,7 @@ export default function EditarEvento() {
         fecha: form.fecha,
         horaInicio: form.horaInicio,
         horaFin: form.horaFin,
-        ubicacion: form.ubicacion,
+        ubicacion: ubicacionFinal(),
         idEventoActual: id,
       })
       setGuardando(false)
@@ -259,8 +281,20 @@ export default function EditarEvento() {
 
           <label style={styles.label}>
             Ubicación
-            <input name="ubicacion" value={form.ubicacion} onChange={handleChange} style={styles.input} />
+            <select name="ubicacion" value={form.ubicacion} onChange={handleChange} style={styles.input}>
+              <option value="">Selecciona un lugar</option>
+              {UBICACIONES.map((u) => (
+                <option key={u} value={u}>{u}</option>
+              ))}
+            </select>
           </label>
+
+          {form.ubicacion === 'Otro' && (
+            <label style={styles.label}>
+              Especifica el lugar
+              <input name="ubicacionOtro" value={form.ubicacionOtro} onChange={handleChange} style={styles.input} />
+            </label>
+          )}
 
           <label style={styles.label}>
             Responsable

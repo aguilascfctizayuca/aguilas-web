@@ -7,6 +7,8 @@ import { buscarConflictos } from './conflictos'
 import { registrarActividad } from './actividad'
 import './portal.css'
 
+const UBICACIONES = ['Templo principal', 'Salón de niños', 'Estacionamiento', 'Virtual', 'Otro']
+
 function eventoVacio() {
   return {
     id: Math.random().toString(36).slice(2),
@@ -16,11 +18,16 @@ function eventoVacio() {
     horaInicio: '',
     horaFin: '',
     ubicacion: '',
+    ubicacionOtro: '',
     responsable: '',
     ministerioOrganizador: '',
     ministeriosRequeridos: [],
     mostrarChecklist: false,
   }
+}
+
+function ubicacionFinal(ev) {
+  return ev.ubicacion === 'Otro' ? (ev.ubicacionOtro.trim() || 'Otro') : ev.ubicacion
 }
 
 export default function NuevoEvento() {
@@ -99,6 +106,7 @@ export default function NuevoEvento() {
 
     for (let i = 0; i < validos.length; i++) {
       const ev = validos[i]
+      const ubicacion = ubicacionFinal(ev)
       try {
         const docRef = await addDoc(collection(db, 'eventos_internos'), {
           titulo: ev.titulo.trim(),
@@ -106,7 +114,7 @@ export default function NuevoEvento() {
           fecha: ev.fecha,
           horaInicio: ev.horaInicio,
           horaFin: ev.horaFin,
-          ubicacion: ev.ubicacion,
+          ubicacion,
           responsable: ev.responsable,
           ministerioOrganizador: ev.ministerioOrganizador,
           ministeriosRequeridos: ev.ministeriosRequeridos,
@@ -127,7 +135,7 @@ export default function NuevoEvento() {
               fecha: ev.fecha,
               horaInicio: ev.horaInicio,
               horaFin: ev.horaFin,
-              ubicacion: ev.ubicacion,
+              ubicacion,
             }),
           })
           if (respuesta.ok) {
@@ -173,7 +181,7 @@ export default function NuevoEvento() {
           fecha: ev.fecha,
           horaInicio: ev.horaInicio,
           horaFin: ev.horaFin,
-          ubicacion: ev.ubicacion,
+          ubicacion: ubicacionFinal(ev),
         })
         if (encontrados.length > 0) conflictosEncontrados[ev.id] = encontrados
       }
@@ -299,13 +307,29 @@ export default function NuevoEvento() {
 
                 <label style={styles.label}>
                   Ubicación
-                  <input
+                  <select
                     value={ev.ubicacion}
                     onChange={(e) => actualizarEvento(ev.id, 'ubicacion', e.target.value)}
                     style={styles.input}
-                    placeholder="Ej. Templo principal"
-                  />
+                  >
+                    <option value="">Selecciona un lugar</option>
+                    {UBICACIONES.map((u) => (
+                      <option key={u} value={u}>{u}</option>
+                    ))}
+                  </select>
                 </label>
+
+                {ev.ubicacion === 'Otro' && (
+                  <label style={styles.label}>
+                    Especifica el lugar
+                    <input
+                      value={ev.ubicacionOtro}
+                      onChange={(e) => actualizarEvento(ev.id, 'ubicacionOtro', e.target.value)}
+                      style={styles.input}
+                      placeholder="Ej. Casa de la familia Pérez"
+                    />
+                  </label>
+                )}
 
                 <label style={styles.label}>
                   Responsable
