@@ -1,0 +1,41 @@
+:root {
+  color-scheme: light dark;
+
+  --portal-bg: #F7F7F5;
+  --portal-text: #111111;
+  --portal-muted: #666666;
+  --portal-muted-2: #888888;
+  --portal-card-bg: #ffffff;
+  --portal-card-border: #eeeeee;
+  --portal-input-bg: #ffffff;
+  --portal-input-border: #dddddd;
+  --portal-input-text: #111111;
+  --portal-label-text: #333333;
+  --portal-badge-bg: #eeeeee;
+  --portal-badge-text: #555555;
+  --portal-button-secondary-bg: #ffffff;
+  --portal-button-secondary-border: #dddddd;
+  --portal-error-bg: #FEF3F2;
+  --portal-error-text: #D92D20;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --portal-bg: #0F0F12;
+    --portal-text: #F5F3EE;
+    --portal-muted: #A0A0A8;
+    --portal-muted-2: #7A7A82;
+    --portal-card-bg: #1A1A1E;
+    --portal-card-border: #2A2A2E;
+    --portal-input-bg: #1A1A1E;
+    --portal-input-border: #33333A;
+    --portal-input-text: #F5F3EE;
+    --portal-label-text: #D8D8DE;
+    --portal-badge-bg: #2A2A2E;
+    --portal-badge-text: #D0D0D6;
+    --portal-button-secondary-bg: #1A1A1E;
+    --portal-button-secondary-border: #33333A;
+    --portal-error-bg: #3A1414;
+    --portal-error-text: #FF6B6B;
+  }
+}

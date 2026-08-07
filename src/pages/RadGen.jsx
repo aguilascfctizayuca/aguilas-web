@@ -9,7 +9,7 @@ function RadGen() {
       justifyContent: 'center',
       fontFamily: 'Montserrat, sans-serif',
     }}>
-      <h1>RadGen Mx - proximamente</h1>
+      <h1>RadGen Mx — próximamente</h1>
     </div>
   )
 }
