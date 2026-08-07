@@ -6,6 +6,8 @@ import { PortalAuthProvider } from './portal/PortalAuthContext'
 import PortalLogin from './portal/PortalLogin'
 import PortalDashboard from './portal/PortalDashboard'
 import NuevoEvento from './portal/NuevoEvento'
+import EditarEvento from './portal/EditarEvento'
+import PortalCalendario from './portal/PortalCalendario'
 import ProtectedRoute from './portal/ProtectedRoute'
 
 function PortalLayout() {
@@ -38,6 +40,22 @@ function App() {
           element={
             <ProtectedRoute>
               <NuevoEvento />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="eventos/:id/editar"
+          element={
+            <ProtectedRoute>
+              <EditarEvento />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="calendario"
+          element={
+            <ProtectedRoute>
+              <PortalCalendario />
             </ProtectedRoute>
           }
         />

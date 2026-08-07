@@ -1,20 +1,24 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { collection, addDoc, updateDoc, getDocs, serverTimestamp } from 'firebase/firestore'
+import { useNavigate, useParams, Link } from 'react-router-dom'
+import { doc, getDoc, updateDoc, deleteDoc, collection, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
 import { usePortalAuth } from './PortalAuthContext'
 import { buscarConflictos } from './conflictos'
 import { registrarActividad } from './actividad'
 import './portal.css'
 
-export default function NuevoEvento() {
+export default function EditarEvento() {
+  const { id } = useParams()
   const navigate = useNavigate()
   const { userData, user } = usePortalAuth()
 
   const [ministerios, setMinisterios] = useState([])
-  const [cargandoMinisterios, setCargandoMinisterios] = useState(true)
+  const [cargandoDatos, setCargandoDatos] = useState(true)
   const [guardando, setGuardando] = useState(false)
+  const [eliminando, setEliminando] = useState(false)
+  const [confirmandoEliminar, setConfirmandoEliminar] = useState(false)
   const [error, setError] = useState(null)
+  const [googleEventId, setGoogleEventId] = useState(null)
   const [conflictos, setConflictos] = useState([])
   const [ignorarConflictos, setIgnorarConflictos] = useState(false)
 
@@ -31,15 +35,37 @@ export default function NuevoEvento() {
   })
 
   useEffect(() => {
-    async function cargarMinisterios() {
-      const snap = await getDocs(collection(db, 'ministerios'))
-      const lista = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+    async function cargar() {
+      const [eventoSnap, ministeriosSnap] = await Promise.all([
+        getDoc(doc(db, 'eventos_internos', id)),
+        getDocs(collection(db, 'ministerios')),
+      ])
+
+      const lista = ministeriosSnap.docs.map((d) => ({ id: d.id, ...d.data() }))
       lista.sort((a, b) => a.nombre.localeCompare(b.nombre))
       setMinisterios(lista)
-      setCargandoMinisterios(false)
+
+      if (eventoSnap.exists()) {
+        const data = eventoSnap.data()
+        setForm({
+          titulo: data.titulo || '',
+          descripcion: data.descripcion || '',
+          fecha: data.fecha || '',
+          horaInicio: data.horaInicio || '',
+          horaFin: data.horaFin || '',
+          ubicacion: data.ubicacion || '',
+          responsable: data.responsable || '',
+          ministerioOrganizador: data.ministerioOrganizador || '',
+          ministeriosRequeridos: data.ministeriosRequeridos || [],
+        })
+        setGoogleEventId(data.googleEventId || null)
+      } else {
+        setError('No se encontró el evento.')
+      }
+      setCargandoDatos(false)
     }
-    cargarMinisterios()
-  }, [])
+    cargar()
+  }, [id])
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -47,35 +73,29 @@ export default function NuevoEvento() {
     setIgnorarConflictos(false)
   }
 
-  function toggleMinisterioRequerido(id) {
+  function toggleMinisterioRequerido(mid) {
     setForm((prev) => {
-      const yaEsta = prev.ministeriosRequeridos.includes(id)
+      const yaEsta = prev.ministeriosRequeridos.includes(mid)
       return {
         ...prev,
         ministeriosRequeridos: yaEsta
-          ? prev.ministeriosRequeridos.filter((m) => m !== id)
-          : [...prev.ministeriosRequeridos, id],
+          ? prev.ministeriosRequeridos.filter((m) => m !== mid)
+          : [...prev.ministeriosRequeridos, mid],
       }
     })
   }
 
-  async function guardarEvento() {
+  async function guardarCambios() {
     setGuardando(true)
     try {
-      const docRef = await addDoc(collection(db, 'eventos_internos'), {
-        ...form,
-        estado: 'pendiente',
-        googleEventId: null,
-        creadoPor: user.email,
-        creadoPorNombre: userData?.nombre || user.email,
-        createdAt: serverTimestamp(),
-      })
+      await updateDoc(doc(db, 'eventos_internos', id), { ...form })
 
       try {
-        const respuesta = await fetch('/api/crear-evento-calendario', {
+        const respuesta = await fetch('/api/actualizar-evento-calendario', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            googleEventId,
             titulo: form.titulo,
             descripcion: form.descripcion,
             fecha: form.fecha,
@@ -86,15 +106,17 @@ export default function NuevoEvento() {
         })
         if (respuesta.ok) {
           const data = await respuesta.json()
-          await updateDoc(docRef, { googleEventId: data.googleEventId })
+          if (data.googleEventId !== googleEventId) {
+            await updateDoc(doc(db, 'eventos_internos', id), { googleEventId: data.googleEventId })
+          }
         }
       } catch (calendarErr) {
         console.warn('Error de red al sincronizar con Google Calendar:', calendarErr)
       }
 
       await registrarActividad({
-        tipo: 'crear',
-        descripcion: `${userData?.nombre || user.email} creó el evento "${form.titulo}"`,
+        tipo: 'editar',
+        descripcion: `${userData?.nombre || user.email} editó el evento "${form.titulo}"`,
         usuarioEmail: user.email,
         usuarioNombre: userData?.nombre || user.email,
       })
@@ -123,6 +145,7 @@ export default function NuevoEvento() {
         horaInicio: form.horaInicio,
         horaFin: form.horaFin,
         ubicacion: form.ubicacion,
+        idEventoActual: id,
       })
       setGuardando(false)
 
@@ -132,13 +155,54 @@ export default function NuevoEvento() {
       }
     }
 
-    await guardarEvento()
+    await guardarCambios()
+  }
+
+  async function handleEliminar() {
+    setEliminando(true)
+    setError(null)
+    try {
+      try {
+        await fetch('/api/eliminar-evento-calendario', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ googleEventId }),
+        })
+      } catch (calendarErr) {
+        console.warn('Error de red al eliminar de Google Calendar:', calendarErr)
+      }
+
+      await deleteDoc(doc(db, 'eventos_internos', id))
+
+      await registrarActividad({
+        tipo: 'eliminar',
+        descripcion: `${userData?.nombre || user.email} eliminó el evento "${form.titulo}"`,
+        usuarioEmail: user.email,
+        usuarioNombre: userData?.nombre || user.email,
+      })
+
+      navigate('/lideres/dashboard')
+    } catch (err) {
+      console.error(err)
+      setError('No se pudo eliminar el evento. Intenta de nuevo.')
+      setEliminando(false)
+      setConfirmandoEliminar(false)
+    }
+  }
+
+  if (cargandoDatos) {
+    return (
+      <div style={styles.page}>
+        <p style={{ color: 'var(--portal-muted-2)' }}>Cargando...</p>
+      </div>
+    )
   }
 
   return (
     <div style={styles.page}>
       <div style={styles.container}>
-        <h1 style={styles.title}>Nuevo evento</h1>
+        <Link to="/lideres/dashboard" style={styles.backLink}>← Volver al dashboard</Link>
+        <h1 style={styles.title}>Editar evento</h1>
 
         {error && <p style={styles.error}>{error}</p>}
 
@@ -155,7 +219,7 @@ export default function NuevoEvento() {
             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
               <button
                 type="button"
-                onClick={() => { setIgnorarConflictos(true); setConflictos([]); guardarEvento() }}
+                onClick={() => { setIgnorarConflictos(true); setConflictos([]); guardarCambios() }}
                 style={styles.botonGuardarDeTodosModos}
               >
                 Guardar de todos modos
@@ -195,7 +259,7 @@ export default function NuevoEvento() {
 
           <label style={styles.label}>
             Ubicación
-            <input name="ubicacion" value={form.ubicacion} onChange={handleChange} style={styles.input} placeholder="Ej. Templo principal" />
+            <input name="ubicacion" value={form.ubicacion} onChange={handleChange} style={styles.input} />
           </label>
 
           <label style={styles.label}>
@@ -215,29 +279,47 @@ export default function NuevoEvento() {
 
           <div style={styles.label}>
             Ministerios requeridos
-            {cargandoMinisterios ? (
-              <p style={{ color: 'var(--portal-muted-2)' }}>Cargando...</p>
-            ) : (
-              <div style={styles.checklist}>
-                {ministerios.map((m) => (
-                  <label key={m.id} style={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      checked={form.ministeriosRequeridos.includes(m.id)}
-                      onChange={() => toggleMinisterioRequerido(m.id)}
-                    />
-                    <span style={{ ...styles.colorDot, background: m.color }} />
-                    {m.nombre}
-                  </label>
-                ))}
-              </div>
-            )}
+            <div style={styles.checklist}>
+              {ministerios.map((m) => (
+                <label key={m.id} style={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    checked={form.ministeriosRequeridos.includes(m.id)}
+                    onChange={() => toggleMinisterioRequerido(m.id)}
+                  />
+                  <span style={{ ...styles.colorDot, background: m.color }} />
+                  {m.nombre}
+                </label>
+              ))}
+            </div>
           </div>
 
           <button type="submit" disabled={guardando} className="portal-button-primary" style={styles.button}>
-            {guardando ? 'Guardando...' : 'Crear evento'}
+            {guardando ? 'Guardando...' : 'Guardar cambios'}
           </button>
         </form>
+
+        <div style={styles.zonaPeligro}>
+          {!confirmandoEliminar ? (
+            <button type="button" onClick={() => setConfirmandoEliminar(true)} style={styles.botonEliminar}>
+              Eliminar evento
+            </button>
+          ) : (
+            <div style={styles.confirmacionBox}>
+              <p style={styles.confirmacionTexto}>
+                ¿Seguro que quieres eliminar "{form.titulo}"? Esto también lo borra de Google Calendar. No se puede deshacer.
+              </p>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button type="button" onClick={handleEliminar} disabled={eliminando} style={styles.botonConfirmarEliminar}>
+                  {eliminando ? 'Eliminando...' : 'Sí, eliminar'}
+                </button>
+                <button type="button" onClick={() => setConfirmandoEliminar(false)} disabled={eliminando} style={styles.buttonSecondary}>
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -246,7 +328,8 @@ export default function NuevoEvento() {
 const styles = {
   page: { minHeight: '100vh', background: 'var(--portal-bg)', padding: '32px 20px' },
   container: { maxWidth: '640px', margin: '0 auto', fontFamily: 'Inter, sans-serif' },
-  title: { fontFamily: 'Montserrat, sans-serif', fontWeight: 900, marginBottom: '24px', color: 'var(--portal-text)' },
+  backLink: { color: 'var(--portal-muted)', fontSize: '14px', textDecoration: 'none' },
+  title: { fontFamily: 'Montserrat, sans-serif', fontWeight: 900, margin: '12px 0 24px', color: 'var(--portal-text)' },
   error: { color: 'var(--portal-error-text)', background: 'var(--portal-error-bg)', padding: '12px', borderRadius: '8px', marginBottom: '16px' },
   conflictoBox: {
     background: 'rgba(217,45,32,0.08)', border: '1px solid #D92D20', borderRadius: '10px',
@@ -276,5 +359,20 @@ const styles = {
   button: {
     padding: '14px 24px', borderRadius: '10px', border: 'none', background: '#3DDC04',
     color: '#0F0F12', fontWeight: 700, fontSize: '16px', cursor: 'pointer', marginTop: '8px',
+  },
+  zonaPeligro: { marginTop: '32px', paddingTop: '20px', borderTop: '1px solid var(--portal-card-border)' },
+  botonEliminar: {
+    padding: '10px 18px', borderRadius: '8px', border: '1px solid #D92D20', background: 'transparent',
+    color: '#D92D20', fontWeight: 600, fontSize: '14px', cursor: 'pointer',
+  },
+  confirmacionBox: { padding: '16px', borderRadius: '10px', background: 'var(--portal-error-bg)', border: '1px solid #D92D20' },
+  confirmacionTexto: { color: 'var(--portal-error-text)', fontSize: '14px', margin: '0 0 12px' },
+  botonConfirmarEliminar: {
+    padding: '10px 18px', borderRadius: '8px', border: 'none', background: '#D92D20',
+    color: '#fff', fontWeight: 700, fontSize: '14px', cursor: 'pointer',
+  },
+  buttonSecondary: {
+    padding: '10px 18px', borderRadius: '8px', border: '1px solid var(--portal-button-secondary-border)',
+    background: 'var(--portal-button-secondary-bg)', color: 'var(--portal-text)', cursor: 'pointer', fontSize: '14px',
   },
 }
