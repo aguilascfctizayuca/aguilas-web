@@ -10,7 +10,7 @@ import './portal.css'
 
 export default function PortalDashboard() {
   const navigate = useNavigate()
-  const { userData, logout } = usePortalAuth()
+  const { userData, user, logout } = usePortalAuth()
   const [eventos, setEventos] = useState([])
   const [cargando, setCargando] = useState(true)
 
@@ -38,6 +38,9 @@ export default function PortalDashboard() {
     [eventos, primerDiaMes]
   )
 
+  const ADMINS_TEMPORALES = ['schottalfredo@gmail.com']
+    const puedeVerAgendaPastoral = userData?.rol === 'pastor' || ADMINS_TEMPORALES.includes(user?.email)
+
   return (
     <div className="portal-dashboard-page" style={styles.page}>
       <div className="portal-fade-in portal-dashboard-header" style={styles.header}>
@@ -52,6 +55,11 @@ export default function PortalDashboard() {
           </p>
         </div>
         <div className="portal-dashboard-actions" style={{ display: 'flex', gap: '12px' }}>
+          {puedeVerAgendaPastoral && (
+            <Link to="/lideres/agenda-pastoral" style={styles.buttonSecondary}>
+              Agenda Pastoral
+            </Link>
+          )}
           <Link to="/lideres/eventos/nuevo" className="portal-button-primary" style={styles.buttonPrimary}>
             + Nuevo evento
           </Link>
@@ -120,7 +128,7 @@ const styles = {
     background: 'var(--portal-bg)',
     color: 'var(--portal-text)',
   },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '16px' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '16px', flexWrap: 'wrap' },
   h1: { fontFamily: 'Montserrat, sans-serif', fontWeight: 900, margin: 0, color: 'var(--portal-text)' },
   h2: { fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: '18px', color: 'var(--portal-text)', margin: '0 0 12px' },
   subtitle: { color: 'var(--portal-muted)', margin: '4px 0 0' },
@@ -144,7 +152,7 @@ const styles = {
   buttonSecondary: {
     padding: '10px 18px', borderRadius: '8px', border: '1px solid var(--portal-button-secondary-border)',
     background: 'var(--portal-button-secondary-bg)', color: 'var(--portal-text)', cursor: 'pointer', fontSize: '14px',
-    whiteSpace: 'nowrap',
+    whiteSpace: 'nowrap', textDecoration: 'none',
   },
   card: {
     display: 'flex', justifyContent: 'space-between', alignItems: 'center',

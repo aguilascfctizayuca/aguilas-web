@@ -8,6 +8,7 @@ import PortalDashboard from './portal/PortalDashboard'
 import NuevoEvento from './portal/NuevoEvento'
 import EditarEvento from './portal/EditarEvento'
 import PortalCalendario from './portal/PortalCalendario'
+import AgendaPastoral from './portal/AgendaPastoral'
 import ProtectedRoute from './portal/ProtectedRoute'
 
 function PortalLayout() {
@@ -56,6 +57,14 @@ function App() {
           element={
             <ProtectedRoute>
               <PortalCalendario />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="agenda-pastoral"
+          element={
+            <ProtectedRoute>
+              <AgendaPastoral />
             </ProtectedRoute>
           }
         />
