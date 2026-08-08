@@ -1,28 +1,29 @@
 import { google } from 'googleapis'
+import { verificarUsuarioRegistrado } from './_lib/verificarAcceso.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' })
   }
 
+  const usuario = await verificarUsuarioRegistrado(req)
+  if (!usuario) {
+    return res.status(403).json({ error: 'No tienes permiso para realizar esta acción' })
+  }
+
   try {
     const { googleEventId, titulo, descripcion, fecha, horaInicio, horaFin, ubicacion } = req.body
-
     if (!fecha || !horaInicio) {
       return res.status(400).json({ error: 'Faltan datos obligatorios' })
     }
-
     const oAuth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET
     )
     oAuth2Client.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN })
-
     const calendar = google.calendar({ version: 'v3', auth: oAuth2Client })
-
     const inicio = `${fecha}T${horaInicio}:00`
     const fin = horaFin ? `${fecha}T${horaFin}:00` : `${fecha}T${horaInicio}:00`
-
     const evento = {
       summary: titulo,
       description: descripcion || '',
@@ -30,9 +31,6 @@ export default async function handler(req, res) {
       start: { dateTime: inicio, timeZone: 'America/Mexico_City' },
       end: { dateTime: fin, timeZone: 'America/Mexico_City' },
     }
-
-    // Si ya existía en Calendar, lo actualizamos. Si no, lo creamos (por si
-    // el evento se creó antes de tener la sincronización, o falló la primera vez).
     let respuesta
     if (googleEventId) {
       respuesta = await calendar.events.update({
@@ -46,7 +44,6 @@ export default async function handler(req, res) {
         requestBody: evento,
       })
     }
-
     return res.status(200).json({ googleEventId: respuesta.data.id })
   } catch (err) {
     console.error('Error actualizando evento en Google Calendar:', err)

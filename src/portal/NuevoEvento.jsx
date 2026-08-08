@@ -5,6 +5,8 @@ import { db } from '../firebase'
 import { usePortalAuth } from './PortalAuthContext'
 import { buscarConflictos } from './conflictos'
 import { registrarActividad } from './actividad'
+import { crearNotificacion } from './notificaciones'
+import { fetchConAuth } from './authFetch'
 import './portal.css'
 
 const UBICACIONES = ['Águilas CFC Tizayuca', 'Salón de niños', 'Oficina pastoral', 'Virtual', 'Otro']
@@ -135,7 +137,7 @@ export default function NuevoEvento() {
         })
 
         try {
-          const respuesta = await fetch('/api/crear-evento-calendario', {
+          const respuesta = await fetchConAuth('/api/crear-evento-calendario', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -153,6 +155,15 @@ export default function NuevoEvento() {
           }
         } catch (calendarErr) {
           console.warn('Error de red al sincronizar con Google Calendar:', calendarErr)
+        }
+
+        for (const ministerioId of ev.ministeriosRequeridos) {
+          await crearNotificacion({
+            ministerioId,
+            eventoId: docRef.id,
+            eventoTitulo: ev.titulo.trim(),
+            creadoPor: userData?.nombre || user.email,
+          })
         }
       } catch (err) {
         console.error('Error creando evento:', err)

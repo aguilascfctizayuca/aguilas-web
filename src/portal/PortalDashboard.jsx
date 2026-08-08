@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { collection, query, orderBy, getDocs } from 'firebase/firestore'
+import { CalendarX2 } from 'lucide-react'
 import { db } from '../firebase'
 import { usePortalAuth } from './PortalAuthContext'
 import PortalCalendario from './PortalCalendario'
 import AvisosBanner from './AvisosBanner'
 import ActividadReciente from './ActividadReciente'
+import NotificacionesBell from './NotificacionesBell'
+import { IconoMinisterio } from './ministeriosConfig'
 import './portal.css'
 
 export default function PortalDashboard() {
@@ -83,6 +86,7 @@ export default function PortalDashboard() {
           if (!m) return null
           return (
             <span key={id} style={{ ...styles.ministerioBadge, background: `${m.color}22`, color: m.color, border: `1px solid ${m.color}55` }}>
+              <IconoMinisterio id={id} size={12} />
               {m.nombre}
             </span>
           )
@@ -146,6 +150,7 @@ export default function PortalDashboard() {
           animationDelay: `${delay}s`,
           cursor: puedeEditar ? 'pointer' : 'default',
           opacity: puedeEditar ? 1 : 0.75,
+          transition: 'transform 0.15s ease, box-shadow 0.15s ease',
         }}
       >
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -153,11 +158,33 @@ export default function PortalDashboard() {
           <p style={styles.cardMeta}>
             {ev.fecha} · {ev.horaInicio}{ev.horaFin ? ` - ${ev.horaFin}` : ''}
             {ev.ubicacion ? ` · ${ev.ubicacion}` : ''}
-            {ministerios[ev.ministerioOrganizador]?.nombre ? ` · ${ministerios[ev.ministerioOrganizador].nombre}` : ''}
+            {ministerios[ev.ministerioOrganizador]?.nombre && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', marginLeft: '4px' }}>
+                · <IconoMinisterio id={ev.ministerioOrganizador} size={13} /> {ministerios[ev.ministerioOrganizador].nombre}
+              </span>
+            )}
           </p>
           <BadgesMinisterios ids={ev.ministeriosRequeridos} />
         </div>
         <ProgresoMinisterios ev={ev} />
+      </div>
+    )
+  }
+
+  function SkeletonCard({ delay }) {
+    return (
+      <div className="portal-skeleton-card" style={{ ...styles.skeletonCard, animationDelay: `${delay}s` }}>
+        <div className="portal-skeleton-shimmer" style={{ ...styles.skeletonLine, width: '55%' }} />
+        <div className="portal-skeleton-shimmer" style={{ ...styles.skeletonLine, width: '80%', marginTop: '10px' }} />
+      </div>
+    )
+  }
+
+  function EstadoVacio({ mensaje }) {
+    return (
+      <div style={styles.estadoVacio}>
+        <CalendarX2 size={28} color="var(--portal-muted-2)" strokeWidth={1.5} />
+        <p style={{ ...styles.muted, margin: '8px 0 0' }}>{mensaje}</p>
       </div>
     )
   }
@@ -176,11 +203,17 @@ export default function PortalDashboard() {
               {userData?.rol === 'pastor' && 'Pastor'}
               {userData?.rol === 'primera_mesa' && 'Primera Mesa'}
               {userData?.rol === 'administrativo' && 'Administrativo'}
-              {userData?.rol === 'lider' && `Líder de ${ministerios[userData?.ministerio]?.nombre || userData?.ministerio || 'ministerio'}`}
+              {userData?.rol === 'lider' && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                  <IconoMinisterio id={userData?.ministerio} size={14} />
+                  Líder de {ministerios[userData?.ministerio]?.nombre || userData?.ministerio || 'ministerio'}
+                </span>
+              )}
             </p>
           </div>
         </div>
-        <div className="portal-dashboard-actions" style={{ display: 'flex', gap: '12px' }}>
+        <div className="portal-dashboard-actions" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <NotificacionesBell />
           {puedeVerAgendaPastoral && (
             <Link to="/lideres/agenda-pastoral" style={styles.buttonSecondary}>
               Agenda Pastoral
@@ -212,7 +245,13 @@ export default function PortalDashboard() {
         <PortalCalendario embedded />
       </div>
 
-      {cargando && <p style={styles.muted}>Cargando...</p>}
+      {cargando && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
+          <SkeletonCard delay={0} />
+          <SkeletonCard delay={0.05} />
+          <SkeletonCard delay={0.1} />
+        </div>
+      )}
 
       {!cargando && esLiderConMinisterio && (
         <>
@@ -220,7 +259,7 @@ export default function PortalDashboard() {
             Eventos donde te necesitan
           </h2>
           {misEventos.length === 0 && (
-            <p style={styles.muted}>No hay eventos próximos que requieran tu ministerio.</p>
+            <EstadoVacio mensaje="No hay eventos próximos que requieran tu ministerio." />
           )}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
             {misEventos.map((ev, i) => (
@@ -232,7 +271,7 @@ export default function PortalDashboard() {
             Otros eventos próximos
           </h2>
           {otrosEventos.length === 0 && (
-            <p style={styles.muted}>No hay más eventos próximos registrados.</p>
+            <EstadoVacio mensaje="No hay más eventos próximos registrados." />
           )}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
             {otrosEventos.map((ev, i) => (
@@ -248,7 +287,7 @@ export default function PortalDashboard() {
             Próximos eventos
           </h2>
           {otrosEventos.length === 0 && (
-            <p style={styles.muted}>No hay eventos próximos registrados.</p>
+            <EstadoVacio mensaje="No hay eventos próximos registrados." />
           )}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
             {otrosEventos.map((ev, i) => (
@@ -272,7 +311,7 @@ const styles = {
     color: 'var(--portal-text)',
   },
   accentBar: { height: '4px', borderRadius: '4px', marginBottom: '20px', transition: 'background 0.3s ease' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '16px', flexWrap: 'wrap' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '16px', flexWrap: 'wrap', position: 'relative', zIndex: 10 },
   headerLeft: { display: 'flex', alignItems: 'center', gap: '14px' },
   logo: { width: '48px', height: '48px', flexShrink: 0 },
   h1: { fontFamily: 'Montserrat, sans-serif', fontWeight: 900, margin: 0, color: 'var(--portal-text)' },
@@ -306,10 +345,11 @@ const styles = {
     border: '1px solid var(--portal-card-border)', background: 'var(--portal-card-bg)',
   },
   cardTitle: { color: 'var(--portal-text)' },
-  cardMeta: { margin: '4px 0 0', color: 'var(--portal-muted)', fontSize: '14px' },
+  cardMeta: { margin: '4px 0 0', color: 'var(--portal-muted)', fontSize: '14px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '2px' },
   badgesRow: { display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' },
   ministerioBadge: {
     fontSize: '11px', fontWeight: 600, padding: '3px 9px', borderRadius: '20px',
+    display: 'inline-flex', alignItems: 'center', gap: '4px',
   },
   badge: {
     fontSize: '12px', fontWeight: 600, textTransform: 'capitalize',
@@ -320,4 +360,16 @@ const styles = {
   progresoTexto: { fontSize: '12px', fontWeight: 700, whiteSpace: 'nowrap' },
   progresoBarraFondo: { width: '80px', height: '5px', borderRadius: '10px', background: 'var(--portal-card-border)', overflow: 'hidden' },
   progresoBarraRelleno: { height: '100%', borderRadius: '10px', transition: 'width 0.3s ease' },
+  skeletonCard: {
+    padding: '14px 16px', borderRadius: '10px',
+    border: '1px solid var(--portal-card-border)', background: 'var(--portal-card-bg)',
+  },
+  skeletonLine: {
+    height: '12px', borderRadius: '6px',
+    background: 'var(--portal-card-border)',
+  },
+  estadoVacio: {
+    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+    padding: '28px 16px', textAlign: 'center',
+  },
 }

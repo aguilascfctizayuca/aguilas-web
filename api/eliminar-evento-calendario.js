@@ -1,8 +1,14 @@
 import { google } from 'googleapis'
+import { verificarUsuarioRegistrado } from './_lib/verificarAcceso.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' })
+  }
+
+  const usuario = await verificarUsuarioRegistrado(req)
+  if (!usuario) {
+    return res.status(403).json({ error: 'No tienes permiso para realizar esta acción' })
   }
 
   try {
@@ -27,7 +33,6 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ ok: true })
   } catch (err) {
-    // Si el evento ya no existe en Calendar (código 410 o 404), no es un error real.
     if (err.code === 410 || err.code === 404) {
       return res.status(200).json({ ok: true })
     }

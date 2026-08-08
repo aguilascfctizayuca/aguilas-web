@@ -5,6 +5,8 @@ import { db } from '../firebase'
 import { usePortalAuth } from './PortalAuthContext'
 import { buscarConflictos } from './conflictos'
 import { registrarActividad } from './actividad'
+import ActividadEvento from './ActividadEvento'
+import { fetchConAuth } from './authFetch'
 import './portal.css'
 
 const UBICACIONES = ['Águilas CFC Tizayuca', 'Salón de niños', 'Oficina pastoral', 'Virtual', 'Otro']
@@ -165,7 +167,7 @@ export default function EditarEvento() {
       })
 
       try {
-        const respuesta = await fetch('/api/actualizar-evento-calendario', {
+        const respuesta = await fetchConAuth('/api/actualizar-evento-calendario', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -193,6 +195,7 @@ export default function EditarEvento() {
         descripcion: `${userData?.nombre || user.email} editó el evento "${form.titulo}"`,
         usuarioEmail: user.email,
         usuarioNombre: userData?.nombre || user.email,
+        eventoId: id,
       })
 
       navigate('/lideres/dashboard')
@@ -237,7 +240,7 @@ export default function EditarEvento() {
     setError(null)
     try {
       try {
-        await fetch('/api/eliminar-evento-calendario', {
+        await fetchConAuth('/api/eliminar-evento-calendario', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ googleEventId }),
@@ -253,6 +256,7 @@ export default function EditarEvento() {
         descripcion: `${userData?.nombre || user.email} eliminó el evento "${form.titulo}"`,
         usuarioEmail: user.email,
         usuarioNombre: userData?.nombre || user.email,
+        eventoId: id,
       })
 
       navigate('/lideres/dashboard')
@@ -460,6 +464,8 @@ export default function EditarEvento() {
             </div>
           )}
         </div>
+
+        <ActividadEvento eventoId={id} />
       </div>
     </div>
   )
