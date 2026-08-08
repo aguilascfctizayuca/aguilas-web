@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useLayoutEffect } from 'react'
 import { Bell } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { usePortalAuth } from './PortalAuthContext'
@@ -10,7 +10,9 @@ export default function NotificacionesBell() {
   const navigate = useNavigate()
   const [notificaciones, setNotificaciones] = useState([])
   const [abierto, setAbierto] = useState(false)
+  const [posicion, setPosicion] = useState({ top: 0, left: 0 })
   const cajaRef = useRef(null)
+  const botonRef = useRef(null)
 
   const ministerioId = userData?.rol === 'lider' ? userData?.ministerio : null
 
@@ -28,6 +30,28 @@ export default function NotificacionesBell() {
     return () => document.removeEventListener('mousedown', clickFuera)
   }, [])
 
+  useLayoutEffect(() => {
+    if (!abierto || !botonRef.current) return
+
+    function calcularPosicion() {
+      const rect = botonRef.current.getBoundingClientRect()
+      const margen = 12
+      const anchoDropdown = Math.min(300, window.innerWidth - margen * 2)
+
+      let left = rect.right - anchoDropdown
+      if (left < margen) left = margen
+      if (left + anchoDropdown > window.innerWidth - margen) {
+        left = window.innerWidth - margen - anchoDropdown
+      }
+
+      setPosicion({ top: rect.bottom + 8, left, width: anchoDropdown })
+    }
+
+    calcularPosicion()
+    window.addEventListener('resize', calcularPosicion)
+    return () => window.removeEventListener('resize', calcularPosicion)
+  }, [abierto])
+
   if (!ministerioId) return null
 
   const noLeidas = notificaciones.filter((n) => !n.leidoPor?.includes(user?.email))
@@ -40,13 +64,21 @@ export default function NotificacionesBell() {
 
   return (
     <div ref={cajaRef} style={{ position: 'relative' }}>
-      <button onClick={() => setAbierto((v) => !v)} style={styles.botonCampana} aria-label="Notificaciones">
+      <button
+        ref={botonRef}
+        onClick={() => setAbierto((v) => !v)}
+        style={styles.botonCampana}
+        aria-label="Notificaciones"
+      >
         <Bell size={19} strokeWidth={2.1} />
         {noLeidas.length > 0 && <span style={styles.badgeContador}>{noLeidas.length > 9 ? '9+' : noLeidas.length}</span>}
       </button>
 
       {abierto && (
-        <div className="portal-fade-in" style={styles.dropdown}>
+        <div
+          className="portal-fade-in"
+          style={{ ...styles.dropdown, top: posicion.top, left: posicion.left, width: posicion.width }}
+        >
           <div style={styles.dropdownHeader}>Notificaciones</div>
           {notificaciones.length === 0 && (
             <p style={styles.vacio}>No tienes notificaciones todavía.</p>
@@ -84,8 +116,7 @@ const styles = {
     display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px',
   },
   dropdown: {
-    position: 'absolute', top: '46px', right: 0, width: '300px', maxWidth: '90vw',
-    background: 'var(--portal-card-bg)', border: '1px solid var(--portal-card-border)',
+    position: 'fixed', background: 'var(--portal-card-bg)', border: '1px solid var(--portal-card-border)',
     borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.18)', zIndex: 9999, overflow: 'hidden',
   },
   dropdownHeader: {
