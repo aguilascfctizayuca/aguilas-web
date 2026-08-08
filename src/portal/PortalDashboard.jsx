@@ -318,15 +318,15 @@ const styles = {
   h2: { fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: '18px', color: 'var(--portal-text)', margin: '0 0 12px' },
   subtitle: { color: 'var(--portal-muted)', margin: '4px 0 0' },
   muted: { color: 'var(--portal-muted-2)' },
-  statsRow: { display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' },
-  statCard: {
-  boxSizing: 'border-box',
-  flex: '1 1 130px', padding: '12px 14px', borderRadius: '10px',
+  statsRow: { display: 'flex', gap: '10px', marginBottom: '20px' },
+statCard: {
+  width: 'calc(50% - 5px)', boxSizing: 'border-box',
+  padding: '10px 12px', borderRadius: '10px',
   background: 'var(--portal-card-bg)', border: '1px solid var(--portal-card-border)',
-  display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '8px',
+  display: 'flex', flexDirection: 'column', gap: '2px',
 },
-statNumber: { fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: '24px', color: '#3DDC04' },
-statLabel: { fontSize: '12px', color: 'var(--portal-muted)', textAlign: 'right' },
+statNumber: { fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: '20px', color: '#3DDC04' },
+statLabel: { fontSize: '11px', color: 'var(--portal-muted)' },
   
   calendarioBox: {
     padding: '20px', borderRadius: '14px', background: 'var(--portal-card-bg)',
