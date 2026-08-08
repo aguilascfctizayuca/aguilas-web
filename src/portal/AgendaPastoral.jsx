@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { usePortalAuth } from './PortalAuthContext'
+import { fetchConAuth } from './authFetch'
 import './portal.css'
 
 // Correos con acceso especial mientras no hay más de un administrador definido.
@@ -12,13 +13,15 @@ export default function AgendaPastoral() {
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
 
-  const tieneAcceso = userData?.rol === 'pastor' || ADMINS_TEMPORALES.includes(user?.email)
+  const tieneAcceso =
+    ['pastor', 'administrativo', 'primera_mesa'].includes(userData?.rol) ||
+    ADMINS_TEMPORALES.includes(user?.email)
 
   useEffect(() => {
     if (!tieneAcceso) return
     async function cargar() {
       try {
-        const respuesta = await fetch('/api/eventos-pastorales')
+        const respuesta = await fetchConAuth('/api/eventos-pastorales')
         if (respuesta.ok) {
           const data = await respuesta.json()
           setEventos(data.eventos || [])

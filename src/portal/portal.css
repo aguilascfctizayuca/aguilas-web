@@ -138,4 +138,18 @@
   .portal-print-only {
     display: block !important;
   }
+}@media (max-width: 640px) {
+  .portal-stat-card {
+    padding: 10px 14px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+  }
+  .portal-stat-number {
+    font-size: 20px !important;
+  }
+  .portal-stat-label {
+    font-size: 12px !important;
+  }
 }

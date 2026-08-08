@@ -212,7 +212,7 @@ export default function PortalDashboard() {
             </p>
           </div>
         </div>
-        <div className="portal-dashboard-actions" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <div className="portal-dashboard-actions" style={{ display: 'flex', gap: '12px', alignItems: 'center', position: 'relative', zIndex: 10 }}>
           <NotificacionesBell />
           {puedeVerAgendaPastoral && (
             <Link to="/lideres/agenda-pastoral" style={styles.buttonSecondary}>
@@ -232,12 +232,12 @@ export default function PortalDashboard() {
 
       <div className="portal-fade-in portal-dashboard-stats" style={{ ...styles.statsRow, animationDelay: '0.06s' }}>
         <div className="portal-stat-card" style={styles.statCard}>
-          <span style={{ ...styles.statNumber, color: accentColor }}>{proximosEventos.length}</span>
-          <span style={styles.statLabel}>Próximos eventos</span>
+          <span className="portal-stat-number" style={{ ...styles.statNumber, color: accentColor }}>{proximosEventos.length}</span>
+          <span className="portal-stat-label" style={styles.statLabel}>Próximos eventos</span>
         </div>
         <div className="portal-stat-card" style={styles.statCard}>
-          <span style={styles.statNumber}>{eventosEsteMes}</span>
-          <span style={styles.statLabel}>Eventos este mes</span>
+          <span className="portal-stat-number" style={styles.statNumber}>{eventosEsteMes}</span>
+          <span className="portal-stat-label" style={styles.statLabel}>Eventos este mes</span>
         </div>
       </div>
 
