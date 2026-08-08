@@ -320,12 +320,12 @@ const styles = {
   muted: { color: 'var(--portal-muted-2)' },
   statsRow: { display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' },
   statCard: {
-  flex: '1 1 140px', padding: '12px 16px', borderRadius: '10px',
+  flex: '1 1 160px', padding: '16px 18px', borderRadius: '12px',
   background: 'var(--portal-card-bg)', border: '1px solid var(--portal-card-border)',
-  display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '10px',
+  display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
 },
-statNumber: { fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: '22px', color: '#3DDC04' },
-statLabel: { fontSize: '12px', color: 'var(--portal-muted)' },
+statNumber: { fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: '28px', color: '#3DDC04' },
+statLabel: { fontSize: '13px', color: 'var(--portal-muted)', textAlign: 'right' },
   
   calendarioBox: {
     padding: '20px', borderRadius: '14px', background: 'var(--portal-card-bg)',
