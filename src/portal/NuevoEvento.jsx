@@ -17,6 +17,7 @@ function eventoVacio() {
     titulo: '',
     descripcion: '',
     fecha: '',
+    fechaFin: '',
     horaInicio: '',
     horaFin: '',
     ubicacion: '',
@@ -101,7 +102,7 @@ export default function NuevoEvento() {
     setEventos((prev) => {
       const original = prev.find((ev) => ev.id === id)
       if (!original) return prev
-      const copia = { ...original, id: Math.random().toString(36).slice(2), fecha: '' }
+      const copia = { ...original, id: Math.random().toString(36).slice(2), fecha: '', fechaFin: '' }
       const idx = prev.findIndex((ev) => ev.id === id)
       const nuevos = [...prev]
       nuevos.splice(idx + 1, 0, copia)
@@ -117,11 +118,13 @@ export default function NuevoEvento() {
     for (let i = 0; i < validos.length; i++) {
       const ev = validos[i]
       const ubicacion = ubicacionFinal(ev)
+      const fechaFin = ev.fechaFin || ev.fecha
       try {
         const docRef = await addDoc(collection(db, 'eventos_internos'), {
           titulo: ev.titulo.trim(),
           descripcion: ev.descripcion,
           fecha: ev.fecha,
+          fechaFin,
           horaInicio: ev.horaInicio,
           horaFin: ev.horaFin,
           ubicacion,
@@ -144,6 +147,7 @@ export default function NuevoEvento() {
               titulo: ev.titulo.trim(),
               descripcion: ev.descripcion,
               fecha: ev.fecha,
+              fechaFin,
               horaInicio: ev.horaInicio,
               horaFin: ev.horaFin,
               ubicacion,
@@ -193,12 +197,19 @@ export default function NuevoEvento() {
       return
     }
 
+    const fechaFinInvalida = validos.find((ev) => ev.fechaFin && ev.fechaFin < ev.fecha)
+    if (fechaFinInvalida) {
+      setError(`En "${fechaFinInvalida.titulo}", la fecha de fin no puede ser antes que la fecha de inicio.`)
+      return
+    }
+
     if (!ignorarConflictos) {
       setGuardando(true)
       const conflictosEncontrados = {}
       for (const ev of validos) {
         const encontrados = await buscarConflictos({
           fecha: ev.fecha,
+          fechaFin: ev.fechaFin || ev.fecha,
           horaInicio: ev.horaInicio,
           horaFin: ev.horaFin,
           ubicacion: ubicacionFinal(ev),
@@ -305,6 +316,25 @@ export default function NuevoEvento() {
                       style={styles.input}
                     />
                   </label>
+                  <label style={styles.label}>
+                    Fecha fin
+                    <input
+                      type="date"
+                      value={ev.fechaFin}
+                      min={ev.fecha || undefined}
+                      onChange={(e) => actualizarEvento(ev.id, 'fechaFin', e.target.value)}
+                      style={styles.input}
+                      placeholder="Solo si dura varios días"
+                    />
+                  </label>
+                </div>
+                {ev.fechaFin && ev.fechaFin !== ev.fecha && (
+                  <p style={styles.notaVariosDias}>
+                    📅 Este evento durará varios días, del {ev.fecha} al {ev.fechaFin}.
+                  </p>
+                )}
+
+                <div style={styles.row}>
                   <label style={styles.label}>
                     Hora inicio *
                     <input
@@ -457,6 +487,9 @@ const styles = {
     fontFamily: 'Inter, sans-serif', background: 'var(--portal-input-bg)', color: 'var(--portal-input-text)',
   },
   row: { display: 'flex', gap: '12px' },
+  notaVariosDias: {
+    margin: '-8px 0 0', fontSize: '13px', color: 'var(--portal-muted)', fontStyle: 'italic',
+  },
   botonToggleChecklist: {
     alignSelf: 'flex-start', padding: '7px 12px', borderRadius: '7px', border: '1px dashed var(--portal-card-border)',
     background: 'transparent', color: 'var(--portal-muted)', fontSize: '13px', cursor: 'pointer',

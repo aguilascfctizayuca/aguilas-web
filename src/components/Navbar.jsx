@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 
 function Navbar({ logoVisible }) {
   const [scrolled, setScrolled] = useState(false)
@@ -66,6 +67,7 @@ function Navbar({ logoVisible }) {
           <a href="#servicios" onClick={() => handleNavClick('#servicios')} className="nav-pill">Servicios</a>
           <a href="#valores" onClick={() => handleNavClick('#valores')} className="nav-pill">Valores</a>
           <a href="#contacto" onClick={() => handleNavClick('#contacto')} className="nav-pill">Contacto</a>
+          <Link to="/lideres" onClick={() => setMenuAbierto(false)} className="nav-pill">Líderes</Link>
         </div>
 
         <button
@@ -110,6 +112,7 @@ function Navbar({ logoVisible }) {
         <a href="#servicios" onClick={() => handleNavClick('#servicios')} className="nav-pill-movil">Servicios</a>
         <a href="#valores" onClick={() => handleNavClick('#valores')} className="nav-pill-movil">Valores</a>
         <a href="#contacto" onClick={() => handleNavClick('#contacto')} className="nav-pill-movil">Contacto</a>
+        <Link to="/lideres" onClick={() => setMenuAbierto(false)} className="nav-pill-movil">Líderes</Link>
       </div>
     </>
   )
