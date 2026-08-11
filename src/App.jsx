@@ -10,6 +10,10 @@ import EditarEvento from './portal/EditarEvento'
 import PortalCalendario from './portal/PortalCalendario'
 import AgendaPastoral from './portal/AgendaPastoral'
 import ProtectedRoute from './portal/ProtectedRoute'
+import InventarioMinisterio from './portal/InventarioMinisterio'
+import NuevoItemInventario from './portal/NuevoItemInventario'
+import EditarItemInventario from './portal/EditarItemInventario'
+import PrestamosInventario from './portal/PrestamosInventario'
 
 function PortalLayout() {
   return (
@@ -65,6 +69,38 @@ function App() {
           element={
             <ProtectedRoute>
               <AgendaPastoral />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="inventario"
+          element={
+            <ProtectedRoute>
+              <InventarioMinisterio />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="inventario/nuevo"
+          element={
+            <ProtectedRoute>
+              <NuevoItemInventario />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="inventario/:id/editar"
+          element={
+            <ProtectedRoute>
+              <EditarItemInventario />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="inventario/prestamos"
+          element={
+            <ProtectedRoute>
+              <PrestamosInventario />
             </ProtectedRoute>
           }
         />

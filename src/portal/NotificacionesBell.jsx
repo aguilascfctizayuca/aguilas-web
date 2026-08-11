@@ -57,10 +57,11 @@ export default function NotificacionesBell() {
   const noLeidas = notificaciones.filter((n) => !n.leidoPor?.includes(user?.email))
 
   function abrirNotificacion(n) {
-    if (!n.leidoPor?.includes(user?.email)) marcarComoLeida(n.id, user?.email)
-    setAbierto(false)
-    if (n.eventoId) navigate(`/lideres/eventos/${n.eventoId}/editar`)
-  }
+  if (!n.leidoPor?.includes(user?.email)) marcarComoLeida(n.id, user?.email)
+  setAbierto(false)
+  if (n.eventoId) navigate(`/lideres/eventos/${n.eventoId}/editar`)
+  else if (n.itemId) navigate('/lideres/inventario')
+}
 
   return (
     <div ref={cajaRef} style={{ position: 'relative' }}>

@@ -214,14 +214,17 @@ export default function PortalDashboard() {
         </div>
         <div className="portal-dashboard-actions" style={{ display: 'flex', gap: '12px', alignItems: 'center', position: 'relative', zIndex: 10 }}>
           <NotificacionesBell />
-          {puedeVerAgendaPastoral && (
-            <Link to="/lideres/agenda-pastoral" style={styles.buttonSecondary}>
-              Agenda Pastoral
-            </Link>
-          )}
-          <Link to="/lideres/eventos/nuevo" className="portal-button-primary" style={styles.buttonPrimary}>
-            + Nuevo evento
-          </Link>
+<Link to="/lideres/inventario" style={styles.buttonSecondary}>
+  Inventario
+</Link>
+{puedeVerAgendaPastoral && (
+  <Link to="/lideres/agenda-pastoral" style={styles.buttonSecondary}>
+    Agenda Pastoral
+  </Link>
+)}
+<Link to="/lideres/eventos/nuevo" className="portal-button-primary" style={styles.buttonPrimary}>
+  + Nuevo evento
+</Link>
           <button onClick={logout} style={styles.buttonSecondary}>Cerrar sesión</button>
         </div>
       </div>

@@ -18,6 +18,30 @@ export async function crearNotificacion({ ministerioId, eventoId, eventoTitulo, 
   }
 }
 
+export async function crearNotificacionInventario({
+  ministerioId,
+  itemId,
+  itemNombre,
+  cantidad,
+  cantidadMinima,
+  creadoPor,
+}) {
+  if (!ministerioId) return
+  try {
+    await addDoc(collection(db, 'notificaciones_portal'), {
+      ministerioId,
+      itemId,
+      itemNombre,
+      texto: `"${itemNombre}" está bajo en inventario (quedan ${cantidad}, mínimo ${cantidadMinima})`,
+      creadoPor,
+      leidoPor: [],
+      createdAt: serverTimestamp(),
+    })
+  } catch (err) {
+    console.warn('No se pudo crear la notificación de inventario:', err)
+  }
+}
+
 export function escucharNotificaciones(ministerioId, callback) {
   if (!ministerioId) return () => {}
   const q = query(
