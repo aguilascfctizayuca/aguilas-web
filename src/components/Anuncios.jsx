@@ -7,8 +7,7 @@ function TarjetaAnuncio({ anuncio }) {
   const ref = useReveal()
 
   return (
-    <div ref={ref} className="reveal" style={{
-      border: '1px solid var(--borde)',
+    <div ref={ref} className="reveal glass-panel" style={{
       borderRadius: '16px',
       padding: '1.5rem',
       display: 'flex',
@@ -16,12 +15,17 @@ function TarjetaAnuncio({ anuncio }) {
       alignItems: 'center',
       maxWidth: '600px',
       margin: '0 auto 1.5rem auto',
-      backgroundColor: 'var(--fondo)',
+      position: 'relative',
+      zIndex: 1,
     }}>
       {anuncio.imagenUrl && (
         <img
           src={anuncio.imagenUrl}
           alt={anuncio.titulo}
+          width="80"
+          height="80"
+          loading="lazy"
+          decoding="async"
           style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '10px', flexShrink: 0 }}
         />
       )}
@@ -65,8 +69,8 @@ function Anuncios() {
   if (anunciosVigentes.length === 0) return null
 
   return (
-    <section style={{ backgroundColor: 'var(--fondo)', padding: '5rem 2rem', borderTop: '1px solid var(--borde)' }}>
-      <div ref={refTitulo} style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+    <section style={{ background: 'radial-gradient(ellipse 800px 500px at 85% 0%, rgba(61,220,4,0.08), transparent 65%), var(--fondo)', padding: 'clamp(2.5rem, 7vw, 5rem) 2rem', borderTop: '1px solid var(--borde)', overflow: 'hidden', position: 'relative' }}>
+      <div ref={refTitulo} style={{ textAlign: 'center', marginBottom: '2.5rem', position: 'relative', zIndex: 1 }}>
         <p style={{ color: 'var(--verde)', fontFamily: 'Inter, sans-serif', fontWeight: '600', fontSize: '0.75rem', letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '1rem' }}>
           Mantente informado
         </p>

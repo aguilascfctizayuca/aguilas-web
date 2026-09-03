@@ -57,7 +57,7 @@ function TarjetaEvento({ evento }) {
     : null
 
   return (
-    <div ref={ref} className="reveal" style={{
+    <div ref={ref} className="reveal glass-panel" style={{
       border: '1.5px solid var(--verde)',
       borderRadius: '16px',
       padding: '2rem',
@@ -66,12 +66,17 @@ function TarjetaEvento({ evento }) {
       maxWidth: '340px',
       flexShrink: 0,
       scrollSnapAlign: 'center',
-      backgroundColor: 'var(--fondo)',
+      position: 'relative',
+      zIndex: 1,
     }}>
       {evento.imagenUrl && (
         <img
           src={evento.imagenUrl}
           alt={evento.titulo}
+          width="260"
+          height="260"
+          loading="lazy"
+          decoding="async"
           style={{ width: '100%', maxWidth: '260px', borderRadius: '14px', boxShadow: '0 8px 40px rgba(0,0,0,0.15)', marginBottom: '1.5rem' }}
         />
       )}
@@ -124,6 +129,19 @@ function TarjetaEvento({ evento }) {
   )
 }
 
+function estaVigente(evento) {
+  if (!evento.fecha) return true
+  const finDelDia = new Date(evento.fecha + 'T23:59:59')
+  return finDelDia >= new Date()
+}
+
+function compararPorFecha(a, b) {
+  if (!a.fecha && !b.fecha) return 0
+  if (!a.fecha) return 1
+  if (!b.fecha) return -1
+  return new Date(a.fecha + 'T' + (a.hora || '00:00')) - new Date(b.fecha + 'T' + (b.hora || '00:00'))
+}
+
 function ProximosEventos() {
   const [eventos, setEventos] = useState([])
   const refTitulo = useReveal()
@@ -138,11 +156,13 @@ function ProximosEventos() {
     return () => unsubscribe()
   }, [])
 
-  if (eventos.length === 0) return null
+  const eventosVigentes = eventos.filter(estaVigente).sort(compararPorFecha)
+
+  if (eventosVigentes.length === 0) return null
 
   return (
-    <section style={{ backgroundColor: 'var(--fondo)', padding: '6rem 0', borderTop: '1px solid var(--borde)', overflow: 'hidden' }}>
-      <div ref={refTitulo} style={{ textAlign: 'center', marginBottom: '2.5rem', padding: '0 2rem' }}>
+    <section style={{ background: 'radial-gradient(ellipse 900px 600px at 20% 0%, rgba(61,220,4,0.08), transparent 65%), var(--fondo)', padding: 'clamp(2.5rem, 8vw, 6rem) 0', borderTop: '1px solid var(--borde)', overflow: 'hidden', position: 'relative' }}>
+      <div ref={refTitulo} style={{ textAlign: 'center', marginBottom: 'clamp(1.5rem, 4vw, 2.5rem)', padding: '0 2rem', position: 'relative', zIndex: 1 }}>
         <p style={{ color: 'var(--verde)', fontFamily: 'Inter, sans-serif', fontWeight: '600', fontSize: '0.75rem', letterSpacing: '0.25em', textTransform: 'uppercase', marginBottom: '1rem' }}>
           No te lo pierdas
         </p>
@@ -159,8 +179,10 @@ function ProximosEventos() {
         scrollSnapType: 'x mandatory',
         padding: '0.5rem 2rem 1.5rem 2rem',
         WebkitOverflowScrolling: 'touch',
+        position: 'relative',
+        zIndex: 1,
       }}>
-        {eventos.map(function (evento) {
+        {eventosVigentes.map(function (evento) {
           return <TarjetaEvento key={evento.id} evento={evento} />
         })}
       </div>

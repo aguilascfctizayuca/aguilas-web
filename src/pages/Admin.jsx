@@ -157,6 +157,7 @@ function Admin() {
 
 function PanelAnuncios() {
   const [anuncios, setAnuncios] = useState([])
+  const [cargando, setCargando] = useState(true)
   const [editando, setEditando] = useState(null)
   const [subiendo, setSubiendo] = useState(false)
   const [form, setForm] = useState({ titulo: '', texto: '', fechaExpiracion: '', imagenFile: null, imagenUrlActual: '' })
@@ -165,6 +166,7 @@ function PanelAnuncios() {
     const q = query(collection(db, 'anuncios'), orderBy('creado', 'desc'))
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setAnuncios(snapshot.docs.map(d => ({ id: d.id, ...d.data() })))
+      setCargando(false)
     })
     return () => unsubscribe()
   }, [])
@@ -250,7 +252,8 @@ function PanelAnuncios() {
       </form>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-        {anuncios.map(a => (
+        {cargando && <p style={{ color: TEXTO_SUAVE, fontSize: '0.9rem' }}>Cargando anuncios...</p>}
+        {!cargando && anuncios.map(a => (
           <div key={a.id} style={{ border: `1px solid ${BORDE}`, backgroundColor: CARD, borderRadius: '14px', padding: '1rem 1.25rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
             {a.imagenUrl && <img src={a.imagenUrl} alt={a.titulo} style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />}
             <div style={{ flex: 1, minWidth: 0 }}>
@@ -264,7 +267,7 @@ function PanelAnuncios() {
             </div>
           </div>
         ))}
-        {anuncios.length === 0 && <p style={{ color: TEXTO_SUAVE, fontSize: '0.9rem' }}>Aún no hay anuncios.</p>}
+        {!cargando && anuncios.length === 0 && <p style={{ color: TEXTO_SUAVE, fontSize: '0.9rem' }}>Aún no hay anuncios.</p>}
       </div>
     </>
   )
@@ -275,8 +278,14 @@ const formEventoVacio = {
   whatsappMensaje: '', mostrarContador: false, imagenFile: null, imagenUrlActual: '',
 }
 
+function eventoPaso(ev) {
+  if (!ev.fecha) return false
+  return new Date(ev.fecha + 'T23:59:59') < new Date()
+}
+
 function PanelEventos() {
   const [eventos, setEventos] = useState([])
+  const [cargando, setCargando] = useState(true)
   const [editando, setEditando] = useState(null)
   const [subiendo, setSubiendo] = useState(false)
   const [form, setForm] = useState(formEventoVacio)
@@ -285,9 +294,30 @@ function PanelEventos() {
     const q = query(collection(db, 'eventos'), orderBy('creado', 'desc'))
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setEventos(snapshot.docs.map(d => ({ id: d.id, ...d.data() })))
+      setCargando(false)
     })
     return () => unsubscribe()
   }, [])
+
+  const eventosOrdenados = [...eventos].sort((a, b) => {
+    const aPaso = eventoPaso(a)
+    const bPaso = eventoPaso(b)
+    if (aPaso !== bPaso) return aPaso ? 1 : -1
+    if (!a.fecha && !b.fecha) return 0
+    if (!a.fecha) return 1
+    if (!b.fecha) return -1
+    return new Date(a.fecha + 'T' + (a.hora || '00:00')) - new Date(b.fecha + 'T' + (b.hora || '00:00'))
+  })
+  const eventosPasados = eventos.filter(eventoPaso)
+
+  const limpiarPasados = async () => {
+    if (eventosPasados.length === 0) return
+    if (!confirm(`¿Borrar ${eventosPasados.length} evento(s) que ya pasaron? Esto no se puede deshacer.`)) return
+    for (const ev of eventosPasados) {
+      borrarImagenDeStorage(ev.imagenUrl)
+      await deleteDoc(doc(db, 'eventos', ev.id))
+    }
+  }
 
   const resetForm = () => {
     setForm(formEventoVacio)
@@ -367,6 +397,9 @@ function PanelEventos() {
           <label style={{ ...labelStyle, flex: 1, minWidth: '140px' }}>
             Fecha (opcional)
             <input type="date" value={form.fecha} onChange={e => setForm({ ...form, fecha: e.target.value })} style={{ ...inputStyle, colorScheme: 'dark' }} />
+            <span style={{ display: 'block', fontSize: '0.75rem', color: TEXTO_SUAVE, textTransform: 'none', letterSpacing: 'normal', marginTop: '0.35rem', fontWeight: '400' }}>
+              El evento se oculta solo del sitio al terminar este día
+            </span>
           </label>
           <label style={{ ...labelStyle, flex: 1, minWidth: '140px' }}>
             Hora (opcional)
@@ -399,6 +432,11 @@ function PanelEventos() {
           <input type="checkbox" checked={form.mostrarContador} onChange={e => setForm({ ...form, mostrarContador: e.target.checked })} style={{ width: '18px', height: '18px', accentColor: VERDE }} />
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.9rem', color: TEXTO }}>Mostrar contador regresivo para este evento</span>
         </label>
+        {form.mostrarContador && !form.fecha && (
+          <p style={{ margin: 0, fontSize: '0.8rem', color: '#F0997B' }}>
+            Agrega una fecha arriba — sin fecha el contador no se muestra.
+          </p>
+        )}
 
         <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
           <button type="submit" disabled={subiendo} style={{ backgroundColor: subiendo ? BORDE : VERDE, color: subiendo ? TEXTO_SUAVE : '#000', border: 'none', padding: '0.85rem 1.75rem', borderRadius: '999px', cursor: subiendo ? 'default' : 'pointer', fontWeight: '700', fontFamily: 'Montserrat, sans-serif', fontSize: '0.9rem' }}>
@@ -412,26 +450,48 @@ function PanelEventos() {
         </div>
       </form>
 
+      {eventosPasados.length > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.25rem', padding: '0.9rem 1.1rem', backgroundColor: 'rgba(240,153,123,0.08)', border: '1px solid #4A1B0C', borderRadius: '12px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.85rem', color: '#F0997B' }}>
+            {eventosPasados.length} evento(s) ya pasaron y siguen guardados aquí (ya no se muestran en el sitio).
+          </span>
+          <button onClick={limpiarPasados} style={{ cursor: 'pointer', background: 'none', border: '1px solid #4A1B0C', color: '#F0997B', padding: '0.5rem 1rem', borderRadius: '999px', fontSize: '0.8rem', flexShrink: 0 }}>
+            Borrar pasados
+          </button>
+        </div>
+      )}
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-        {eventos.map(ev => (
-          <div key={ev.id} style={{ border: `1px solid ${BORDE}`, backgroundColor: CARD, borderRadius: '14px', padding: '1rem 1.25rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            {ev.imagenUrl && <img src={ev.imagenUrl} alt={ev.titulo} style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <strong style={{ color: TEXTO, fontFamily: 'Montserrat, sans-serif', fontSize: '0.95rem' }}>{ev.titulo}</strong>
-              <p style={{ margin: '0.3rem 0', fontSize: '0.85rem', color: TEXTO_SUAVE }}>{ev.descripcion}</p>
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                {ev.fecha && <span style={{ fontSize: '0.75rem', color: VERDE }}>{ev.fecha}{ev.hora ? ` · ${ev.hora}` : ''}</span>}
-                {ev.ubicacion && <span style={{ fontSize: '0.75rem', color: TEXTO_SUAVE }}>{ev.ubicacion}</span>}
-                {ev.mostrarContador && <span style={{ fontSize: '0.75rem', color: VERDE }}>Contador activo</span>}
+        {cargando && <p style={{ color: TEXTO_SUAVE, fontSize: '0.9rem' }}>Cargando eventos...</p>}
+        {!cargando && eventosOrdenados.map(ev => {
+          const pasado = eventoPaso(ev)
+          return (
+            <div key={ev.id} style={{ border: `1px solid ${BORDE}`, backgroundColor: CARD, borderRadius: '14px', padding: '1rem 1.25rem', display: 'flex', gap: '1rem', alignItems: 'center', opacity: pasado ? 0.55 : 1 }}>
+              {ev.imagenUrl && <img src={ev.imagenUrl} alt={ev.titulo} style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+                  <strong style={{ color: TEXTO, fontFamily: 'Montserrat, sans-serif', fontSize: '0.95rem' }}>{ev.titulo}</strong>
+                  {pasado && (
+                    <span style={{ fontSize: '0.65rem', fontWeight: '700', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#F0997B', border: '1px solid #4A1B0C', borderRadius: '999px', padding: '0.15rem 0.55rem' }}>
+                      Pasado
+                    </span>
+                  )}
+                </div>
+                <p style={{ margin: '0.3rem 0', fontSize: '0.85rem', color: TEXTO_SUAVE }}>{ev.descripcion}</p>
+                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  {ev.fecha && <span style={{ fontSize: '0.75rem', color: pasado ? TEXTO_SUAVE : VERDE }}>{ev.fecha}{ev.hora ? ` · ${ev.hora}` : ''}</span>}
+                  {ev.ubicacion && <span style={{ fontSize: '0.75rem', color: TEXTO_SUAVE }}>{ev.ubicacion}</span>}
+                  {ev.mostrarContador && <span style={{ fontSize: '0.75rem', color: pasado ? TEXTO_SUAVE : VERDE }}>Contador activo</span>}
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+                <button onClick={() => editar(ev)} style={{ cursor: 'pointer', background: 'none', border: `1px solid ${BORDE}`, color: TEXTO, padding: '0.45rem 0.9rem', borderRadius: '999px', fontSize: '0.8rem' }}>Editar</button>
+                <button onClick={() => borrar(ev)} style={{ cursor: 'pointer', background: 'none', border: '1px solid #4A1B0C', color: '#F0997B', padding: '0.45rem 0.9rem', borderRadius: '999px', fontSize: '0.8rem' }}>Borrar</button>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
-              <button onClick={() => editar(ev)} style={{ cursor: 'pointer', background: 'none', border: `1px solid ${BORDE}`, color: TEXTO, padding: '0.45rem 0.9rem', borderRadius: '999px', fontSize: '0.8rem' }}>Editar</button>
-              <button onClick={() => borrar(ev)} style={{ cursor: 'pointer', background: 'none', border: '1px solid #4A1B0C', color: '#F0997B', padding: '0.45rem 0.9rem', borderRadius: '999px', fontSize: '0.8rem' }}>Borrar</button>
-            </div>
-          </div>
-        ))}
-        {eventos.length === 0 && <p style={{ color: TEXTO_SUAVE, fontSize: '0.9rem' }}>Aún no hay eventos.</p>}
+          )
+        })}
+        {!cargando && eventos.length === 0 && <p style={{ color: TEXTO_SUAVE, fontSize: '0.9rem' }}>Aún no hay eventos.</p>}
       </div>
     </>
   )
