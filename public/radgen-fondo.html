@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<style>html,body{margin:0;height:100%;overflow:hidden;background:#222}canvas{display:block;width:100%;height:100%}</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+var cfg = (window.__VISU_CFG_COMPAT__||{}).captureRef=({
+  _animEnabled:{ value:true,  type:'toggle', label:'Animate', group:'Motion' },
+  cols:        { value:6,  type:'slider', label:'Columns', group:'Shapes', min:2, max:24, step:1 },
+  rows:        { value:9,  type:'slider', label:'Rows',    group:'Shapes', min:2, max:24, step:1 },
+  pull:        { value:1, type:'slider', label:'Mouse pull strength', group:'Motion', min:0, max:1, step:0.001 },
+  pullRange:   { value:0.1, type:'slider', label:'Pull range',  group:'Motion', min:0.1, max:1.5, step:0.001 },
+  damping:     { value:0.02, type:'slider', label:'Smoothness', group:'Motion', min:0.02, max:0.5, step:0.001 },
+  drift:       { value:0.878, type:'slider', label:'Idle drift', group:'Motion', min:0, max:1, step:0.001 },
+  reroll:      { value:true, type:'toggle', label:'Re-roll palette',  group:'Colors' },
+  paletteName: { value:'noir', type:'dropdown', label:'Palette', group:'Colors', options:['sandia','tropic','tide','pulp','noir','citrus'] },
+  grain:       { value:0.446,  type:'slider', label:'Grain',    group:'Effects', min:0, max:1, step:0.001 },
+  gradientChance:{ value:0.95, type:'slider', label:'Gradient chance', group:'Effects', min:0, max:1, step:0.001 },
+  cellPad:     { value:0,    type:'slider', label:'Cell gap', group:'Effects', min:0, max:8, step:0.5, unit:'px' }
+});
+
+var palettes = {
+  sandia: ['#ee3d2c','#f08fb1','#dab63b','#1e7e3a','#86a624','#fbe6c5'],
+  tropic: ['#00b894','#fdcb6e','#e84393','#0984e3','#fab1a0','#2d3436'],
+  tide:   ['#0d3b66','#faf0ca','#f4d35e','#ee964b','#f95738'],
+  pulp:   ['#fff200','#ff007f','#00f5d4','#7209b7','#0d0d0d','#f8f9fa'],
+  noir:   ['#0a0a0a','#1a1a1a','#2a2a2a','#cccccc','#f5f5f5'],
+  citrus: ['#ffd400','#ff8a00','#10b981','#1e3a8a','#fde68a','#ffffff']
+};
+
+var canvas=document.getElementById('c'), ctx=canvas.getContext('2d');
+var W=0,H=0,dpr=Math.min(2,window.devicePixelRatio||1);
+function resize(){ W=canvas.clientWidth=window.innerWidth; H=canvas.clientHeight=window.innerHeight; canvas.width=W*dpr; canvas.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); makeGrain(); }
+window.addEventListener('resize', resize);
+
+var grainCanvas = document.createElement('canvas');
+function makeGrain(){
+  grainCanvas.width=320; grainCanvas.height=320;
+  var g=grainCanvas.getContext('2d');
+  var img=g.createImageData(320,320);
+  for(var i=0;i<img.data.length;i+=4){
+    var v=128 + (Math.random()-0.5)*220;
+    img.data[i]=img.data[i+1]=img.data[i+2]=v;
+    img.data[i+3]=255;
+  }
+  g.putImageData(img,0,0);
+}
+resize();
+
+var cellsCfg = []; // grid colors per cell
+var prevKey = '';
+function rebuild(){
+  cellsCfg = [];
+  var pal = palettes[cfg.paletteName.value] || palettes.sandia;
+  for (var r=0;r<cfg.rows.value;r++){
+    var row=[];
+    for (var c=0;c<cfg.cols.value;c++){
+      var a = pal[Math.floor(Math.random()*pal.length)];
+      var b = pal[Math.floor(Math.random()*pal.length)];
+      var dir = Math.floor(Math.random()*4); // 0 h, 1 v, 2 d, 3 anti
+      var asGrad = Math.random() < cfg.gradientChance.value;
+      row.push({a:a,b:asGrad?b:a, dir:dir});
+    }
+    cellsCfg.push(row);
+  }
+}
+rebuild();
+
+var mx=0.5, my=0.5, hasPtr=false;
+canvas.addEventListener('pointermove', function(e){ var r=canvas.getBoundingClientRect(); mx=(e.clientX-r.left)/W; my=(e.clientY-r.top)/H; hasPtr=true; });
+canvas.addEventListener('mouseleave', function(){ hasPtr=false; });
+
+var colWidthsTarget=[], colWidths=[], rowHeightsTarget=[], rowHeights=[];
+
+function distributeAxis(n, focus, range, pull){
+  // produce widths summing to 1; cells closer to focus get larger weight
+  var w = new Array(n);
+  var sum = 0;
+  for (var i=0;i<n;i++){
+    var cx = (i+0.5)/n;
+    var d = Math.abs(cx - focus);
+    var k = Math.exp(- (d*d)/(range*range*0.5));
+    w[i] = 1 + k*pull*4;
+    sum += w[i];
+  }
+  for (var i=0;i<n;i++) w[i]/=sum;
+  return w;
+}
+
+var t0 = performance.now();
+var _cameraZoom=1, _cameraPanX=0, _cameraPanY=0, _animEnabled=true;
+function frame(){
+  var t=(performance.now()-t0)/1000;
+  if (cfg.reroll.value){ rebuild(); cfg.reroll.value=false; }
+  var key = cfg.cols.value+'|'+cfg.rows.value+'|'+cfg.paletteName.value+'|'+cfg.gradientChance.value.toFixed(2);
+  if (key !== prevKey){ rebuild(); prevKey = key; }
+
+  var fx = hasPtr ? mx : 0.5 + Math.sin(t*0.4)*0.3*cfg.drift.value + 0.5*(1-cfg.drift.value? 0:0);
+  var fy = hasPtr ? my : 0.5 + Math.cos(t*0.31)*0.3*cfg.drift.value;
+  var pull = cfg.pull.value * (hasPtr?1: cfg.drift.value);
+  colWidthsTarget = distributeAxis(cfg.cols.value, fx, cfg.pullRange.value, pull);
+  rowHeightsTarget = distributeAxis(cfg.rows.value, fy, cfg.pullRange.value, pull);
+  if (colWidths.length !== colWidthsTarget.length){ colWidths = colWidthsTarget.slice(); rowHeights = rowHeightsTarget.slice(); }
+  for (var i=0;i<colWidths.length;i++) colWidths[i] += (colWidthsTarget[i]-colWidths[i])*cfg.damping.value;
+  for (var j=0;j<rowHeights.length;j++) rowHeights[j] += (rowHeightsTarget[j]-rowHeights[j])*cfg.damping.value;
+
+  ctx.fillStyle = '#000'; ctx.fillRect(0,0,W,H);
+  ctx.save();
+  ctx.translate(W/2, H/2);
+  ctx.scale(_cameraZoom, _cameraZoom);
+  ctx.translate(-W/2 + _cameraPanX, -H/2 + _cameraPanY);
+
+  var x=0;
+  var pad = cfg.cellPad.value;
+  for (var c=0;c<colWidths.length;c++){
+    var cw = colWidths[c]*W;
+    var y=0;
+    for (var r=0;r<rowHeights.length;r++){
+      var rh = rowHeights[r]*H;
+      var cell = cellsCfg[r][c];
+      var x0 = x+pad, y0 = y+pad, w=cw-pad*2, h=rh-pad*2;
+      var grad;
+      if (cell.a !== cell.b){
+        var dir=cell.dir;
+        if (dir===0) grad = ctx.createLinearGradient(x0,y0,x0+w,y0);
+        else if (dir===1) grad = ctx.createLinearGradient(x0,y0,x0,y0+h);
+        else if (dir===2) grad = ctx.createLinearGradient(x0,y0,x0+w,y0+h);
+        else grad = ctx.createLinearGradient(x0+w,y0,x0,y0+h);
+        grad.addColorStop(0, cell.a);
+        grad.addColorStop(1, cell.b);
+        ctx.fillStyle = grad;
+      } else {
+        ctx.fillStyle = cell.a;
+      }
+      ctx.fillRect(x0,y0,w,h);
+      y += rh;
+    }
+    x += cw;
+  }
+  // grain overlay
+  if (cfg.grain.value > 0){
+    ctx.globalAlpha = cfg.grain.value*0.55;
+    ctx.fillStyle = ctx.createPattern(grainCanvas,'repeat');
+    ctx.fillRect(0,0,W,H);
+    ctx.globalAlpha = 1;
+  }
+  ctx.restore();
+}
+
+function loop(){ frame(); requestAnimationFrame(loop); }
+
+window.addEventListener('message', function(e){
+  if(!e.data) return;
+  if(e.data.type==='cfg_update'){
+    if(e.data.key==='_animEnabled') _animEnabled=e.data.value;
+    else if(cfg[e.data.key]) cfg[e.data.key].value=e.data.value;
+  }
+  if(e.data.type==='camera_update'){ _cameraZoom=e.data.zoom||1; _cameraPanX=e.data.panX||0; _cameraPanY=e.data.panY||0; }
+  if(e.data.type==='request_snapshot'){ var cv=document.getElementById('c'); if(cv) parent.postMessage({type:'snapshot_ready', dataUrl: cv.toDataURL('image/png')}, '*'); }
+});
+window.addEventListener('load', function(){ parent.postMessage({type:'cfg_schema', cfg:cfg}, '*'); });
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
