@@ -14,7 +14,6 @@ const TEXTO_COMPLETO = 'Ven como eres. Sal diferente.'
 
 function Hero() {
   const [animado, setAnimado] = useState(false)
-  const [hover, setHover] = useState(false)
   const [textoVisible, setTextoVisible] = useState('')
   const { ref: ctaRef, onMouseMove: onCtaMove, onMouseLeave: onCtaLeave } = useMagnetico(0.3)
 
@@ -31,6 +30,16 @@ function Hero() {
     const timer = setTimeout(() => setAnimado(true), 1500)
     return () => clearTimeout(timer)
   }, [])
+
+  // El blur del botón solo se activa una vez que su transición de aparición
+  // (opacity) terminó por completo — mezclar backdrop-filter con esa
+  // transición es lo que dejaba el vidrio "cortado" a la mitad.
+  const [blurListo, setBlurListo] = useState(false)
+  useEffect(() => {
+    if (!animado) return
+    const t = setTimeout(() => setBlurListo(true), 1700)
+    return () => clearTimeout(t)
+  }, [animado])
 
   // Typewriter — arranca cuando animado se activa
   useEffect(() => {
@@ -148,13 +157,13 @@ function Hero() {
           target="_blank"
           rel="noreferrer"
           ref={ctaRef}
-          onMouseEnter={() => setHover(true)}
-          onMouseLeave={(e) => { setHover(false); onCtaLeave(e) }}
+          onMouseLeave={onCtaLeave}
           onMouseMove={onCtaMove}
+          className={`hero-cta${blurListo ? ' hero-cta--glass' : ''}`}
           style={{
             position: 'relative',
-            overflow: 'hidden',
             display: 'inline-block',
+            padding: '1rem 3rem',
             color: '#ffffff',
             fontFamily: 'Inter, sans-serif',
             fontWeight: '500',
@@ -165,38 +174,14 @@ function Hero() {
             letterSpacing: '0.2em',
             textTransform: 'uppercase',
             opacity: animado ? 1 : 0,
-            transition: 'opacity 0.8s ease 0.8s, box-shadow 0.3s ease, transform 0.15s ease-out',
-            boxShadow: hover
-              ? '0 0 20px rgba(61,220,4,0.4)'
-              : 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(255,255,255,0.05)',
-            zIndex: 1,
+            transition: 'opacity 0.8s ease 0.8s, transform 0.15s ease-out',
           }}
         >
-          {/* Capa de vidrio — sin hijos con z-index, para evitar el bug de Chromium con backdrop-filter */}
-          <span style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundColor: 'rgba(255,255,255,0.08)',
-            backdropFilter: 'blur(16px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-            willChange: 'backdrop-filter',
-          }} />
-          {/* Capa de contenido — el barrido animado va aquí, separado del blur */}
-          <span style={{ position: 'relative', display: 'block', padding: '1rem 3rem' }}>
-            <span style={{
-              position: 'absolute',
-              top: 0, left: 0,
-              width: hover ? '100%' : '0%',
-              height: '100%',
-              backgroundColor: '#2BAF1E',
-              transition: 'width 0.4s ease',
-            }} />
-            <span style={{ position: 'relative' }}>Visítanos este domingo</span>
-          </span>
+          Visítanos este domingo
         </a>
 
         {/* Indicadores */}
-        <div className="glass" style={{
+        <div className={`glass${blurListo ? '' : ' glass-pending'}`} style={{
           display: 'flex',
           gap: '8px',
           marginTop: '2rem',

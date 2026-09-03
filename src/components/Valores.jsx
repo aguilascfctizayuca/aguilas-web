@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import {
   Cross, Home, HandHeart, Handshake, Users,
   Crown, Sprout, Compass, Gift, Award,
@@ -21,7 +20,6 @@ const VALORES = [
 
 function Valores() {
   const refTitulo = useReveal()
-  const refGrid = useReveal()
 
   return (
     <section id="valores" style={{
@@ -54,7 +52,7 @@ function Valores() {
         </h2>
       </div>
 
-      <div ref={refGrid} className="reveal valores-grid" style={{
+      <div className="valores-grid" style={{
         maxWidth: '900px',
         margin: '0 auto',
         position: 'relative',
@@ -74,66 +72,40 @@ function Valores() {
 }
 
 function ValorCard({ nombre, Icono, span }) {
-  const [hovered, setHovered] = useState(false)
+  const ref = useReveal()
   const destacado = span === 2
 
   return (
     <div
-      className={`valor-card${destacado ? ' valor-destacado' : ''}`}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      ref={ref}
+      className={`reveal glass-panel valor-card${destacado ? ' valor-destacado' : ''}`}
       style={{
         gridColumn: `span ${span}`,
         position: 'relative',
-        overflow: 'hidden',
-        borderRadius: '18px',
-        border: '1px solid var(--borde-glass)',
-        borderColor: hovered ? 'rgba(61,220,4,0.5)' : undefined,
-        cursor: 'default',
-        transition: 'border-color 0.3s ease',
-      }}
-    >
-      {/* Capa de vidrio — sin hijos con z-index, para evitar el bug de Chromium con backdrop-filter */}
-      <span className="glass-panel" style={{ position: 'absolute', inset: 0, border: 'none', borderRadius: '18px' }} />
-
-      {/* Capa de contenido — el barrido animado va aquí, separado del blur */}
-      <div className="valor-card__body" style={{
-        position: 'relative',
         padding: destacado ? '1.75rem' : '1.5rem',
+        borderRadius: '18px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'flex-start',
         gap: '0.6rem',
+        cursor: 'default',
+      }}
+    >
+      <Icono
+        size={destacado ? 28 : 22}
+        strokeWidth={1.75}
+        className="valor-card__icon"
+        style={{ position: 'relative' }}
+      />
+      <span className="valor-card__label" style={{
+        position: 'relative',
+        fontFamily: 'Montserrat, sans-serif',
+        fontWeight: '700',
+        fontSize: destacado ? '1.15rem' : '0.95rem',
       }}>
-        <span style={{
-          position: 'absolute',
-          top: 0, left: 0,
-          width: hovered ? '100%' : '0%',
-          height: '100%',
-          backgroundColor: 'var(--verde)',
-          transition: 'width 0.4s ease',
-        }} />
-        <Icono
-          size={destacado ? 28 : 22}
-          strokeWidth={1.75}
-          style={{
-            position: 'relative',
-            color: hovered ? '#000000' : 'var(--verde)',
-            transition: 'color 0.3s ease',
-          }}
-        />
-        <span style={{
-          position: 'relative',
-          fontFamily: 'Montserrat, sans-serif',
-          fontWeight: '700',
-          fontSize: destacado ? '1.15rem' : '0.95rem',
-          color: hovered ? '#000000' : 'var(--texto)',
-          transition: 'color 0.3s ease',
-        }}>
-          {nombre}
-        </span>
-      </div>
+        {nombre}
+      </span>
     </div>
   )
 }

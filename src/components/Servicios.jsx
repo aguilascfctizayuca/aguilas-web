@@ -56,12 +56,9 @@ function formatearRestante(ms) {
 }
 
 function CardServicio({ dia, subtitulo, horarios, activo, esHoy }) {
-  const [hover, setHover] = useState(false)
-
   return (
     <div
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
+      className="card-servicio"
       style={{
         flex: '1 1 220px',
         padding: '2.5rem 2rem',
@@ -71,17 +68,11 @@ function CardServicio({ dia, subtitulo, horarios, activo, esHoy }) {
         border: '1.5px solid var(--verde)',
         position: 'relative',
         overflow: 'hidden',
-        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-        transform: hover ? 'translateY(-6px)' : 'translateY(0)',
-        boxShadow: hover
-          ? '0 0 30px rgba(61,220,4,0.25)'
-          : activo
-            ? '0 0 24px rgba(61,220,4,0.2)'
-            : '0 0 0px rgba(61,220,4,0)',
+        boxShadow: activo ? '0 0 24px rgba(61,220,4,0.2)' : '0 0 0px rgba(61,220,4,0)',
       }}
     >
       {activo && (
-        <span style={{
+        <span className="card-servicio__badge" style={{
           position: 'absolute',
           top: '0.9rem',
           right: '0.9rem',
@@ -94,60 +85,55 @@ function CardServicio({ dia, subtitulo, horarios, activo, esHoy }) {
           fontSize: '0.6rem',
           letterSpacing: '0.15em',
           textTransform: 'uppercase',
-          color: hover ? '#ffffff' : 'var(--verde)',
         }}>
-          <span style={{
+          <span className="card-servicio__dot" style={{
             width: '6px',
             height: '6px',
             borderRadius: '50%',
-            backgroundColor: hover ? '#ffffff' : 'var(--verde)',
+            backgroundColor: 'var(--verde)',
             animation: 'whatsappPulso 1.6s ease-out infinite',
           }} />
           {esHoy ? 'Hoy' : 'Próximo'}
         </span>
       )}
-      <div style={{
+      <div className="card-servicio__sweep" style={{
         position: 'absolute',
         top: 0, left: 0,
-        width: hover ? '100%' : '0%',
+        width: '0%',
         height: '100%',
         backgroundColor: '#2BAF1E',
-        transition: 'width 0.4s ease',
         zIndex: 0,
       }} />
       <div style={{ position: 'relative', zIndex: 1 }}>
-        <p style={{
+        <p className="card-servicio__dia" style={{
           fontFamily: 'Montserrat, sans-serif',
           fontWeight: '900',
           fontSize: '1.5rem',
-          color: hover ? '#ffffff' : 'var(--texto)',
+          color: 'var(--texto)',
           marginBottom: '0.75rem',
-          transition: 'color 0.3s ease',
         }}>
           {dia}
         </p>
         {subtitulo && (
-          <p style={{
+          <p className="card-servicio__sub" style={{
             fontFamily: 'Inter, sans-serif',
             fontSize: '0.75rem',
             fontWeight: '500',
             letterSpacing: '0.15em',
             textTransform: 'uppercase',
-            color: hover ? 'rgba(255,255,255,0.8)' : 'var(--texto-suave)',
+            color: 'var(--texto-suave)',
             marginBottom: '0.75rem',
-            transition: 'color 0.3s ease',
           }}>
             {subtitulo}
           </p>
         )}
         {horarios.map((h) => (
-          <p key={h} style={{
+          <p key={h} className="card-servicio__dia" style={{
             fontFamily: 'Inter, sans-serif',
             fontSize: '1.1rem',
             fontWeight: '300',
-            color: hover ? '#ffffff' : 'var(--texto)',
+            color: 'var(--texto)',
             lineHeight: '1.8',
-            transition: 'color 0.3s ease',
           }}>
             {h}
           </p>
@@ -196,8 +182,8 @@ function Servicios() {
         </h2>
       </div>
 
-      <div ref={refCountdown} className="reveal" style={{ textAlign: 'center', marginBottom: 'clamp(1.5rem, 4vw, 3rem)', position: 'relative', zIndex: 1 }}>
-        <div className="glass-panel" style={{
+      <div style={{ textAlign: 'center', marginBottom: 'clamp(1.5rem, 4vw, 3rem)', position: 'relative', zIndex: 1 }}>
+        <div ref={refCountdown} className="reveal glass-panel" style={{
           display: 'inline-flex',
           alignItems: 'center',
           flexWrap: 'wrap',
