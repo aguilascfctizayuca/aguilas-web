@@ -6,12 +6,9 @@ import useReveal from '../hooks/useReveal'
 function TarjetaAnuncio({ anuncio }) {
   return (
     <div className="glass-panel" style={{
-      borderRadius: '16px',
-      padding: '1.5rem',
-      display: 'flex',
-      gap: '1.25rem',
-      alignItems: 'center',
-      maxWidth: '600px',
+      borderRadius: '18px',
+      overflow: 'hidden',
+      maxWidth: '420px',
       margin: '0 auto 1.5rem auto',
       position: 'relative',
       zIndex: 1,
@@ -20,15 +17,15 @@ function TarjetaAnuncio({ anuncio }) {
         <img
           src={anuncio.imagenUrl}
           alt={anuncio.titulo}
-          width="80"
-          height="80"
+          width="420"
+          height="420"
           loading="lazy"
           decoding="async"
-          style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '10px', flexShrink: 0 }}
+          style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', display: 'block' }}
         />
       )}
-      <div>
-        <h3 style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: '900', fontSize: '1.1rem', color: 'var(--texto)', marginBottom: '0.35rem' }}>
+      <div style={{ padding: '1.5rem' }}>
+        <h3 style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: '900', fontSize: '1.2rem', color: 'var(--texto)', marginBottom: '0.4rem' }}>
           {anuncio.titulo}
         </h3>
         {anuncio.texto && (
