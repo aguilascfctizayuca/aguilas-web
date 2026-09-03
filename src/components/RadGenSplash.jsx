@@ -2,17 +2,14 @@ import { useState, useEffect } from 'react'
 
 const BARRAS = [40, 70, 45, 90, 55, 75, 35, 65]
 
-function RadGenSplash({ onComplete }) {
+function RadGenSplash() {
   const [fase, setFase] = useState('entrando') // 'entrando' → 'saliendo' → 'listo'
 
   useEffect(() => {
     const t1 = setTimeout(() => setFase('saliendo'), 950)
-    const t2 = setTimeout(() => {
-      setFase('listo')
-      onComplete()
-    }, 1650)
+    const t2 = setTimeout(() => setFase('listo'), 1650)
     return () => { clearTimeout(t1); clearTimeout(t2) }
-  }, [onComplete])
+  }, [])
 
   if (fase === 'listo') return null
 

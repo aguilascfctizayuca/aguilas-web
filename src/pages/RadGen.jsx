@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import RadGenSplash from '../components/RadGenSplash'
@@ -6,8 +5,6 @@ import RadGenSplash from '../components/RadGenSplash'
 const BARRAS = [40, 70, 45, 90, 55, 75, 35, 65, 50, 80, 42, 60]
 
 function RadGen() {
-  const [splashListo, setSplashListo] = useState(false)
-
   return (
     <div style={{
       position: 'relative',
@@ -17,7 +14,7 @@ function RadGen() {
       fontFamily: 'Inter, sans-serif',
       background: '#0F0F12',
     }}>
-      <RadGenSplash onComplete={() => setSplashListo(true)} />
+      <RadGenSplash />
 
       <style>{`
         @keyframes radgenLiveDot {
@@ -73,8 +70,6 @@ function RadGen() {
               width: 'auto',
               display: 'block',
               justifySelf: 'center',
-              opacity: splashListo ? 1 : 0,
-              transition: 'opacity 0.3s ease',
             }}
           />
         </nav>
