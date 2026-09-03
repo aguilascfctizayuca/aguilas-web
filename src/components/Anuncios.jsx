@@ -4,14 +4,22 @@ import { db } from '../firebase'
 import useReveal from '../hooks/useReveal'
 
 function TarjetaAnuncio({ anuncio }) {
+  const Tarjeta = anuncio.link ? 'a' : 'div'
+  const propsLink = anuncio.link
+    ? { href: anuncio.link, target: '_blank', rel: 'noopener noreferrer' }
+    : {}
+
   return (
-    <div className="glass-panel" style={{
+    <Tarjeta {...propsLink} className="glass-panel" style={{
       borderRadius: '18px',
       overflow: 'hidden',
       maxWidth: '420px',
       margin: '0 auto 1.5rem auto',
       position: 'relative',
       zIndex: 1,
+      display: 'block',
+      textDecoration: 'none',
+      cursor: anuncio.link ? 'pointer' : 'default',
     }}>
       {anuncio.imagenUrl && (
         <img
@@ -34,7 +42,7 @@ function TarjetaAnuncio({ anuncio }) {
           </p>
         )}
       </div>
-    </div>
+    </Tarjeta>
   )
 }
 

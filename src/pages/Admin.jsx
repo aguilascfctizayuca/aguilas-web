@@ -160,7 +160,7 @@ function PanelAnuncios() {
   const [cargando, setCargando] = useState(true)
   const [editando, setEditando] = useState(null)
   const [subiendo, setSubiendo] = useState(false)
-  const [form, setForm] = useState({ titulo: '', texto: '', fechaExpiracion: '', imagenFile: null, imagenUrlActual: '' })
+  const [form, setForm] = useState({ titulo: '', texto: '', link: '', fechaExpiracion: '', imagenFile: null, imagenUrlActual: '' })
 
   useEffect(() => {
     const q = query(collection(db, 'anuncios'), orderBy('creado', 'desc'))
@@ -172,7 +172,7 @@ function PanelAnuncios() {
   }, [])
 
   const resetForm = () => {
-    setForm({ titulo: '', texto: '', fechaExpiracion: '', imagenFile: null, imagenUrlActual: '' })
+    setForm({ titulo: '', texto: '', link: '', fechaExpiracion: '', imagenFile: null, imagenUrlActual: '' })
     setEditando(null)
   }
 
@@ -185,7 +185,7 @@ function PanelAnuncios() {
       if (form.imagenFile) {
         imagenUrl = await subirImagenComprimida(form.imagenFile, 'anuncios')
       }
-      const datos = { titulo: form.titulo, texto: form.texto, fechaExpiracion: form.fechaExpiracion || null, imagenUrl }
+      const datos = { titulo: form.titulo, texto: form.texto, link: form.link || null, fechaExpiracion: form.fechaExpiracion || null, imagenUrl }
       if (editando) {
         await updateDoc(doc(db, 'anuncios', editando), datos)
       } else {
@@ -201,7 +201,7 @@ function PanelAnuncios() {
   }
 
   const editar = (a) => {
-    setForm({ titulo: a.titulo || '', texto: a.texto || '', fechaExpiracion: a.fechaExpiracion || '', imagenFile: null, imagenUrlActual: a.imagenUrl || '' })
+    setForm({ titulo: a.titulo || '', texto: a.texto || '', link: a.link || '', fechaExpiracion: a.fechaExpiracion || '', imagenFile: null, imagenUrlActual: a.imagenUrl || '' })
     setEditando(a.id)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -233,6 +233,13 @@ function PanelAnuncios() {
           <img src={form.imagenUrlActual} alt="actual" style={{ maxWidth: '140px', borderRadius: '10px', border: `1px solid ${BORDE}` }} />
         )}
         <label style={labelStyle}>
+          Link (opcional)
+          <input type="url" value={form.link} onChange={e => setForm({ ...form, link: e.target.value })} style={inputStyle} placeholder="https://..." />
+          <span style={{ display: 'block', fontSize: '0.75rem', color: TEXTO_SUAVE, textTransform: 'none', letterSpacing: 'normal', marginTop: '0.35rem', fontWeight: '400' }}>
+            Si lo agregas, la tarjeta del anuncio será clickeable y llevará a esta dirección
+          </span>
+        </label>
+        <label style={labelStyle}>
           Fecha de expiración (opcional)
           <input type="date" value={form.fechaExpiracion} onChange={e => setForm({ ...form, fechaExpiracion: e.target.value })} style={{ ...inputStyle, colorScheme: 'dark', maxWidth: '200px' }} />
           <span style={{ display: 'block', fontSize: '0.75rem', color: TEXTO_SUAVE, textTransform: 'none', letterSpacing: 'normal', marginTop: '0.35rem', fontWeight: '400' }}>
@@ -259,6 +266,7 @@ function PanelAnuncios() {
             <div style={{ flex: 1, minWidth: 0 }}>
               <strong style={{ color: TEXTO, fontFamily: 'Montserrat, sans-serif', fontSize: '0.95rem' }}>{a.titulo}</strong>
               <p style={{ margin: '0.3rem 0', fontSize: '0.85rem', color: TEXTO_SUAVE }}>{a.texto}</p>
+              {a.link && <span style={{ display: 'block', fontSize: '0.75rem', color: '#8fb4ff', wordBreak: 'break-all' }}>🔗 {a.link}</span>}
               {a.fechaExpiracion && <span style={{ fontSize: '0.75rem', color: VERDE }}>Expira: {a.fechaExpiracion}</span>}
             </div>
             <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
@@ -274,7 +282,7 @@ function PanelAnuncios() {
 }
 
 const formEventoVacio = {
-  titulo: '', descripcion: '', fecha: '', hora: '', ubicacion: '',
+  titulo: '', descripcion: '', fecha: '', hora: '', ubicacion: '', link: '',
   whatsappMensaje: '', mostrarContador: false, imagenFile: null, imagenUrlActual: '',
 }
 
@@ -339,6 +347,7 @@ function PanelEventos() {
         fecha: form.fecha || null,
         hora: form.hora || null,
         ubicacion: form.ubicacion || null,
+        link: form.link || null,
         whatsappMensaje: form.whatsappMensaje || ('Quisiera información sobre el evento: ' + form.titulo),
         mostrarContador: !!form.mostrarContador,
         imagenUrl,
@@ -364,6 +373,7 @@ function PanelEventos() {
       fecha: ev.fecha || '',
       hora: ev.hora || '',
       ubicacion: ev.ubicacion || '',
+      link: ev.link || '',
       whatsappMensaje: ev.whatsappMensaje || '',
       mostrarContador: !!ev.mostrarContador,
       imagenFile: null,
@@ -410,6 +420,14 @@ function PanelEventos() {
         <label style={labelStyle}>
           Ubicación (opcional)
           <input type="text" value={form.ubicacion} onChange={e => setForm({ ...form, ubicacion: e.target.value })} style={inputStyle} placeholder="Ej. Jardín las Flores, Tizayuca" />
+        </label>
+
+        <label style={labelStyle}>
+          Link (opcional)
+          <input type="url" value={form.link} onChange={e => setForm({ ...form, link: e.target.value })} style={inputStyle} placeholder="https://..." />
+          <span style={{ display: 'block', fontSize: '0.75rem', color: TEXTO_SUAVE, textTransform: 'none', letterSpacing: 'normal', marginTop: '0.35rem', fontWeight: '400' }}>
+            Si lo agregas, la tarjeta del evento será clickeable y llevará a esta dirección
+          </span>
         </label>
 
         <label style={labelStyle}>
@@ -483,6 +501,7 @@ function PanelEventos() {
                   {ev.ubicacion && <span style={{ fontSize: '0.75rem', color: TEXTO_SUAVE }}>{ev.ubicacion}</span>}
                   {ev.mostrarContador && <span style={{ fontSize: '0.75rem', color: pasado ? TEXTO_SUAVE : VERDE }}>Contador activo</span>}
                 </div>
+                {ev.link && <span style={{ display: 'block', marginTop: '0.3rem', fontSize: '0.75rem', color: '#8fb4ff', wordBreak: 'break-all' }}>🔗 {ev.link}</span>}
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
                 <button onClick={() => editar(ev)} style={{ cursor: 'pointer', background: 'none', border: `1px solid ${BORDE}`, color: TEXTO, padding: '0.45rem 0.9rem', borderRadius: '999px', fontSize: '0.8rem' }}>Editar</button>

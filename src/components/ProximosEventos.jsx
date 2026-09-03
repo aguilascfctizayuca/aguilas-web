@@ -55,19 +55,28 @@ function TarjetaEvento({ evento }) {
     ? 'https://wa.me/527711107903?text=' + encodeURIComponent(evento.whatsappMensaje)
     : null
 
+  const irAlLink = () => {
+    if (evento.link) window.open(evento.link, '_blank', 'noopener,noreferrer')
+  }
+
   return (
-    <div className="glass-panel" style={{
-      border: '1.5px solid var(--verde)',
-      borderRadius: '16px',
-      padding: '2rem',
-      textAlign: 'center',
-      minWidth: '320px',
-      maxWidth: '340px',
-      flexShrink: 0,
-      scrollSnapAlign: 'center',
-      position: 'relative',
-      zIndex: 1,
-    }}>
+    <div
+      className="glass-panel"
+      onClick={evento.link ? irAlLink : undefined}
+      style={{
+        border: '1.5px solid var(--verde)',
+        borderRadius: '16px',
+        padding: '2rem',
+        textAlign: 'center',
+        minWidth: '320px',
+        maxWidth: '340px',
+        flexShrink: 0,
+        scrollSnapAlign: 'center',
+        position: 'relative',
+        zIndex: 1,
+        cursor: evento.link ? 'pointer' : 'default',
+      }}
+    >
       {evento.imagenUrl && (
         <img
           src={evento.imagenUrl}
@@ -103,6 +112,7 @@ function TarjetaEvento({ evento }) {
           <a href={linkWhatsapp}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
           style={{
             display: 'inline-block',
             backgroundColor: VERDE,
