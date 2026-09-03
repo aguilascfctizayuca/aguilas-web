@@ -1,6 +1,11 @@
+import { useState } from 'react'
+import RadGenSplash from '../components/RadGenSplash'
+
 const BARRAS = [40, 70, 45, 90, 55, 75, 35, 65, 50, 80, 42, 60]
 
 function RadGen() {
+  const [splashListo, setSplashListo] = useState(false)
+
   return (
     <div style={{
       position: 'relative',
@@ -10,6 +15,8 @@ function RadGen() {
       fontFamily: 'Inter, sans-serif',
       background: '#0F0F12',
     }}>
+      <RadGenSplash onComplete={() => setSplashListo(true)} />
+
       <style>{`
         @keyframes radgenLiveDot {
           0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(58,123,255,0.5); }
@@ -54,7 +61,13 @@ function RadGen() {
           <img
             src="/radgen-logo.png"
             alt="RadGen Mx"
-            style={{ height: '42px', width: 'auto', display: 'block' }}
+            style={{
+              height: '42px',
+              width: 'auto',
+              display: 'block',
+              opacity: splashListo ? 1 : 0,
+              transition: 'opacity 0.3s ease',
+            }}
           />
         </nav>
 
