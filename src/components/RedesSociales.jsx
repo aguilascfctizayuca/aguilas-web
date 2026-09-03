@@ -1,14 +1,10 @@
-import useReveal from '../hooks/useReveal';
-
 const RedesSociales = () => {
-  const ref = useReveal();
-
   return (
     <section className="redes-section">
       <div className="blob" style={{ width: '340px', height: '340px', top: '-100px', left: '-80px', background: 'rgba(61,220,4,0.25)' }} />
       <div className="blob" style={{ width: '300px', height: '300px', top: '20px', right: '5%', background: 'rgba(157,90,255,0.22)' }} />
       <div className="blob" style={{ width: '280px', height: '280px', bottom: '-120px', left: '35%', background: 'rgba(58,123,255,0.2)' }} />
-      <div className="redes-container reveal" ref={ref}>
+      <div className="redes-container">
         <div className="redes-header">
           <h2>Únete a nuestra comunidad</h2>
           <p>Síguenos y mantente conectado con todo lo que Dios está haciendo en Águilas CFC</p>

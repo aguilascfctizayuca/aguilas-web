@@ -4,10 +4,8 @@ import { db } from '../firebase'
 import useReveal from '../hooks/useReveal'
 
 function TarjetaAnuncio({ anuncio }) {
-  const ref = useReveal()
-
   return (
-    <div ref={ref} className="reveal glass-panel" style={{
+    <div className="glass-panel" style={{
       borderRadius: '16px',
       padding: '1.5rem',
       display: 'flex',

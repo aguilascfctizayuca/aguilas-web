@@ -51,13 +51,12 @@ function Contador({ fecha, hora }) {
 }
 
 function TarjetaEvento({ evento }) {
-  const ref = useReveal()
   const linkWhatsapp = evento.whatsappMensaje
     ? 'https://wa.me/527711107903?text=' + encodeURIComponent(evento.whatsappMensaje)
     : null
 
   return (
-    <div ref={ref} className="reveal glass-panel" style={{
+    <div className="glass-panel" style={{
       border: '1.5px solid var(--verde)',
       borderRadius: '16px',
       padding: '2rem',

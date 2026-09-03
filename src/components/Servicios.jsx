@@ -145,7 +145,6 @@ function CardServicio({ dia, subtitulo, horarios, activo, esHoy }) {
 
 function Servicios() {
   const refTitulo = useReveal()
-  const refCountdown = useReveal()
   const refCards = useReveal()
   const { proximo, restante } = useProximoServicio()
   const esHoy = proximo.fecha.toDateString() === new Date().toDateString()
@@ -183,7 +182,7 @@ function Servicios() {
       </div>
 
       <div style={{ textAlign: 'center', marginBottom: 'clamp(1.5rem, 4vw, 3rem)', position: 'relative', zIndex: 1 }}>
-        <div ref={refCountdown} className="reveal glass-panel" style={{
+        <div className="glass-panel" style={{
           display: 'inline-flex',
           alignItems: 'center',
           flexWrap: 'wrap',

@@ -72,13 +72,11 @@ function Valores() {
 }
 
 function ValorCard({ nombre, Icono, span }) {
-  const ref = useReveal()
   const destacado = span === 2
 
   return (
     <div
-      ref={ref}
-      className={`reveal glass-panel valor-card${destacado ? ' valor-destacado' : ''}`}
+      className={`glass-panel valor-card${destacado ? ' valor-destacado' : ''}`}
       style={{
         gridColumn: `span ${span}`,
         position: 'relative',

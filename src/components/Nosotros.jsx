@@ -1,12 +1,9 @@
-import useReveal from '../hooks/useReveal'
 import useSyncedRotation from '../hooks/useSyncedRotation'
 
 const fotos = ['/foto-pastor.jpg', '/foto-adoracion.jpg']
 const INTERVALO_FOTOS = 5000
 
 function Nosotros() {
-  const ref1 = useReveal()
-  const ref3 = useReveal()
   const fotoActual = useSyncedRotation(fotos.length, INTERVALO_FOTOS)
 
   return (
@@ -53,7 +50,7 @@ function Nosotros() {
         }}>
 
           {/* Texto */}
-          <div ref={ref1} className="reveal glass nosotros-card" style={{ flex: '1 1 340px', borderRadius: '20px' }}>
+          <div className="glass nosotros-card" style={{ flex: '1 1 340px', borderRadius: '20px' }}>
             <p style={{
               color: 'var(--verde)',
               fontFamily: 'Inter, sans-serif',
@@ -86,7 +83,7 @@ function Nosotros() {
           </div>
 
           {/* Visión y Misión */}
-          <div ref={ref3} className="reveal" style={{
+          <div style={{
             flex: '1 1 300px',
             display: 'flex',
             flexDirection: 'column',

@@ -73,50 +73,33 @@ body::before {
 }
 
 /* ===== EFECTO GLASS estilo "Liquid Glass" (vidrio esmerilado con brillo especular) =====
-   El blur (backdrop-filter) solo se activa cuando el elemento no depende de una
-   animación .reveal en curso, o cuando esta ya terminó (.reveal-done, ver useReveal.js).
-   Mezclar backdrop-filter con la transición de opacidad/transform del .reveal deja el
-   vidrio "cortado" a la mitad (bug de Chromium/WebKit). */
+   Importante: un elemento con backdrop-filter (o un descendiente suyo) nunca debe
+   coincidir con una transición de opacity/transform en curso sobre sí mismo o un
+   ancestro — eso deja el vidrio "cortado" a la mitad (bug de Chromium/WebKit). Por
+   eso estos elementos no llevan animación de entrada: aparecen completos desde el
+   primer frame. */
 .glass {
   position: relative;
-  background: rgba(255, 255, 255, 0.05);
+  background:
+    radial-gradient(130% 100% at 15% -10%, rgba(255, 255, 255, 0.22), transparent 55%),
+    rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.16);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
     inset 0 -1px 0 rgba(255, 255, 255, 0.04),
     inset 0 0 0 1px rgba(255, 255, 255, 0.04),
     0 16px 40px -16px rgba(0, 0, 0, 0.55);
-  transition: background 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.glass:not(.reveal),
-.glass.reveal-done {
-  background:
-    radial-gradient(130% 100% at 15% -10%, rgba(255, 255, 255, 0.22), transparent 55%),
-    rgba(255, 255, 255, 0.05);
   -webkit-backdrop-filter: blur(24px) saturate(190%);
   backdrop-filter: blur(24px) saturate(190%);
   will-change: backdrop-filter;
+  transition: background 0.4s ease, border-color 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
 }
 
 .glass:hover {
   border-color: rgba(61, 220, 4, 0.4);
-}
-
-.glass:not(.reveal):hover,
-.glass.reveal-done:hover {
   background:
     radial-gradient(130% 100% at 15% -10%, rgba(255, 255, 255, 0.3), transparent 55%),
     rgba(255, 255, 255, 0.1);
-}
-
-/* Escape hatch: para elementos glass con su propia transición de opacidad
-   (fuera del sistema .reveal), como los indicadores del Hero. */
-.glass-pending,
-.glass-pending:hover {
-  background: rgba(255, 255, 255, 0.08) !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
 }
 
 /* Tarjetas de vidrio en "Quiénes somos" — más compactas en móvil */
@@ -145,22 +128,17 @@ body::before {
 
 /* Vidrio adaptable a light/dark, para usar sobre fondos planos (--fondo) */
 .glass-panel {
-  background: var(--fondo-glass);
+  background:
+    radial-gradient(130% 100% at 15% -10%, var(--glass-shine), transparent 55%),
+    var(--fondo-glass);
   border: 1px solid var(--borde-glass);
   box-shadow:
     inset 0 1px 0 var(--glass-highlight),
     0 12px 32px -16px var(--glass-shadow);
-  transition: background 0.4s ease, border-color 0.4s ease, transform 0.3s ease, box-shadow 0.4s ease;
-}
-
-.glass-panel:not(.reveal),
-.glass-panel.reveal-done {
-  background:
-    radial-gradient(130% 100% at 15% -10%, var(--glass-shine), transparent 55%),
-    var(--fondo-glass);
   -webkit-backdrop-filter: blur(20px) saturate(170%);
   backdrop-filter: blur(20px) saturate(170%);
   will-change: backdrop-filter;
+  transition: background 0.4s ease, border-color 0.4s ease, transform 0.3s ease, box-shadow 0.4s ease;
 }
 
 .glass-panel:hover {
@@ -224,24 +202,17 @@ body::before {
    En touch, :hover puede quedar "pegado" (no hay mouseleave al navegar a
    WhatsApp), así que ahí simplemente no se anima nada: siempre vidrio. */
 .hero-cta {
-  background-color: rgba(15, 15, 18, 0.5);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 -1px 0 rgba(255, 255, 255, 0.05);
-}
-
-/* El vidrio (blur) solo se activa cuando termina la transición de aparición
-   del botón — ver comentario en Hero.jsx (blurListo). Mezclar backdrop-filter
-   con esa transición dejaba el vidrio "cortado" a la mitad. */
-.hero-cta--glass {
   background-color: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 -1px 0 rgba(255, 255, 255, 0.05);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   backdrop-filter: blur(16px) saturate(180%);
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .hero-cta--glass {
+  .hero-cta {
     transition: transform 0.15s ease-out, background-color 0.35s ease, box-shadow 0.3s ease;
   }
-  .hero-cta--glass:hover {
+  .hero-cta:hover {
     background-color: #2BAF1E;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
@@ -303,14 +274,6 @@ p {
 .redes-container {
   max-width: 1000px;
   margin: 0 auto;
-  opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
-}
-
-.redes-container.visible {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 .redes-header {
@@ -351,19 +314,13 @@ p {
   min-width: 260px;
   max-width: 320px;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s ease, border-color 0.4s ease;
-  background: rgba(255, 255, 255, 0.06);
+  background:
+    radial-gradient(130% 100% at 20% -10%, rgba(255, 255, 255, 0.16), transparent 55%),
+    rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.14),
     inset 0 -1px 0 rgba(255, 255, 255, 0.03);
-}
-
-/* El blur solo se activa cuando el .redes-container (ancestro que anima su
-   opacidad al aparecer) ya terminó esa transición — ver useReveal.js */
-.redes-container.reveal-done .red-card {
-  background:
-    radial-gradient(130% 100% at 20% -10%, rgba(255, 255, 255, 0.16), transparent 55%),
-    rgba(255, 255, 255, 0.06);
   -webkit-backdrop-filter: blur(22px) saturate(180%);
   backdrop-filter: blur(22px) saturate(180%);
   will-change: backdrop-filter;

@@ -27,19 +27,9 @@ function Hero() {
   const fotoActual = manual ?? sincronizado
 
   useEffect(() => {
-    const timer = setTimeout(() => setAnimado(true), 1500)
+    const timer = setTimeout(() => setAnimado(true), 300)
     return () => clearTimeout(timer)
   }, [])
-
-  // El blur del botón solo se activa una vez que su transición de aparición
-  // (opacity) terminó por completo — mezclar backdrop-filter con esa
-  // transición es lo que dejaba el vidrio "cortado" a la mitad.
-  const [blurListo, setBlurListo] = useState(false)
-  useEffect(() => {
-    if (!animado) return
-    const t = setTimeout(() => setBlurListo(true), 1700)
-    return () => clearTimeout(t)
-  }, [animado])
 
   // Typewriter — arranca cuando animado se activa
   useEffect(() => {
@@ -107,8 +97,6 @@ function Hero() {
           letterSpacing: '0.35em',
           textTransform: 'uppercase',
           marginBottom: '2rem',
-          opacity: animado ? 1 : 0,
-          transition: 'opacity 0.8s ease 0.2s',
         }}>
           Tizayuca, Hidalgo
         </p>
@@ -122,9 +110,6 @@ function Hero() {
           color: '#ffffff',
           maxWidth: '800px',
           marginBottom: '2.5rem',
-          opacity: animado ? 1 : 0,
-          transform: animado ? 'translateY(0)' : 'translateY(20px)',
-          transition: 'all 0.8s ease 0.4s',
         }}>
           Hay un lugar{' '}
           <span style={{ color: '#3DDC04', fontStyle: 'italic' }}>para ti</span>
@@ -159,7 +144,7 @@ function Hero() {
           ref={ctaRef}
           onMouseLeave={onCtaLeave}
           onMouseMove={onCtaMove}
-          className={`hero-cta${blurListo ? ' hero-cta--glass' : ''}`}
+          className="hero-cta hero-cta--glass"
           style={{
             position: 'relative',
             display: 'inline-block',
@@ -173,22 +158,19 @@ function Hero() {
             textDecoration: 'none',
             letterSpacing: '0.2em',
             textTransform: 'uppercase',
-            opacity: animado ? 1 : 0,
-            transition: 'opacity 0.8s ease 0.8s, transform 0.15s ease-out',
+            transition: 'transform 0.15s ease-out',
           }}
         >
           Visítanos este domingo
         </a>
 
         {/* Indicadores */}
-        <div className={`glass${blurListo ? '' : ' glass-pending'}`} style={{
+        <div className="glass" style={{
           display: 'flex',
           gap: '8px',
           marginTop: '2rem',
           padding: '10px 14px',
           borderRadius: '999px',
-          opacity: animado ? 1 : 0,
-          transition: 'opacity 0.8s ease 1s, background 0.4s ease, border-color 0.4s ease',
         }}>
           {fotos.map((_, i) => (
             <button

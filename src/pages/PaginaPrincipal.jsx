@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useLayoutEffect } from 'react'
 import Navbar from '../components/Navbar'
 import Hero from '../components/Hero'
 import ProximosEventos from '../components/ProximosEventos'
@@ -17,6 +17,13 @@ import ScrollProgress from '../components/ScrollProgress'
 
 function PaginaPrincipal() {
   const [logoVisible, setLogoVisible] = useState(false)
+
+  // El splash de entrada siempre empieza desde arriba, aunque la URL traiga
+  // un hash (#servicios) de una navegación previa — evita el salto hacia
+  // abajo justo al terminar de montar las secciones.
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
 
   return (
     <>
