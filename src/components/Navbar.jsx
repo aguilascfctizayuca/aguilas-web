@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
-const SECCIONES_NAV = ['nosotros', 'servicios', 'valores', 'contacto']
+const SECCIONES_NAV = ['servicios', 'nosotros', 'valores', 'contacto']
 
 function Navbar({ logoVisible }) {
   const [scrolled, setScrolled] = useState(false)
@@ -94,12 +94,15 @@ function Navbar({ logoVisible }) {
         </div>
 
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }} className="nav-desktop">
-          <a href="#nosotros" onClick={() => handleNavClick('#nosotros')} className={`nav-pill${seccionActiva === 'nosotros' ? ' active' : ''}`}>Nosotros</a>
           <a href="#servicios" onClick={() => handleNavClick('#servicios')} className={`nav-pill${seccionActiva === 'servicios' ? ' active' : ''}`}>Servicios</a>
+          <a href="#nosotros" onClick={() => handleNavClick('#nosotros')} className={`nav-pill${seccionActiva === 'nosotros' ? ' active' : ''}`}>Nosotros</a>
           <a href="#valores" onClick={() => handleNavClick('#valores')} className={`nav-pill${seccionActiva === 'valores' ? ' active' : ''}`}>Valores</a>
           <a href="#contacto" onClick={() => handleNavClick('#contacto')} className={`nav-pill${seccionActiva === 'contacto' ? ' active' : ''}`}>Contacto</a>
           <Link to="/lideres" onClick={() => setMenuAbierto(false)} className="nav-pill">Líderes</Link>
-          <Link to="/radgen" onClick={() => setMenuAbierto(false)} className="nav-pill-radgen">RadGen Mx</Link>
+          <Link to="/radgen" onClick={() => setMenuAbierto(false)} className="nav-pill-radgen">
+            <span className="nav-pill-radgen__dot" />
+            RadGen Mx
+          </Link>
         </div>
 
         <button
@@ -157,12 +160,15 @@ function Navbar({ logoVisible }) {
         gridTemplateColumns: 'repeat(2, 1fr)',
         gap: '0.6rem',
       }}>
-        <a href="#nosotros" onClick={() => handleNavClick('#nosotros')} className={`nav-pill-movil${seccionActiva === 'nosotros' ? ' active' : ''}`}>Nosotros</a>
         <a href="#servicios" onClick={() => handleNavClick('#servicios')} className={`nav-pill-movil${seccionActiva === 'servicios' ? ' active' : ''}`}>Servicios</a>
+        <a href="#nosotros" onClick={() => handleNavClick('#nosotros')} className={`nav-pill-movil${seccionActiva === 'nosotros' ? ' active' : ''}`}>Nosotros</a>
         <a href="#valores" onClick={() => handleNavClick('#valores')} className={`nav-pill-movil${seccionActiva === 'valores' ? ' active' : ''}`}>Valores</a>
         <a href="#contacto" onClick={() => handleNavClick('#contacto')} className={`nav-pill-movil${seccionActiva === 'contacto' ? ' active' : ''}`}>Contacto</a>
         <Link to="/lideres" onClick={() => setMenuAbierto(false)} className="nav-pill-movil">Líderes</Link>
-        <Link to="/radgen" onClick={() => setMenuAbierto(false)} className="nav-pill-radgen-movil">RadGen Mx</Link>
+        <Link to="/radgen" onClick={() => setMenuAbierto(false)} className="nav-pill-radgen-movil">
+          <span className="nav-pill-radgen__dot" />
+          RadGen Mx
+        </Link>
       </div>
     </>
   )
