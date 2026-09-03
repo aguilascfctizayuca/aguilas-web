@@ -67,15 +67,15 @@ function RadGen() {
         }}>
           <div style={{
             position: 'relative',
-            width: 'min(92vw, 620px)',
-            padding: 'clamp(2rem, 5vw, 3.5rem)',
-            borderRadius: '28px',
+            width: 'min(92vw, 640px)',
+            padding: 'clamp(2.25rem, 6vw, 4rem)',
+            borderRadius: '32px',
             textAlign: 'center',
-            background: 'rgba(15,15,18,0.55)',
-            border: '1px solid rgba(58,123,255,0.3)',
-            backdropFilter: 'blur(20px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 30px 80px -20px rgba(58,123,255,0.35), 0 0 0 1px rgba(58,123,255,0.08)',
+            background: 'radial-gradient(130% 100% at 20% -10%, rgba(143,180,255,0.16), transparent 55%), rgba(15,15,18,0.55)',
+            border: '1px solid rgba(58,123,255,0.32)',
+            backdropFilter: 'blur(24px) saturate(190%)',
+            WebkitBackdropFilter: 'blur(24px) saturate(190%)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), inset 0 0 0 1px rgba(255,255,255,0.03), 0 40px 90px -24px rgba(58,123,255,0.4), 0 0 0 1px rgba(58,123,255,0.08)',
           }}>
 
             {/* Ecualizador decorativo */}
@@ -125,9 +125,10 @@ function RadGen() {
             <h1 style={{
               fontFamily: 'Inter, sans-serif',
               fontWeight: 800,
-              fontSize: 'clamp(1.9rem, 5vw, 2.9rem)',
-              lineHeight: 1.1,
-              marginBottom: '1.25rem',
+              fontSize: 'clamp(2.1rem, 5.5vw, 3.2rem)',
+              letterSpacing: '-0.02em',
+              lineHeight: 1.08,
+              marginBottom: '1.5rem',
             }}>
               Algo grande{' '}
               <span style={{
@@ -141,6 +142,14 @@ function RadGen() {
               </span>
             </h1>
 
+            <div style={{
+              width: '48px',
+              height: '3px',
+              borderRadius: '999px',
+              background: 'linear-gradient(90deg, #3a7bff, #8fb4ff)',
+              margin: '0 auto 1.5rem auto',
+            }} />
+
             <p style={{
               fontFamily: 'Inter, sans-serif',
               fontSize: 'clamp(0.95rem, 2vw, 1.1rem)',
@@ -149,7 +158,15 @@ function RadGen() {
               marginBottom: 0,
             }}>
               Estamos preparando{' '}
-              <strong style={{ color: '#F5F3EE', fontWeight: 700 }}>RadGen Education</strong>
+              <strong style={{
+                background: 'linear-gradient(90deg, #F5F3EE, #8fb4ff)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                color: 'transparent',
+                fontWeight: 700,
+              }}>
+                RadGen Education
+              </strong>
               {' '}— vuelve pronto.
             </p>
           </div>

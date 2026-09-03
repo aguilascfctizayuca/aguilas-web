@@ -155,38 +155,44 @@ function Hero() {
             position: 'relative',
             overflow: 'hidden',
             display: 'inline-block',
-            backgroundColor: 'rgba(255,255,255,0.08)',
-            backdropFilter: 'blur(16px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-            willChange: 'backdrop-filter, transform',
             color: '#ffffff',
             fontFamily: 'Inter, sans-serif',
             fontWeight: '500',
             fontSize: '0.75rem',
-            padding: '1rem 3rem',
             border: '1.5px solid var(--verde)',
             borderRadius: '4px',
             textDecoration: 'none',
             letterSpacing: '0.2em',
             textTransform: 'uppercase',
             opacity: animado ? 1 : 0,
-            transition: 'opacity 0.8s ease 0.8s, box-shadow 0.3s ease, background-color 0.3s ease, transform 0.15s ease-out',
+            transition: 'opacity 0.8s ease 0.8s, box-shadow 0.3s ease, transform 0.15s ease-out',
             boxShadow: hover
               ? '0 0 20px rgba(61,220,4,0.4)'
               : 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(255,255,255,0.05)',
             zIndex: 1,
           }}
         >
+          {/* Capa de vidrio — sin hijos con z-index, para evitar el bug de Chromium con backdrop-filter */}
           <span style={{
             position: 'absolute',
-            top: 0, left: 0,
-            width: hover ? '100%' : '0%',
-            height: '100%',
-            backgroundColor: '#2BAF1E',
-            transition: 'width 0.4s ease',
-            zIndex: -1,
+            inset: 0,
+            backgroundColor: 'rgba(255,255,255,0.08)',
+            backdropFilter: 'blur(16px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+            willChange: 'backdrop-filter',
           }} />
-          Visítanos este domingo
+          {/* Capa de contenido — el barrido animado va aquí, separado del blur */}
+          <span style={{ position: 'relative', display: 'block', padding: '1rem 3rem' }}>
+            <span style={{
+              position: 'absolute',
+              top: 0, left: 0,
+              width: hover ? '100%' : '0%',
+              height: '100%',
+              backgroundColor: '#2BAF1E',
+              transition: 'width 0.4s ease',
+            }} />
+            <span style={{ position: 'relative' }}>Visítanos este domingo</span>
+          </span>
         </a>
 
         {/* Indicadores */}

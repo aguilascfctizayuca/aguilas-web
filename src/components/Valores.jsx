@@ -79,54 +79,61 @@ function ValorCard({ nombre, Icono, span }) {
 
   return (
     <div
-      className={`glass-panel valor-card${destacado ? ' valor-destacado' : ''}`}
+      className={`valor-card${destacado ? ' valor-destacado' : ''}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
         gridColumn: `span ${span}`,
         position: 'relative',
         overflow: 'hidden',
-        padding: destacado ? '1.75rem' : '1.5rem',
         borderRadius: '18px',
+        border: '1px solid var(--borde-glass)',
+        borderColor: hovered ? 'rgba(61,220,4,0.5)' : undefined,
+        cursor: 'default',
+        transition: 'border-color 0.3s ease',
+      }}
+    >
+      {/* Capa de vidrio — sin hijos con z-index, para evitar el bug de Chromium con backdrop-filter */}
+      <span className="glass-panel" style={{ position: 'absolute', inset: 0, border: 'none', borderRadius: '18px' }} />
+
+      {/* Capa de contenido — el barrido animado va aquí, separado del blur */}
+      <div className="valor-card__body" style={{
+        position: 'relative',
+        padding: destacado ? '1.75rem' : '1.5rem',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'flex-start',
         gap: '0.6rem',
-        cursor: 'default',
-        borderColor: hovered ? 'rgba(61,220,4,0.5)' : undefined,
-      }}
-    >
-      <span style={{
-        position: 'absolute',
-        top: 0, left: 0,
-        width: hovered ? '100%' : '0%',
-        height: '100%',
-        backgroundColor: 'var(--verde)',
-        transition: 'width 0.4s ease',
-        zIndex: 0,
-      }} />
-      <Icono
-        size={destacado ? 28 : 22}
-        strokeWidth={1.75}
-        style={{
-          position: 'relative',
-          zIndex: 1,
-          color: hovered ? '#000000' : 'var(--verde)',
-          transition: 'color 0.3s ease',
-        }}
-      />
-      <span style={{
-        position: 'relative',
-        zIndex: 1,
-        fontFamily: 'Montserrat, sans-serif',
-        fontWeight: '700',
-        fontSize: destacado ? '1.15rem' : '0.95rem',
-        color: hovered ? '#000000' : 'var(--texto)',
-        transition: 'color 0.3s ease',
       }}>
-        {nombre}
-      </span>
+        <span style={{
+          position: 'absolute',
+          top: 0, left: 0,
+          width: hovered ? '100%' : '0%',
+          height: '100%',
+          backgroundColor: 'var(--verde)',
+          transition: 'width 0.4s ease',
+        }} />
+        <Icono
+          size={destacado ? 28 : 22}
+          strokeWidth={1.75}
+          style={{
+            position: 'relative',
+            color: hovered ? '#000000' : 'var(--verde)',
+            transition: 'color 0.3s ease',
+          }}
+        />
+        <span style={{
+          position: 'relative',
+          fontFamily: 'Montserrat, sans-serif',
+          fontWeight: '700',
+          fontSize: destacado ? '1.15rem' : '0.95rem',
+          color: hovered ? '#000000' : 'var(--texto)',
+          transition: 'color 0.3s ease',
+        }}>
+          {nombre}
+        </span>
+      </div>
     </div>
   )
 }

@@ -99,6 +99,7 @@ function Navbar({ logoVisible }) {
           <a href="#valores" onClick={() => handleNavClick('#valores')} className={`nav-pill${seccionActiva === 'valores' ? ' active' : ''}`}>Valores</a>
           <a href="#contacto" onClick={() => handleNavClick('#contacto')} className={`nav-pill${seccionActiva === 'contacto' ? ' active' : ''}`}>Contacto</a>
           <Link to="/lideres" onClick={() => setMenuAbierto(false)} className="nav-pill">Líderes</Link>
+          <Link to="/radgen" onClick={() => setMenuAbierto(false)} className="nav-pill-radgen">RadGen Mx</Link>
         </div>
 
         <button
@@ -148,19 +149,20 @@ function Navbar({ logoVisible }) {
         willChange: 'backdrop-filter',
         borderBottom: '1px solid var(--borde)',
         boxShadow: menuAbierto ? '0 16px 32px rgba(0, 0, 0, 0.18)' : 'none',
-        padding: menuAbierto ? '2rem 1.5rem' : '0 1.5rem',
+        padding: menuAbierto ? '1.5rem' : '0 1.5rem',
         maxHeight: menuAbierto ? '300px' : '0',
         overflow: 'hidden',
         transition: 'all 0.3s ease',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.5rem',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gap: '0.6rem',
       }}>
         <a href="#nosotros" onClick={() => handleNavClick('#nosotros')} className={`nav-pill-movil${seccionActiva === 'nosotros' ? ' active' : ''}`}>Nosotros</a>
         <a href="#servicios" onClick={() => handleNavClick('#servicios')} className={`nav-pill-movil${seccionActiva === 'servicios' ? ' active' : ''}`}>Servicios</a>
         <a href="#valores" onClick={() => handleNavClick('#valores')} className={`nav-pill-movil${seccionActiva === 'valores' ? ' active' : ''}`}>Valores</a>
         <a href="#contacto" onClick={() => handleNavClick('#contacto')} className={`nav-pill-movil${seccionActiva === 'contacto' ? ' active' : ''}`}>Contacto</a>
         <Link to="/lideres" onClick={() => setMenuAbierto(false)} className="nav-pill-movil">Líderes</Link>
+        <Link to="/radgen" onClick={() => setMenuAbierto(false)} className="nav-pill-radgen-movil">RadGen Mx</Link>
       </div>
     </>
   )

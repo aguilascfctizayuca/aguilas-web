@@ -369,13 +369,19 @@ p {
 }
 
 .nav-pill-movil {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 500;
   color: var(--texto-suave);
   text-decoration: none;
-  padding: 0.5rem 1rem;
-  border-radius: 999px;
-  transition: background-color 0.25s ease, color 0.25s ease;
+  padding: 0.75rem 0.5rem;
+  border-radius: 14px;
+  border: 1px solid var(--borde-glass);
+  text-align: center;
+  background: var(--fondo-glass);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  backdrop-filter: blur(10px) saturate(160%);
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
 
 .nav-pill-movil:hover {
@@ -390,6 +396,48 @@ p {
 
 .scrolled .nav-pill {
   color: var(--texto-suave);
+}
+
+/* Link a RadGen Mx — azul y vidrio, distinto del resto del nav (marca aparte) */
+.nav-pill-radgen {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  color: #8fb4ff;
+  background: rgba(58, 123, 255, 0.1);
+  border: 1px solid rgba(58, 123, 255, 0.35);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+.nav-pill-radgen:hover {
+  background: rgba(58, 123, 255, 0.22);
+  border-color: rgba(58, 123, 255, 0.6);
+  color: #c2d6ff;
+}
+
+.nav-pill-radgen-movil {
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0.75rem 0.5rem;
+  border-radius: 14px;
+  text-align: center;
+  color: #8fb4ff;
+  background: rgba(58, 123, 255, 0.1);
+  border: 1px solid rgba(58, 123, 255, 0.3);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  backdrop-filter: blur(10px) saturate(160%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.nav-pill-radgen-movil:hover {
+  background: rgba(58, 123, 255, 0.2);
 }
 
 /* ===== BARRA DE PROGRESO DE SCROLL ===== */
@@ -413,10 +461,13 @@ p {
 
   .valor-destacado {
     grid-column: span 1 !important;
+  }
+
+  .valor-destacado .valor-card__body {
     padding: 1.5rem !important;
   }
 
-  .valor-card {
+  .valor-card__body {
     justify-content: flex-start !important;
   }
 
