@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore'
+import { collection, onSnapshot } from 'firebase/firestore'
 import { db } from '../firebase'
 import useReveal from '../hooks/useReveal'
 
@@ -47,10 +47,21 @@ function TarjetaAnuncio({ anuncio }) {
 }
 
 function estaVigente(anuncio) {
-  if (!anuncio.fechaExpiracion) return true
   const hoy = new Date()
-  const expiracion = new Date(anuncio.fechaExpiracion + 'T23:59:59')
-  return expiracion >= hoy
+  if (anuncio.fechaExpiracion) {
+    const expiracion = new Date(anuncio.fechaExpiracion + 'T23:59:59')
+    if (expiracion < hoy) return false
+  }
+  if (anuncio.fechaPublicacion) {
+    const publicacion = new Date(anuncio.fechaPublicacion + 'T00:00:00')
+    if (publicacion > hoy) return false
+  }
+  return true
+}
+
+function ordenValor(item) {
+  if (typeof item.orden === 'number') return item.orden
+  return item.creado?.toMillis ? item.creado.toMillis() : 0
 }
 
 function Anuncios() {
@@ -58,8 +69,7 @@ function Anuncios() {
   const refTitulo = useReveal()
 
   useEffect(() => {
-    const q = query(collection(db, 'anuncios'), orderBy('creado', 'desc'))
-    const unsubscribe = onSnapshot(q, function (snapshot) {
+    const unsubscribe = onSnapshot(collection(db, 'anuncios'), function (snapshot) {
       setAnuncios(snapshot.docs.map(function (d) {
         return { id: d.id, ...d.data() }
       }))
@@ -67,7 +77,7 @@ function Anuncios() {
     return () => unsubscribe()
   }, [])
 
-  const anunciosVigentes = anuncios.filter(estaVigente)
+  const anunciosVigentes = anuncios.filter(estaVigente).sort((a, b) => ordenValor(b) - ordenValor(a))
 
   if (anunciosVigentes.length === 0) return null
 

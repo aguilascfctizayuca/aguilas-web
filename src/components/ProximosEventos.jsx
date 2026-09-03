@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore'
+import { collection, onSnapshot } from 'firebase/firestore'
 import { db } from '../firebase'
 import useReveal from '../hooks/useReveal'
 
@@ -139,9 +139,16 @@ function TarjetaEvento({ evento }) {
 }
 
 function estaVigente(evento) {
-  if (!evento.fecha) return true
-  const finDelDia = new Date(evento.fecha + 'T23:59:59')
-  return finDelDia >= new Date()
+  const ahora = new Date()
+  if (evento.fecha) {
+    const finDelDia = new Date(evento.fecha + 'T23:59:59')
+    if (finDelDia < ahora) return false
+  }
+  if (evento.fechaPublicacion) {
+    const publicacion = new Date(evento.fechaPublicacion + 'T00:00:00')
+    if (publicacion > ahora) return false
+  }
+  return true
 }
 
 function compararPorFecha(a, b) {
@@ -156,8 +163,7 @@ function ProximosEventos() {
   const refTitulo = useReveal()
 
   useEffect(() => {
-    const q = query(collection(db, 'eventos'), orderBy('creado', 'desc'))
-    const unsubscribe = onSnapshot(q, function (snapshot) {
+    const unsubscribe = onSnapshot(collection(db, 'eventos'), function (snapshot) {
       setEventos(snapshot.docs.map(function (d) {
         return { id: d.id, ...d.data() }
       }))

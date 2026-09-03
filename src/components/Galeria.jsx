@@ -1,8 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { collection, onSnapshot } from 'firebase/firestore'
+import { db } from '../firebase'
 import useReveal from '../hooks/useReveal'
 import useSyncedRotation from '../hooks/useSyncedRotation'
 
-const fotos = [
+// Se usa mientras el admin no haya subido fotos propias a Firestore
+// (colección "galeria"), para que la sección nunca se vea vacía.
+const FOTOS_FALLBACK = [
   '/galeria-1.webp',
   '/galeria-2.webp',
   '/galeria-3.webp',
@@ -13,8 +17,24 @@ const fotos = [
 
 const INTERVALO_FOTOS = 5000
 
+function useFotosGaleria() {
+  const [fotosFirestore, setFotosFirestore] = useState(null)
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'galeria'), (snapshot) => {
+      const docs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
+      docs.sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0))
+      setFotosFirestore(docs.map((d) => d.imagenUrl))
+    })
+    return () => unsubscribe()
+  }, [])
+
+  return fotosFirestore && fotosFirestore.length > 0 ? fotosFirestore : FOTOS_FALLBACK
+}
+
 function Galeria() {
   const refTitulo = useReveal()
+  const fotos = useFotosGaleria()
   const sincronizado = useSyncedRotation(fotos.length, INTERVALO_FOTOS)
   const [manual, setManual] = useState(null)
   const [prevSincronizado, setPrevSincronizado] = useState(sincronizado)
@@ -94,7 +114,7 @@ function Galeria() {
         }}>
             {fotos.map((foto, i) => (
               <img
-                key={i}
+                key={foto}
                 src={foto}
                 alt={`Momento Aguilas CFC ${i + 1}`}
                 width="800"
@@ -154,7 +174,7 @@ function Galeria() {
         }}>
           {fotos.map((foto, i) => (
             <button
-              key={i}
+              key={foto}
               aria-label={`Ver foto ${i + 1}`}
               onClick={() => setManual(i)}
               style={{

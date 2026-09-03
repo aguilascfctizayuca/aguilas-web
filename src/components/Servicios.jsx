@@ -1,18 +1,46 @@
 import { useState, useEffect } from 'react'
+import { collection, onSnapshot } from 'firebase/firestore'
+import { db } from '../firebase'
 import useReveal from '../hooks/useReveal'
 
-// day: 0=domingo ... 6=sábado
-const HORARIOS = [
-  { dia: 'Domingo', diaSemana: 0, hora: 9, minuto: 45, label: 'Domingo 9:45 AM' },
-  { dia: 'Domingo', diaSemana: 0, hora: 11, minuto: 45, label: 'Domingo 11:45 AM' },
-  { dia: 'Miércoles', diaSemana: 3, hora: 19, minuto: 0, label: 'Miércoles 7:00 PM' },
-  { dia: 'Lunes', diaSemana: 1, hora: 19, minuto: 30, label: 'Lunes 7:30 PM (Tabernáculo)' },
+// Se usa mientras el admin no haya cargado horarios propios en Firestore
+// (colección "horarios"), para que la sección nunca se vea vacía.
+const HORARIOS_FALLBACK = [
+  { dia: 'Domingo', diaSemana: 0, hora: 9, minuto: 45 },
+  { dia: 'Domingo', diaSemana: 0, hora: 11, minuto: 45 },
+  { dia: 'Miércoles', diaSemana: 3, hora: 19, minuto: 0 },
+  { dia: 'Lunes', diaSemana: 1, hora: 19, minuto: 30, subtitulo: 'Tabernáculo' },
 ]
 
-function proximoServicio() {
+function formatearHora(hora, minuto) {
+  const ampm = hora >= 12 ? 'PM' : 'AM'
+  let h12 = hora % 12
+  if (h12 === 0) h12 = 12
+  return `${h12}:${String(minuto).padStart(2, '0')} ${ampm}`
+}
+
+function agruparHorarios(horarios) {
+  const ordenados = [...horarios].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0))
+  const grupos = []
+  const indice = new Map()
+  for (const h of ordenados) {
+    const key = h.dia + '||' + (h.subtitulo || '')
+    if (!indice.has(key)) {
+      const grupo = { dia: h.dia, subtitulo: h.subtitulo || '', horarios: [] }
+      indice.set(key, grupo)
+      grupos.push(grupo)
+    }
+    indice.get(key).horarios.push(h)
+  }
+  grupos.forEach((g) => g.horarios.sort((a, b) => (a.hora * 60 + a.minuto) - (b.hora * 60 + b.minuto)))
+  return grupos
+}
+
+function proximoServicio(horarios) {
+  if (horarios.length === 0) return null
   const ahora = new Date()
   let mejor = null
-  for (const h of HORARIOS) {
+  for (const h of horarios) {
     const fecha = new Date(ahora)
     const delta = (h.diaSemana - ahora.getDay() + 7) % 7
     fecha.setDate(ahora.getDate() + delta)
@@ -23,36 +51,45 @@ function proximoServicio() {
   return mejor
 }
 
-function useProximoServicio() {
-  const [proximo, setProximo] = useState(proximoServicio)
-  const [restante, setRestante] = useState(0)
+function useHorarios() {
+  const [horariosFirestore, setHorariosFirestore] = useState(null)
 
   useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'horarios'), (snapshot) => {
+      setHorariosFirestore(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })))
+    })
+    return () => unsubscribe()
+  }, [])
+
+  return horariosFirestore && horariosFirestore.length > 0 ? horariosFirestore : HORARIOS_FALLBACK
+}
+
+function useProximoServicio(horarios) {
+  const [proximo, setProximo] = useState(() => proximoServicio(horarios))
+  const [prevHorarios, setPrevHorarios] = useState(horarios)
+  const [restante, setRestante] = useState(0)
+
+  if (horarios !== prevHorarios) {
+    setPrevHorarios(horarios)
+    setProximo(proximoServicio(horarios))
+  }
+
+  useEffect(() => {
+    if (!proximo) return
     const interval = setInterval(() => {
       const ahora = new Date()
       let diff = proximo.fecha - ahora
       if (diff <= 0) {
-        const nuevo = proximoServicio()
+        const nuevo = proximoServicio(horarios)
         setProximo(nuevo)
-        diff = nuevo.fecha - ahora
+        diff = nuevo ? nuevo.fecha - ahora : 0
       }
       setRestante(diff)
     }, 1000)
     return () => clearInterval(interval)
-  }, [proximo])
+  }, [proximo, horarios])
 
   return { proximo, restante }
-}
-
-function formatearRestante(ms) {
-  const totalSeg = Math.max(0, Math.floor(ms / 1000))
-  const dias = Math.floor(totalSeg / 86400)
-  const horas = Math.floor((totalSeg % 86400) / 3600)
-  const minutos = Math.floor((totalSeg % 3600) / 60)
-  const segundos = totalSeg % 60
-  const pad = (n) => String(n).padStart(2, '0')
-  if (dias > 0) return `${dias}d ${pad(horas)}h ${pad(minutos)}m`
-  return `${pad(horas)}h ${pad(minutos)}m ${pad(segundos)}s`
 }
 
 function CardServicio({ dia, subtitulo, horarios, activo, esHoy }) {
@@ -143,12 +180,28 @@ function CardServicio({ dia, subtitulo, horarios, activo, esHoy }) {
   )
 }
 
+function formatearRestante(ms) {
+  const totalSeg = Math.max(0, Math.floor(ms / 1000))
+  const dias = Math.floor(totalSeg / 86400)
+  const horas = Math.floor((totalSeg % 86400) / 3600)
+  const minutos = Math.floor((totalSeg % 3600) / 60)
+  const segundos = totalSeg % 60
+  const pad = (n) => String(n).padStart(2, '0')
+  if (dias > 0) return `${dias}d ${pad(horas)}h ${pad(minutos)}m`
+  return `${pad(horas)}h ${pad(minutos)}m ${pad(segundos)}s`
+}
+
 function Servicios() {
   const refTitulo = useReveal()
   const refCards = useReveal()
-  const { proximo, restante } = useProximoServicio()
-  const esHoy = proximo.fecha.toDateString() === new Date().toDateString()
+  const horarios = useHorarios()
+  const grupos = agruparHorarios(horarios)
+  const { proximo, restante } = useProximoServicio(horarios)
+  const esHoy = !!proximo && proximo.fecha.toDateString() === new Date().toDateString()
   const esUrgente = restante > 0 && restante < 2 * 60 * 60 * 1000
+  const proximoLabel = proximo
+    ? `${proximo.dia} ${formatearHora(proximo.hora, proximo.minuto)}${proximo.subtitulo ? ` (${proximo.subtitulo})` : ''}`
+    : ''
 
   return (
     <section id="servicios" style={{
@@ -181,33 +234,35 @@ function Servicios() {
         </h2>
       </div>
 
-      <div style={{ textAlign: 'center', marginBottom: 'clamp(1.5rem, 4vw, 3rem)', position: 'relative', zIndex: 1 }}>
-        <div className="glass-panel" style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          gap: '0.6rem',
-          padding: '0.6rem 1.2rem',
-          borderRadius: '999px',
-          fontFamily: 'Inter, sans-serif',
-          fontSize: '0.85rem',
-          color: 'var(--texto-suave)',
-          maxWidth: '100%',
-          borderColor: esUrgente ? 'rgba(255,159,10,0.5)' : undefined,
-          animation: esUrgente ? 'urgentPulso 1.8s ease-in-out infinite' : 'none',
-        }}>
-          <span>{esUrgente ? '¡Ya casi empieza!' : 'Próximo servicio:'} <strong style={{ color: 'var(--texto)' }}>{proximo.label}</strong></span>
-          <span style={{
-            fontFamily: 'Montserrat, sans-serif',
-            fontWeight: '700',
-            color: esUrgente ? '#FF9F0A' : 'var(--verde)',
-            fontVariantNumeric: 'tabular-nums',
+      {proximo && (
+        <div style={{ textAlign: 'center', marginBottom: 'clamp(1.5rem, 4vw, 3rem)', position: 'relative', zIndex: 1 }}>
+          <div className="glass-panel" style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            gap: '0.6rem',
+            padding: '0.6rem 1.2rem',
+            borderRadius: '999px',
+            fontFamily: 'Inter, sans-serif',
+            fontSize: '0.85rem',
+            color: 'var(--texto-suave)',
+            maxWidth: '100%',
+            borderColor: esUrgente ? 'rgba(255,159,10,0.5)' : undefined,
+            animation: esUrgente ? 'urgentPulso 1.8s ease-in-out infinite' : 'none',
           }}>
-            {formatearRestante(restante)}
-          </span>
+            <span>{esUrgente ? '¡Ya casi empieza!' : 'Próximo servicio:'} <strong style={{ color: 'var(--texto)' }}>{proximoLabel}</strong></span>
+            <span style={{
+              fontFamily: 'Montserrat, sans-serif',
+              fontWeight: '700',
+              color: esUrgente ? '#FF9F0A' : 'var(--verde)',
+              fontVariantNumeric: 'tabular-nums',
+            }}>
+              {formatearRestante(restante)}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       <div ref={refCards} className="reveal" style={{
         display: 'flex',
@@ -219,9 +274,19 @@ function Servicios() {
         position: 'relative',
         zIndex: 1,
       }}>
-        <CardServicio dia="Domingo" horarios={['9:45 AM', '11:45 AM']} activo={proximo.dia === 'Domingo'} esHoy={esHoy && proximo.dia === 'Domingo'} />
-        <CardServicio dia="Miércoles" horarios={['7:00 PM']} activo={proximo.dia === 'Miércoles'} esHoy={esHoy && proximo.dia === 'Miércoles'} />
-        <CardServicio dia="Lunes" subtitulo="Tabernáculo" horarios={['7:30 PM']} activo={proximo.dia === 'Lunes'} esHoy={esHoy && proximo.dia === 'Lunes'} />
+        {grupos.map((g) => {
+          const activo = !!proximo && proximo.dia === g.dia && (proximo.subtitulo || '') === g.subtitulo
+          return (
+            <CardServicio
+              key={g.dia + '||' + g.subtitulo}
+              dia={g.dia}
+              subtitulo={g.subtitulo}
+              horarios={g.horarios.map((h) => formatearHora(h.hora, h.minuto))}
+              activo={activo}
+              esHoy={activo && esHoy}
+            />
+          )
+        })}
       </div>
 
     </section>
