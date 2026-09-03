@@ -523,6 +523,39 @@ p {
   background: linear-gradient(135deg, rgba(58, 123, 255, 0.36), rgba(157, 90, 255, 0.3));
 }
 
+/* Botón "volver" en la página de RadGen — mismo vidrio del sitio principal */
+.radgen-volver {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(245, 243, 238, 0.85);
+  text-decoration: none;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .radgen-volver {
+    transition: color 0.25s ease;
+  }
+  .radgen-volver:hover {
+    color: #ffffff;
+  }
+}
+
+@media (max-width: 640px) {
+  .radgen-volver span {
+    display: none;
+  }
+  .radgen-volver {
+    padding: 0.5rem 0.65rem;
+  }
+}
+
 /* ===== BARRA DE PROGRESO DE SCROLL ===== */
 .scroll-progress {
   position: fixed;

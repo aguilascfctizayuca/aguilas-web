@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import RadGenSplash from '../components/RadGenSplash'
 
 const BARRAS = [40, 70, 45, 90, 55, 75, 35, 65, 50, 80, 42, 60]
@@ -50,14 +52,19 @@ function RadGen() {
       <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
 
         <nav style={{
-          display: 'flex',
+          display: 'grid',
+          gridTemplateColumns: '1fr auto 1fr',
           alignItems: 'center',
-          justifyContent: 'center',
           padding: '1.25rem 1.5rem',
           background: 'rgba(15,15,18,0.75)',
           backdropFilter: 'blur(8px)',
           borderBottom: '1px solid rgba(58,123,255,0.25)',
         }}>
+          <Link to="/" className="glass radgen-volver">
+            <ArrowLeft size={15} strokeWidth={2} />
+            <span>Águilas CFC</span>
+          </Link>
+
           <img
             src="/radgen-logo.png"
             alt="RadGen Mx"
@@ -65,6 +72,7 @@ function RadGen() {
               height: '42px',
               width: 'auto',
               display: 'block',
+              justifySelf: 'center',
               opacity: splashListo ? 1 : 0,
               transition: 'opacity 0.3s ease',
             }}
