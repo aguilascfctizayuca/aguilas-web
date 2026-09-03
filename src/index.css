@@ -5,26 +5,33 @@
   padding: 0;
 }
 
+/* El sitio siempre usa el tema oscuro — es la identidad de marca, ya no depende de la preferencia del sistema */
 :root {
   --verde: #3DDC04;
-  --fondo: #ffffff;
-  --texto: #0a0a0a;
-  --texto-suave: #666666;
-  --borde: #f0f0f0;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --fondo: #0a0a0a;
-    --texto: #f5f5f5;
-    --texto-suave: #aaaaaa;
-    --borde: #2a2a2a;
-    --verde: #3DDC04;
-  }
+  --fondo: #0a0a0a;
+  --texto: #f5f5f5;
+  --texto-suave: #aaaaaa;
+  --borde: #2a2a2a;
+  --fondo-glass: rgba(10, 10, 10, 0.65);
+  --borde-glass: rgba(255, 255, 255, 0.12);
+  --glass-highlight: rgba(255, 255, 255, 0.1);
+  --glass-shadow: rgba(0, 0, 0, 0.4);
+  --nav-glass-bg: rgba(10, 10, 10, 0.82);
+  --glass-shine: rgba(255, 255, 255, 0.12);
 }
 
 html {
   scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+/* Atenúa el brillo del mapa de Google (siempre claro) para que no rompa el fondo oscuro */
+.mapa-frame {
+  background: var(--fondo);
+}
+
+.mapa-frame iframe {
+  filter: brightness(0.82) contrast(1.05) saturate(0.85);
 }
 
 body {
@@ -42,6 +49,18 @@ section {
   scroll-margin-top: 80px;
 }
 
+/* Grano sutil sobre todo el sitio — le da textura al negro plano sin distraer */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(30px);
@@ -51,6 +70,135 @@ section {
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* ===== EFECTO GLASS estilo "Liquid Glass" (vidrio esmerilado con brillo especular) ===== */
+.glass {
+  position: relative;
+  background:
+    radial-gradient(130% 100% at 15% -10%, rgba(255, 255, 255, 0.22), transparent 55%),
+    rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  backdrop-filter: blur(24px) saturate(190%);
+  will-change: backdrop-filter;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 16px 40px -16px rgba(0, 0, 0, 0.55);
+  transition: background 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass:hover {
+  background:
+    radial-gradient(130% 100% at 15% -10%, rgba(255, 255, 255, 0.3), transparent 55%),
+    rgba(255, 255, 255, 0.1);
+  border-color: rgba(61, 220, 4, 0.4);
+}
+
+/* Tarjetas de vidrio en "Quiénes somos" — más compactas en móvil */
+.nosotros-card {
+  padding: 2.5rem;
+}
+
+.nosotros-card h2 {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .nosotros-card {
+    padding: 1.5rem;
+  }
+  .nosotros-card h2 {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+  }
+  .nosotros-card__body {
+    font-size: 0.9rem !important;
+    line-height: 1.6 !important;
+  }
+}
+
+/* Vidrio adaptable a light/dark, para usar sobre fondos planos (--fondo) */
+.glass-panel {
+  background:
+    radial-gradient(130% 100% at 15% -10%, var(--glass-shine), transparent 55%),
+    var(--fondo-glass);
+  border: 1px solid var(--borde-glass);
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  backdrop-filter: blur(20px) saturate(170%);
+  will-change: backdrop-filter;
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    0 12px 32px -16px var(--glass-shadow);
+  transition: background 0.4s ease, border-color 0.4s ease, transform 0.3s ease, box-shadow 0.4s ease;
+}
+
+.glass-panel:hover {
+  border-color: rgba(61, 220, 4, 0.4);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    0 16px 40px -16px var(--glass-shadow),
+    0 0 0 1px rgba(61, 220, 4, 0.15);
+}
+
+/* Manchas de color difuminadas, decorativas, para dar textura detrás del vidrio */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.galeria-glass-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  backdrop-filter: blur(14px) saturate(180%);
+  will-change: backdrop-filter;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 8px 24px -10px rgba(0, 0, 0, 0.5);
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+
+.galeria-glass-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(61, 220, 4, 0.5);
+}
+
+@keyframes whatsappPulso {
+  0% { transform: scale(1); opacity: 0.55; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+
+@keyframes urgentPulso {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(255,159,10,0.25), 0 12px 32px -16px rgba(255,159,10,0.35); }
+  50% { box-shadow: 0 0 0 1px rgba(255,159,10,0.5), 0 12px 36px -14px rgba(255,159,10,0.6); }
+}
+
+/* Rebote periódico sutil del ícono de WhatsApp, para que no se sienta estático */
+@keyframes whatsappRebote {
+  0%, 85%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+  89% { transform: translateY(-7px) rotate(-8deg) scale(1.08); }
+  92% { transform: translateY(0) rotate(6deg) scale(0.96); }
+  95% { transform: translateY(-3px) rotate(-3deg) scale(1.03); }
+  98% { transform: translateY(0) rotate(0deg) scale(1); }
+}
+
+.whatsapp-bounce {
+  animation: whatsappRebote 5s ease-in-out infinite;
+}
+
+h1, h2, h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 @media (max-width: 640px) {
@@ -65,7 +213,9 @@ section {
 /* ===== REDES SOCIALES ===== */
 .redes-section {
   background: #1a1a1a;
-  padding: 80px 20px;
+  padding: clamp(40px, 10vw, 80px) 20px;
+  position: relative;
+  overflow: hidden;
 }
 
 .redes-container {
@@ -83,7 +233,7 @@ section {
 
 .redes-header {
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: clamp(28px, 6vw, 50px);
 }
 
 .redes-header h2 {
@@ -104,6 +254,8 @@ section {
   gap: 16px;
   justify-content: center;
   flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
 }
 
 .red-card {
@@ -116,21 +268,26 @@ section {
   flex: 1;
   min-width: 260px;
   max-width: 320px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 1px solid rgba(255,255,255,0.08);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s ease, border-color 0.4s ease;
+  background:
+    radial-gradient(130% 100% at 20% -10%, rgba(255, 255, 255, 0.16), transparent 55%),
+    rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+  will-change: backdrop-filter;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .red-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-}
-
-.red-card.instagram {
-  background: linear-gradient(135deg, #1a1a2e, #2d1b3d);
-}
-
-.red-card.facebook {
-  background: linear-gradient(135deg, #1a1a2e, #1a2a4a);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(61, 220, 4, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 .red-icon {
@@ -175,75 +332,14 @@ section {
   flex-shrink: 0;
 }
 
-/* ===== CURSOR GLOW ===== */
-.cursor-glow {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 700px;
-  height: 700px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(61, 220, 4, 0.12) 0%, rgba(61, 220, 4, 0.04) 40%, transparent 70%);
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  transition: left 0.08s ease, top 0.08s ease;
-  z-index: 9999;
-  mix-blend-mode: screen;
-}
-
-@media (prefers-color-scheme: light) {
-  .cursor-glow {
-    background: radial-gradient(circle, rgba(61, 220, 4, 0.18) 0%, rgba(61, 220, 4, 0.06) 40%, transparent 70%);
-    mix-blend-mode: multiply;
-  }
-}
-
-/* ===== GRADIENTE ANIMADO FONDO ===== */
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    135deg,
-    rgba(61, 220, 4, 0.08) 0%,
-    rgba(0, 0, 0, 0) 25%,
-    rgba(61, 220, 4, 0.12) 50%,
-    rgba(0, 0, 0, 0) 75%,
-    rgba(61, 220, 4, 0.08) 100%
-  );
-  background-size: 400% 400%;
-  animation: gradientShift 8s ease infinite;
-  pointer-events: none;
-  z-index: -1;
-}
-
-@media (prefers-color-scheme: light) {
-  body::before {
-    background: linear-gradient(
-      135deg,
-      rgba(61, 220, 4, 0.1) 0%,
-      rgba(255, 255, 255, 0) 25%,
-      rgba(61, 220, 4, 0.15) 50%,
-      rgba(255, 255, 255, 0) 75%,
-      rgba(61, 220, 4, 0.1) 100%
-    );
-    background-size: 400% 400%;
-    animation: gradientShift 8s ease infinite;
-  }
-}
-
 @keyframes parpadeo {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
+}
+
+@keyframes logoSplashIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 /* ===== NAVBAR PILLS ===== */
@@ -263,6 +359,15 @@ body::before {
   color: #000000;
 }
 
+.nav-pill.active {
+  color: var(--verde);
+  font-weight: 700;
+}
+
+.scrolled .nav-pill.active {
+  color: var(--verde);
+}
+
 .nav-pill-movil {
   font-size: 1.1rem;
   font-weight: 500;
@@ -278,14 +383,41 @@ body::before {
   color: #000000;
 }
 
+.nav-pill-movil.active {
+  color: var(--verde);
+  font-weight: 700;
+}
+
 .scrolled .nav-pill {
   color: var(--texto-suave);
+}
+
+/* ===== BARRA DE PROGRESO DE SCROLL ===== */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--verde);
+  z-index: 101;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 8px rgba(61, 220, 4, 0.6);
 }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 640px) {
   .valores-grid {
     grid-template-columns: repeat(2, 1fr) !important;
+    grid-auto-rows: auto !important;
+  }
+
+  .valor-destacado {
+    grid-column: span 1 !important;
+    padding: 1.5rem !important;
+  }
+
+  .valor-card {
+    justify-content: flex-start !important;
   }
 
   .redes-cards {

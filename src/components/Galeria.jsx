@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import useReveal from '../hooks/useReveal'
+import useSyncedRotation from '../hooks/useSyncedRotation'
 
 const fotos = [
   '/galeria-1.webp',
@@ -10,28 +11,57 @@ const fotos = [
   '/galeria-6.webp',
 ]
 
+const INTERVALO_FOTOS = 5000
+
 function Galeria() {
   const refTitulo = useReveal()
-  const [actual, setActual] = useState(0)
+  const sincronizado = useSyncedRotation(fotos.length, INTERVALO_FOTOS)
+  const [manual, setManual] = useState(null)
+  const [prevSincronizado, setPrevSincronizado] = useState(sincronizado)
+  if (sincronizado !== prevSincronizado) {
+    setPrevSincronizado(sincronizado)
+    setManual(null)
+  }
+  const actual = manual ?? sincronizado
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActual(prev => (prev + 1) % fotos.length)
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [])
-
-  const anterior = () => setActual(prev => (prev - 1 + fotos.length) % fotos.length)
-  const siguiente = () => setActual(prev => (prev + 1) % fotos.length)
+  const anterior = () => setManual((actual - 1 + fotos.length) % fotos.length)
+  const siguiente = () => setManual((actual + 1) % fotos.length)
 
   return (
     <section id="galeria" style={{
-      backgroundColor: 'var(--fondo)',
-      padding: '6rem 2rem',
+      position: 'relative',
+      overflow: 'hidden',
+      padding: 'clamp(2.5rem, 8vw, 6rem) 2rem clamp(1.5rem, 4vw, 3rem)',
       borderTop: '1px solid var(--borde)',
     }}>
 
-      <div ref={refTitulo} className="reveal" style={{ textAlign: 'center', marginBottom: '3rem' }}>
+      {/* Fondo ambiental: la misma foto actual, difuminada, dando contexto de color */}
+      {fotos.map((foto, i) => (
+        <div
+          key={foto}
+          style={{
+            position: 'absolute',
+            top: '-5%', left: '-5%',
+            width: '110%', height: '110%',
+            backgroundImage: `url(${foto})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            filter: 'blur(50px) saturate(130%)',
+            opacity: i === actual ? 0.55 : 0,
+            transition: 'opacity 1s ease',
+            zIndex: 0,
+          }}
+        />
+      ))}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0,
+        width: '100%', height: '100%',
+        backgroundColor: 'rgba(0,0,0,0.55)',
+        zIndex: 1,
+      }} />
+
+      <div ref={refTitulo} className="reveal" style={{ position: 'relative', zIndex: 2, textAlign: 'center', marginBottom: 'clamp(1.5rem, 4vw, 3rem)' }}>
         <p style={{
           color: 'var(--verde)',
           fontFamily: 'Inter, sans-serif',
@@ -47,67 +77,71 @@ function Galeria() {
           fontFamily: 'Montserrat, sans-serif',
           fontWeight: '900',
           fontSize: 'clamp(1.8rem, 4vw, 3rem)',
-          color: 'var(--texto)',
+          color: '#ffffff',
         }}>
           Momentos que nos definen
         </h2>
       </div>
 
-      <div style={{ maxWidth: '900px', margin: '0 auto', position: 'relative' }}>
+      <div style={{ position: 'relative', zIndex: 2, maxWidth: '900px', margin: '0 auto' }}>
 
-        {/* Imagen principal */}
         <div style={{
-          borderRadius: '16px',
+          borderRadius: '18px',
           overflow: 'hidden',
           aspectRatio: '16/9',
           position: 'relative',
+          boxShadow: '0 20px 50px -20px rgba(0,0,0,0.6)',
         }}>
-          {fotos.map((foto, i) => (
-            <img
-              key={i}
-              src={foto}
-              alt={`Momento Aguilas CFC ${i + 1}`}
-              style={{
-                position: 'absolute',
-                top: 0, left: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                opacity: i === actual ? 1 : 0,
-                transition: 'opacity 0.8s ease',
-              }}
-            />
-          ))}
+            {fotos.map((foto, i) => (
+              <img
+                key={i}
+                src={foto}
+                alt={`Momento Aguilas CFC ${i + 1}`}
+                width="800"
+                height="450"
+                loading="lazy"
+                decoding="async"
+                style={{
+                  position: 'absolute',
+                  top: 0, left: 0,
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  opacity: i === actual ? 1 : 0,
+                  transition: 'opacity 0.8s ease',
+                }}
+              />
+            ))}
 
-          {/* Botones */}
-          <button
-            aria-label="Foto anterior"
-            onClick={anterior}
-            style={{
-              position: 'absolute', left: '1rem', top: '50%',
-              transform: 'translateY(-50%)',
-              background: 'rgba(0,0,0,0.5)', border: 'none',
-              color: '#fff', fontSize: '1.5rem', width: '44px', height: '44px',
-              borderRadius: '50%', cursor: 'pointer', zIndex: 2,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            &#8249;
-          </button>
-          <button
-            aria-label="Foto siguiente"
-            onClick={siguiente}
-            style={{
-              position: 'absolute', right: '1rem', top: '50%',
-              transform: 'translateY(-50%)',
-              background: 'rgba(0,0,0,0.5)', border: 'none',
-              color: '#fff', fontSize: '1.5rem', width: '44px', height: '44px',
-              borderRadius: '50%', cursor: 'pointer', zIndex: 2,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            &#8250;
-          </button>
+            {/* Botones */}
+            <button
+              aria-label="Foto anterior"
+              onClick={anterior}
+              className="galeria-glass-btn"
+              style={{
+                position: 'absolute', left: '1rem', top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#fff', fontSize: '1.5rem', width: '44px', height: '44px',
+                borderRadius: '50%', cursor: 'pointer', zIndex: 2,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              &#8249;
+            </button>
+            <button
+              aria-label="Foto siguiente"
+              onClick={siguiente}
+              className="galeria-glass-btn"
+              style={{
+                position: 'absolute', right: '1rem', top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#fff', fontSize: '1.5rem', width: '44px', height: '44px',
+                borderRadius: '50%', cursor: 'pointer', zIndex: 2,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              &#8250;
+            </button>
         </div>
 
         {/* Miniaturas */}
@@ -116,12 +150,13 @@ function Galeria() {
           gap: '0.5rem',
           marginTop: '1rem',
           justifyContent: 'center',
+          flexWrap: 'wrap',
         }}>
           {fotos.map((foto, i) => (
             <button
               key={i}
               aria-label={`Ver foto ${i + 1}`}
-              onClick={() => setActual(i)}
+              onClick={() => setManual(i)}
               style={{
                 width: '60px',
                 height: '44px',
@@ -137,6 +172,10 @@ function Galeria() {
               <img
                 src={foto}
                 alt={`Miniatura ${i + 1}`}
+                width="60"
+                height="44"
+                loading="lazy"
+                decoding="async"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             </button>

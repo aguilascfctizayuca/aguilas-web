@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import useMagnetico from '../hooks/useMagnetico'
+import useSyncedRotation from '../hooks/useSyncedRotation'
 
 const fotos = [
   '/foto-worship.webp',
@@ -6,14 +8,24 @@ const fotos = [
   '/foto-servicio2.webp',
 ]
 
+const INTERVALO_FOTOS = 5000
+
 const TEXTO_COMPLETO = 'Ven como eres. Sal diferente.'
 
 function Hero() {
   const [animado, setAnimado] = useState(false)
   const [hover, setHover] = useState(false)
-  const [fotoActual, setFotoActual] = useState(0)
-  const [fadeIn, setFadeIn] = useState(true)
   const [textoVisible, setTextoVisible] = useState('')
+  const { ref: ctaRef, onMouseMove: onCtaMove, onMouseLeave: onCtaLeave } = useMagnetico(0.3)
+
+  const sincronizado = useSyncedRotation(fotos.length, INTERVALO_FOTOS)
+  const [manual, setManual] = useState(null)
+  const [prevSincronizado, setPrevSincronizado] = useState(sincronizado)
+  if (sincronizado !== prevSincronizado) {
+    setPrevSincronizado(sincronizado)
+    setManual(null)
+  }
+  const fotoActual = manual ?? sincronizado
 
   useEffect(() => {
     const timer = setTimeout(() => setAnimado(true), 1500)
@@ -35,17 +47,6 @@ function Hero() {
     return () => clearTimeout(delay)
   }, [animado])
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setFadeIn(false)
-      setTimeout(() => {
-        setFotoActual((prev) => (prev + 1) % fotos.length)
-        setFadeIn(true)
-      }, 600)
-    }, 5000)
-    return () => clearInterval(interval)
-  }, [])
-
   return (
     <section style={{
       minHeight: '100vh',
@@ -59,18 +60,23 @@ function Hero() {
       position: 'relative',
     }}>
 
-      {/* Fondo con fade */}
-      <div style={{
-        position: 'absolute',
-        top: 0, left: 0,
-        width: '100%', height: '100%',
-        backgroundImage: `url(${fotos[fotoActual]})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        opacity: fadeIn ? 1 : 0,
-        transition: 'opacity 0.6s ease',
-        zIndex: 0,
-      }} />
+      {/* Fondo con fade, apilado igual que Nosotros/Galería para que el cambio sea sincronizado */}
+      {fotos.map((foto, i) => (
+        <div
+          key={foto}
+          style={{
+            position: 'absolute',
+            top: 0, left: 0,
+            width: '100%', height: '100%',
+            backgroundImage: `url(${foto})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: i === fotoActual ? 1 : 0,
+            transition: 'opacity 0.8s ease',
+            zIndex: 0,
+          }}
+        />
+      ))}
 
       {/* Overlay oscuro */}
       <div style={{
@@ -141,13 +147,18 @@ function Hero() {
         <a href="https://wa.me/527711107903?text=Hola,%20me%20gustar%C3%ADa%20saber%20m%C3%A1s%20sobre%20%C3%81guilas%20CFC"
           target="_blank"
           rel="noreferrer"
+          ref={ctaRef}
           onMouseEnter={() => setHover(true)}
-          onMouseLeave={() => setHover(false)}
+          onMouseLeave={(e) => { setHover(false); onCtaLeave(e) }}
+          onMouseMove={onCtaMove}
           style={{
             position: 'relative',
             overflow: 'hidden',
             display: 'inline-block',
-            backgroundColor: 'transparent',
+            backgroundColor: 'rgba(255,255,255,0.08)',
+            backdropFilter: 'blur(16px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+            willChange: 'backdrop-filter, transform',
             color: '#ffffff',
             fontFamily: 'Inter, sans-serif',
             fontWeight: '500',
@@ -159,8 +170,10 @@ function Hero() {
             letterSpacing: '0.2em',
             textTransform: 'uppercase',
             opacity: animado ? 1 : 0,
-            transition: 'opacity 0.8s ease 0.8s, box-shadow 0.3s ease',
-            boxShadow: hover ? '0 0 20px rgba(61,220,4,0.4)' : 'none',
+            transition: 'opacity 0.8s ease 0.8s, box-shadow 0.3s ease, background-color 0.3s ease, transform 0.15s ease-out',
+            boxShadow: hover
+              ? '0 0 20px rgba(61,220,4,0.4)'
+              : 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(255,255,255,0.05)',
             zIndex: 1,
           }}
         >
@@ -177,18 +190,20 @@ function Hero() {
         </a>
 
         {/* Indicadores */}
-        <div style={{
+        <div className="glass" style={{
           display: 'flex',
           gap: '8px',
           marginTop: '2rem',
+          padding: '10px 14px',
+          borderRadius: '999px',
           opacity: animado ? 1 : 0,
-          transition: 'opacity 0.8s ease 1s',
+          transition: 'opacity 0.8s ease 1s, background 0.4s ease, border-color 0.4s ease',
         }}>
           {fotos.map((_, i) => (
             <button
               key={i}
               aria-label={"Ver foto " + (i + 1)}
-              onClick={() => setFotoActual(i)}
+              onClick={() => setManual(i)}
               style={{
                 width: i === fotoActual ? '24px' : '8px',
                 height: '8px',

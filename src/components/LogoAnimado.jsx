@@ -1,36 +1,39 @@
 import { useState, useEffect } from 'react'
 
 function LogoAnimado({ onComplete }) {
-  const [fase, setFase] = useState('grande') // 'grande' → 'moviendose' → 'listo'
+  const [fase, setFase] = useState('entrando') // 'entrando' → 'saliendo' → 'listo'
 
   useEffect(() => {
-    const t1 = setTimeout(() => setFase('moviendose'), 1200)
+    const t1 = setTimeout(() => setFase('saliendo'), 950)
     const t2 = setTimeout(() => {
       setFase('listo')
       onComplete()
-    }, 2200)
+    }, 1600)
     return () => { clearTimeout(t1); clearTimeout(t2) }
-  }, [])
+  }, [onComplete])
 
   if (fase === 'listo') return null
 
   return (
     <div style={{
       position: 'fixed',
-      zIndex: 200,
-      top: fase === 'moviendose' ? '18px' : '50%',
-      left: fase === 'moviendose' ? '24px' : '50%',
-      transform: fase === 'moviendose' ? 'translate(0, 0)' : 'translate(-50%, -50%)',
-      transition: 'all 0.9s cubic-bezier(0.4, 0, 0.2, 1)',
-      pointerEvents: 'none',
+      inset: 0,
+      zIndex: 300,
+      backgroundColor: '#000',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      transform: fase === 'saliendo' ? 'translateY(-100%)' : 'translateY(0)',
+      transition: 'transform 0.65s cubic-bezier(0.76, 0, 0.24, 1)',
+      pointerEvents: fase === 'saliendo' ? 'none' : 'auto',
     }}>
       <img
         src="/ACFC.webp"
         alt="Águilas CFC"
         style={{
-          width: fase === 'moviendose' ? '36px' : '140px',
-          height: fase === 'moviendose' ? '36px' : '140px',
-          transition: 'all 0.9s cubic-bezier(0.4, 0, 0.2, 1)',
+          width: '100px',
+          height: '100px',
+          animation: 'logoSplashIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both',
         }}
       />
     </div>

@@ -1,29 +1,59 @@
 import useReveal from '../hooks/useReveal'
+import useSyncedRotation from '../hooks/useSyncedRotation'
+
+const fotos = ['/foto-pastor.jpg', '/foto-adoracion.jpg']
+const INTERVALO_FOTOS = 5000
 
 function Nosotros() {
   const ref1 = useReveal()
-  const ref2 = useReveal()
   const ref3 = useReveal()
-  const ref4 = useReveal()
+  const fotoActual = useSyncedRotation(fotos.length, INTERVALO_FOTOS)
 
   return (
     <section id="nosotros" style={{
-      backgroundColor: 'var(--fondo)',
-      padding: '8rem 2rem',
-      borderTop: '1px solid #e0e0e0',
+      position: 'relative',
+      overflow: 'hidden',
+      padding: 'clamp(3rem, 10vw, 8rem) 2rem',
+      borderTop: '1px solid var(--borde)',
+      color: '#ffffff',
     }}>
 
-      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+      {/* Fondo con fade, igual que el Hero */}
+      {fotos.map((foto, i) => (
+        <div
+          key={foto}
+          style={{
+            position: 'absolute',
+            top: 0, left: 0,
+            width: '100%', height: '100%',
+            backgroundImage: `url(${foto})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: i === fotoActual ? 1 : 0,
+            transition: 'opacity 1.2s ease',
+            zIndex: 0,
+          }}
+        />
+      ))}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0,
+        width: '100%', height: '100%',
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        zIndex: 1,
+      }} />
 
-        {/* Texto + foto pastor */}
+      <div style={{ position: 'relative', zIndex: 2, maxWidth: '1000px', margin: '0 auto' }}>
+
         <div style={{
           display: 'flex',
           flexWrap: 'wrap',
-          gap: '4rem',
-          alignItems: 'center',
-          marginBottom: '5rem',
+          gap: '2rem',
+          alignItems: 'stretch',
         }}>
-          <div ref={ref1} className="reveal" style={{ flex: '1 1 300px' }}>
+
+          {/* Texto */}
+          <div ref={ref1} className="reveal glass nosotros-card" style={{ flex: '1 1 340px', borderRadius: '20px' }}>
             <p style={{
               color: 'var(--verde)',
               fontFamily: 'Inter, sans-serif',
@@ -38,16 +68,15 @@ function Nosotros() {
             <h2 style={{
               fontFamily: 'Montserrat, sans-serif',
               fontWeight: '900',
-              fontSize: 'clamp(1.8rem, 4vw, 3rem)',
-              color: 'var(--texto)',
-              marginBottom: '2rem',
+              color: '#ffffff',
+              lineHeight: '1.15',
             }}>
               No somos una iglesia de eventos. Somos una familia.
             </h2>
-            <p style={{
+            <p className="nosotros-card__body" style={{
               fontFamily: 'Inter, sans-serif',
               fontSize: '1.05rem',
-              color: 'var(--texto-suave)',
+              color: 'rgba(255,255,255,0.8)',
               lineHeight: '1.9',
             }}>
               Somos una iglesia que cree y vive de acuerdo a la Palabra de Dios.
@@ -56,52 +85,14 @@ function Nosotros() {
             </p>
           </div>
 
-          <div ref={ref4} className="reveal" style={{ flex: '1 1 300px' }}>
-            <img
-              src="/foto-pastor.jpg"
-              alt="Pastor predicando en Águilas CFC"
-              style={{
-                width: '100%',
-                borderRadius: '16px',
-                objectFit: 'cover',
-                maxHeight: '400px',
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Foto adoración + Visión y Misión */}
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '4rem',
-          alignItems: 'center',
-        }}>
-          <div ref={ref2} className="reveal" style={{ flex: '1 1 300px' }}>
-            <img
-              src="/foto-adoracion.jpg"
-              alt="Tiempo de adoración en Águilas CFC"
-              style={{
-                width: '100%',
-                borderRadius: '16px',
-                objectFit: 'cover',
-                maxHeight: '400px',
-              }}
-            />
-          </div>
-
+          {/* Visión y Misión */}
           <div ref={ref3} className="reveal" style={{
             flex: '1 1 300px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '2rem',
+            gap: '1.5rem',
           }}>
-            <div style={{
-              padding: '2rem',
-              borderRadius: '12px',
-              borderLeft: '4px solid var(--verde)',
-              backgroundColor: 'rgba(61, 220, 4, 0.05)',
-            }}>
+            <div className="glass nosotros-card" style={{ borderRadius: '20px', flex: 1 }}>
               <p style={{
                 fontFamily: 'Montserrat, sans-serif',
                 fontWeight: '900',
@@ -118,10 +109,10 @@ function Nosotros() {
                 color: 'var(--verde)',
                 marginBottom: '1rem',
               }}>Visión</p>
-              <p style={{
+              <p className="nosotros-card__body" style={{
                 fontFamily: 'Inter, sans-serif',
                 fontSize: '1rem',
-                color: 'var(--texto)',
+                color: 'rgba(255,255,255,0.85)',
                 lineHeight: '1.8',
               }}>
                 Ser una comunidad que conoce profundamente a Dios, vive en libertad
@@ -130,12 +121,7 @@ function Nosotros() {
               </p>
             </div>
 
-            <div style={{
-              padding: '2rem',
-              borderRadius: '12px',
-              borderLeft: '4px solid var(--verde)',
-              backgroundColor: 'rgba(61, 220, 4, 0.05)',
-            }}>
+            <div className="glass nosotros-card" style={{ borderRadius: '20px', flex: 1 }}>
               <p style={{
                 fontFamily: 'Montserrat, sans-serif',
                 fontWeight: '900',
@@ -152,10 +138,10 @@ function Nosotros() {
                 color: 'var(--verde)',
                 marginBottom: '1rem',
               }}>Misión</p>
-              <p style={{
+              <p className="nosotros-card__body" style={{
                 fontFamily: 'Inter, sans-serif',
                 fontSize: '1rem',
-                color: 'var(--texto)',
+                color: 'rgba(255,255,255,0.85)',
                 lineHeight: '1.8',
               }}>
                 Acercamos personas a Dios y formamos discípulos que sean líderes

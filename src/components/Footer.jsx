@@ -17,7 +17,7 @@ function Footer() {
     <footer style={{
       backgroundColor: '#0a0a0a',
       borderTop: '1px solid #1a1a1a',
-      padding: '5rem 2rem 3rem',
+      padding: 'clamp(2.5rem, 7vw, 5rem) 2rem calc(clamp(1.5rem, 4vw, 3rem) + env(safe-area-inset-bottom))',
     }}>
       <div style={{
         maxWidth: '900px',
@@ -25,10 +25,10 @@ function Footer() {
         display: 'flex',
         flexWrap: 'wrap',
         gap: '3rem',
-        marginBottom: '4rem',
+        marginBottom: 'clamp(2rem, 5vw, 4rem)',
       }}>
         <div style={{ flex: '1 1 200px' }}>
-          <img src="/ACFC.webp" alt="Águilas CFC" style={{ width: '56px', height: '56px', marginBottom: '1rem' }} />
+          <img src="/ACFC.webp" alt="Águilas CFC" width="56" height="56" loading="lazy" decoding="async" style={{ width: '56px', height: '56px', marginBottom: '1rem' }} />
           <p style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: '900', fontSize: '1rem', color: '#ffffff', marginBottom: '0.5rem' }}>
             ÁGUILAS CFC
           </p>
