@@ -31,24 +31,26 @@ function RadGenSplash({ onComplete }) {
         }
       `}</style>
 
-      {/* Cortinas — se abren desde el centro, como un dial que sintoniza */}
+      {/* Cortinas — se abren desde el centro, como un dial que sintoniza.
+          El resplandor va SOLO en el borde que se separa (box-shadow, no
+          border), así no se ve una costura fija mientras están cerradas. */}
       <div style={{
         position: 'absolute',
         top: 0, left: 0,
         width: '50%', height: '100%',
-        backgroundColor: '#0F0F12',
-        borderRight: '1px solid rgba(58,123,255,0.25)',
+        background: 'radial-gradient(120% 140% at 100% 50%, rgba(58,123,255,0.14), transparent 60%), #0F0F12',
+        boxShadow: saliendo ? '4px 0 24px rgba(58,123,255,0.35)' : 'none',
         transform: saliendo ? 'translateX(-100%)' : 'translateX(0)',
-        transition: 'transform 0.7s cubic-bezier(0.76, 0, 0.24, 1)',
+        transition: 'transform 0.7s cubic-bezier(0.76, 0, 0.24, 1), box-shadow 0.7s ease',
       }} />
       <div style={{
         position: 'absolute',
         top: 0, right: 0,
         width: '50%', height: '100%',
-        backgroundColor: '#0F0F12',
-        borderLeft: '1px solid rgba(58,123,255,0.25)',
+        background: 'radial-gradient(120% 140% at 0% 50%, rgba(58,123,255,0.14), transparent 60%), #0F0F12',
+        boxShadow: saliendo ? '-4px 0 24px rgba(58,123,255,0.35)' : 'none',
         transform: saliendo ? 'translateX(100%)' : 'translateX(0)',
-        transition: 'transform 0.7s cubic-bezier(0.76, 0, 0.24, 1)',
+        transition: 'transform 0.7s cubic-bezier(0.76, 0, 0.24, 1), box-shadow 0.7s ease',
       }} />
 
       {/* Logo + ecualizador, centrados sobre ambas cortinas */}
