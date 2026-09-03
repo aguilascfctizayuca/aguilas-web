@@ -180,6 +180,8 @@ function RadGen() {
             }}>
               Estamos preparando{' '}
               <strong style={{
+                display: 'inline-block',
+                whiteSpace: 'nowrap',
                 background: 'linear-gradient(90deg, #F5F3EE, #8fb4ff)',
                 WebkitBackgroundClip: 'text',
                 backgroundClip: 'text',
