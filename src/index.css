@@ -377,6 +377,19 @@ p {
   flex-shrink: 0;
 }
 
+/* Tarjeta de RadGen Mx — mismo formato que las demás, en azul (marca aparte) */
+.red-card.radgen:hover {
+  border-color: rgba(58, 123, 255, 0.45);
+}
+
+.red-card.radgen .red-icon {
+  color: #8fb4ff;
+}
+
+.red-card.radgen .red-cta {
+  color: #8fb4ff;
+}
+
 @keyframes parpadeo {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
@@ -556,71 +569,24 @@ p {
   }
 }
 
-/* Tarjeta "Únete a nuestra comunidad" en RadGen — mismo formato que
-   .red-card de la sección de redes sociales de Águilas, pero en azul. */
-.radgen-red-card {
-  display: flex;
+/* Ícono de Instagram de RadGen en el nav — mismo vidrio del sitio */
+.radgen-social {
+  display: inline-flex;
   align-items: center;
-  gap: 14px;
-  padding: 16px 18px;
-  border-radius: 16px;
-  text-decoration: none;
-  background: linear-gradient(135deg, rgba(58, 123, 255, 0.16), rgba(157, 90, 255, 0.1));
-  border-color: rgba(120, 150, 255, 0.35) !important;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: rgba(245, 243, 238, 0.85);
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .radgen-red-card {
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease, border-color 0.3s ease;
+  .radgen-social {
+    transition: color 0.25s ease;
   }
-  .radgen-red-card:hover {
-    transform: translateY(-4px);
-    background: linear-gradient(135deg, rgba(58, 123, 255, 0.26), rgba(157, 90, 255, 0.18));
-    border-color: rgba(150, 175, 255, 0.6) !important;
+  .radgen-social:hover {
+    color: #ffffff;
   }
-}
-
-.radgen-red-icon {
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-  color: #8fb4ff;
-}
-
-.radgen-red-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.radgen-red-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-  min-width: 0;
-  text-align: left;
-}
-
-.radgen-red-nombre {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #F5F3EE;
-}
-
-.radgen-red-handle {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.78rem;
-  color: rgba(245, 243, 238, 0.5);
-}
-
-.radgen-red-cta {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #8fb4ff;
-  white-space: nowrap;
-  flex-shrink: 0;
 }
 
 /* ===== BARRA DE PROGRESO DE SCROLL ===== */
