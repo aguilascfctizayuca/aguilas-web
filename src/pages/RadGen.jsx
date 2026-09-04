@@ -119,6 +119,11 @@ function RadGen() {
         .radgen-nb .btn-blue:hover, .radgen-nb .btn-blue:active{ transform:translate(3px,3px); box-shadow:2px 2px 0 var(--paper); }
         .radgen-nb .btn-outline{ background: var(--ink); color:var(--paper); border-color: var(--paper); box-shadow: 5px 5px 0 var(--blue); }
         .radgen-nb .btn-outline:hover, .radgen-nb .btn-outline:active{ transform:translate(3px,3px); box-shadow:2px 2px 0 var(--blue); }
+        .radgen-nb .btn-insta{
+          background: linear-gradient(135deg, #f58529, #dd2a7b, #8134af, #515bd4);
+          color:#fff; border-color: var(--ink); box-shadow: 5px 5px 0 var(--red);
+        }
+        .radgen-nb .btn-insta:hover, .radgen-nb .btn-insta:active{ transform:translate(3px,3px); box-shadow:2px 2px 0 var(--red); }
 
         .radgen-nb .hero{
           display:flex; align-items:center; gap:56px; flex-wrap:wrap;
@@ -395,6 +400,9 @@ function RadGen() {
           <div className="hero-actions">
             <a href="#registro" className="btn btn-blue">Ya quiero ir</a>
             <a href="#proposito" className="btn btn-outline">Conoce el ministerio</a>
+            <a href="https://www.instagram.com/radgen.mx/" target="_blank" rel="noopener noreferrer" className="btn btn-insta">
+              <IconoInstagram size={15} /> Síguenos en Insta
+            </a>
           </div>
         </div>
 
