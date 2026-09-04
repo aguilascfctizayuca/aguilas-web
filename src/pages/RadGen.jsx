@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { collection, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, doc, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase'
 import {
   ArrowLeft,
@@ -15,10 +15,86 @@ import {
   Megaphone,
   GraduationCap,
   ChevronDown,
+  ChevronRight,
   ImageOff,
   Check,
+  Clock,
 } from 'lucide-react'
 import RadGenSplash from '../components/RadGenSplash'
+
+const SKY_POSES = ['/sky-mascota.png', '/sky-mascota-2.png', '/sky-mascota-3.png']
+const SKY_FRASES = [
+  '¡Soy Sky! 🦅',
+  '¿Ya te apuntaste? 👀',
+  '¡Qué onda! 🤙',
+  'Vamos que se puede 🔥',
+  'Toca de nuevo 😎',
+]
+
+const QUIZ = [
+  {
+    q: '¿Qué tanto conoces la Biblia?',
+    opciones: [
+      { texto: 'Casi nada, apenas empiezo', pts: 1 },
+      { texto: 'Lo básico, voy aprendiendo', pts: 2 },
+      { texto: 'Bastante, la leo seguido', pts: 3 },
+    ],
+  },
+  {
+    q: '¿Invitarías a un amigo a RadGen?',
+    opciones: [
+      { texto: 'Tal vez, lo pensaría', pts: 1 },
+      { texto: 'Sí, a uno o dos', pts: 2 },
+      { texto: 'Ya invité a varios 😄', pts: 3 },
+    ],
+  },
+  {
+    q: '¿Qué tan seguido oras o buscas a Dios?',
+    opciones: [
+      { texto: 'Casi no', pts: 1 },
+      { texto: 'De vez en cuando', pts: 2 },
+      { texto: 'Todos los días', pts: 3 },
+    ],
+  },
+]
+
+const QUIZ_RESULTADOS = [
+  { min: 3, max: 4, titulo: 'Vas empezando 🌱', desc: 'Y está perfecto — todos empezamos así. RadGen es justo para crecer desde aquí.' },
+  { min: 5, max: 7, titulo: 'Ya la traes 🔥', desc: 'Vas en buen camino. En RadGen le seguimos dando juntos.' },
+  { min: 8, max: 9, titulo: 'Full RadGen 🦅', desc: '¡Eres pura generación radical! Ven y sé ejemplo para los demás.' },
+]
+
+function resultadoQuiz(pts) {
+  return QUIZ_RESULTADOS.find((r) => pts >= r.min && pts <= r.max) || QUIZ_RESULTADOS[0]
+}
+
+function lanzarConfeti() {
+  const colores = ['#3a7bff', '#FF3B3B', '#F5F3EE', '#8fb4ff']
+  const contenedor = document.createElement('div')
+  contenedor.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:999;overflow:hidden;'
+  document.body.appendChild(contenedor)
+
+  for (let i = 0; i < 44; i++) {
+    const pieza = document.createElement('span')
+    const izquierda = Math.random() * 100
+    const retraso = Math.random() * 0.3
+    const duracion = 1.6 + Math.random() * 1.2
+    const rotacion = Math.random() * 360
+    pieza.style.cssText = `
+      position:absolute; top:-20px; left:${izquierda}vw; width:9px; height:9px;
+      background:${colores[i % colores.length]}; border:1.5px solid #0F0F12;
+      transform: rotate(${rotacion}deg);
+      animation: radgenConfeti ${duracion}s ease-in ${retraso}s forwards;
+    `
+    contenedor.appendChild(pieza)
+  }
+
+  setTimeout(() => contenedor.remove(), 3200)
+}
+
+function vibrar(patron) {
+  if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(patron)
+}
 
 function IconoInstagram(props) {
   return (
@@ -148,8 +224,15 @@ function RadGen() {
           box-shadow: 14px 14px 0 var(--blue);
           padding: 18px 24px 0; width:100%; max-width:320px; position:relative;
           display:flex; align-items:flex-end; justify-content:center; overflow:visible;
+          cursor: pointer; user-select:none; transition: transform 0.1s ease;
         }
-        .radgen-nb .mascot-card img{ width:100%; max-width: 250px; display:block; }
+        .radgen-nb .mascot-card:active{ transform: scale(0.97); }
+        .radgen-nb .mascot-card img{ width:100%; max-width: 250px; display:block; pointer-events:none; }
+        .radgen-nb .mascot-hint{
+          position:absolute; bottom:-30px; left:50%; transform:translateX(-50%);
+          font-size:11px; font-weight:700; color:#8a8a90; white-space:nowrap;
+          font-family:'Inter',sans-serif;
+        }
         .radgen-nb .float-badge{
           position:absolute; background: var(--paper); border: var(--bw) solid var(--ink);
           border-radius:12px; padding:10px 14px; font-weight:800; font-size:13px;
@@ -349,6 +432,72 @@ function RadGen() {
         .radgen-nb .registro-ok b{ display:block; font-family:'Montserrat',sans-serif; font-weight:900; font-size:18px; color:var(--ink); margin-bottom:6px; text-transform:uppercase; }
         .radgen-nb .registro-ok span{ color:#4c4c4c; font-size:14px; font-weight:600; }
 
+        .radgen-nb .cuenta-wrap{ padding: 0 5% 60px; position:relative; z-index:1; }
+        .radgen-nb .cuenta-card{
+          max-width: 640px; margin:0 auto; text-align:center; position:relative;
+          background: var(--red); border: var(--bw) solid var(--ink); border-radius:22px;
+          padding: 26px 24px; box-shadow: 8px 8px 0 var(--blue);
+          transform: rotate(-1deg);
+        }
+        .radgen-nb .cuenta-label{
+          display:inline-flex; align-items:center; gap:6px;
+          font-family:'Montserrat',sans-serif; font-weight:800; font-size:12px; text-transform:uppercase;
+          letter-spacing:0.05em; color:var(--paper); opacity:0.9; margin-bottom:14px;
+        }
+        .radgen-nb .cuenta-clock{ animation: cuentaTick 1s steps(4) infinite; }
+        .radgen-nb .cuenta-grid{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; align-items:center; }
+        .radgen-nb .cuenta-box{
+          background: var(--paper); border: 2.5px solid var(--ink); border-radius:12px;
+          padding:10px 14px; min-width:64px;
+        }
+        .radgen-nb .cuenta-box b{
+          display:block; font-family:'Montserrat',sans-serif; font-weight:900; font-size:26px; color:var(--ink);
+          font-variant-numeric: tabular-nums; line-height:1.1;
+        }
+        .radgen-nb .cuenta-box span{ font-size:10px; font-weight:700; text-transform:uppercase; color:#6c6c6c; letter-spacing:0.04em; }
+        .radgen-nb .cuenta-box.seg{
+          background: var(--blue); border-color: var(--ink);
+          animation: cuentaPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .radgen-nb .cuenta-box.seg b{ color: var(--paper); }
+        .radgen-nb .cuenta-box.seg span{ color:#EAF0FF; }
+        .radgen-nb .cuenta-lugar{ margin-top:14px; font-size:13px; font-weight:700; color:var(--paper); opacity:0.95; }
+
+        @keyframes cuentaPop{
+          0%{ transform: scale(1.28) rotate(-4deg); }
+          60%{ transform: scale(0.94) rotate(2deg); }
+          100%{ transform: scale(1) rotate(0deg); }
+        }
+        @keyframes cuentaTick{
+          0%, 100%{ transform: rotate(0deg); }
+          50%{ transform: rotate(-12deg); }
+        }
+
+        .radgen-nb .quiz-card{
+          max-width: 560px; margin:0 auto;
+          background: var(--paper); border: var(--bw) solid var(--ink); border-radius:24px;
+          padding: 32px 5%; box-shadow: 10px 10px 0 var(--red); text-align:center;
+        }
+        .radgen-nb .quiz-progreso{ display:flex; gap:6px; justify-content:center; margin-bottom:22px; }
+        .radgen-nb .quiz-punto{ width:24px; height:6px; border-radius:999px; background:#DAD9D2; border:1.5px solid var(--ink); }
+        .radgen-nb .quiz-punto.activo{ background: var(--blue); }
+        .radgen-nb .quiz-card h3{ color:var(--ink); font-size:18px; margin-bottom:20px; text-transform:none; font-weight:800; }
+        .radgen-nb .quiz-opciones{ display:flex; flex-direction:column; gap:10px; }
+        .radgen-nb .quiz-opcion{
+          border: 2.5px solid var(--ink); border-radius:12px; padding:13px 16px; background:#fff;
+          font-family:'Inter',sans-serif; font-weight:600; font-size:14px; color:var(--ink);
+          cursor:pointer; text-align:left; display:flex; align-items:center; justify-content:space-between; gap:10px;
+          transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+        }
+        .radgen-nb .quiz-opcion:hover{ background: var(--blue); color:var(--paper); transform: translate(-2px,-2px); box-shadow: 3px 3px 0 var(--ink); }
+        .radgen-nb .quiz-resultado b{ display:block; font-family:'Montserrat',sans-serif; font-weight:900; font-size:22px; color:var(--ink); text-transform:uppercase; margin-bottom:10px; }
+        .radgen-nb .quiz-resultado p{ color:#4c4c4c; font-size:14px; font-weight:600; margin-bottom:22px; }
+        .radgen-nb .quiz-reiniciar{ background:none; border:none; color:#8a8a90; font-size:12px; font-weight:700; cursor:pointer; margin-top:14px; text-decoration:underline; }
+
+        @keyframes radgenConfeti{
+          to{ transform: translateY(105vh) rotate(540deg); opacity:0.2; }
+        }
+
         .radgen-nb .footer-cta{
           text-align:center; padding: 80px 5% 50px; border-top: var(--bw) solid var(--paper);
         }
@@ -407,13 +556,13 @@ function RadGen() {
         </div>
 
         <div className="hero-visual">
-          <div className="mascot-card">
-            <img src="/sky-mascota.png" alt="Sky, mascota de RadGen" />
-            <div className="float-badge badge-1">¡Soy Sky! 🦅</div>
-            <div className="float-badge badge-2">RADGEN MX</div>
-          </div>
+          <SkyInteractivo />
         </div>
       </section>
+
+      <div className="cuenta-wrap">
+        <ProximaReunion />
+      </div>
 
       <section id="proposito">
         <div className="section-head">
@@ -471,6 +620,14 @@ function RadGen() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section id="quiz">
+        <div className="section-head">
+          <span className="eyebrow">Solo por diversión</span>
+          <h2>¿Qué tan RadGen eres?</h2>
+        </div>
+        <QuizRadgen />
       </section>
 
       <section id="galeria">
@@ -531,11 +688,145 @@ function RadGen() {
   )
 }
 
+function SkyInteractivo() {
+  const [pose, setPose] = useState(0)
+  const [frase, setFrase] = useState(SKY_FRASES[0])
+
+  const tocar = () => {
+    setPose((p) => (p + 1) % SKY_POSES.length)
+    setFrase(SKY_FRASES[Math.floor(Math.random() * SKY_FRASES.length)])
+    vibrar(10)
+  }
+
+  return (
+    <div
+      className="mascot-card"
+      onClick={tocar}
+      role="button"
+      tabIndex={0}
+      aria-label="Tocar a Sky"
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') tocar() }}
+    >
+      <img src={SKY_POSES[pose]} alt="Sky, mascota de RadGen" />
+      <div className="float-badge badge-1">{frase}</div>
+      <div className="float-badge badge-2">RADGEN MX</div>
+      <span className="mascot-hint">👆 Toca a Sky</span>
+    </div>
+  )
+}
+
+function ProximaReunion() {
+  const [config, setConfig] = useState(null)
+  const [, setTick] = useState(0)
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      doc(db, 'radgenConfig', 'proximaReunion'),
+      (snap) => setConfig(snap.exists() ? snap.data() : null),
+      () => setConfig(null)
+    )
+    return () => unsubscribe()
+  }, [])
+
+  useEffect(() => {
+    if (!config?.fecha) return
+    const interval = setInterval(() => setTick((t) => t + 1), 1000)
+    return () => clearInterval(interval)
+  }, [config])
+
+  if (!config?.fecha) return null
+
+  const objetivo = new Date(config.fecha + 'T' + (config.hora || '00:00') + ':00')
+  const diff = objetivo - new Date()
+  if (diff <= 0) return null
+
+  const pad = (n) => String(n).padStart(2, '0')
+  const tiempo = {
+    dias: Math.floor(diff / 86400000),
+    horas: pad(Math.floor((diff / 3600000) % 24)),
+    minutos: pad(Math.floor((diff / 60000) % 60)),
+    segundos: pad(Math.floor((diff / 1000) % 60)),
+  }
+
+  return (
+    <div className="cuenta-card">
+      <span className="cuenta-label"><Clock size={14} strokeWidth={2.5} className="cuenta-clock" /> Próxima reunión</span>
+      <div className="cuenta-grid">
+        <div className="cuenta-box"><b>{tiempo.dias}</b><span>Días</span></div>
+        <div className="cuenta-box"><b>{tiempo.horas}</b><span>Horas</span></div>
+        <div className="cuenta-box"><b>{tiempo.minutos}</b><span>Min</span></div>
+        <div className="cuenta-box seg" key={tiempo.segundos}><b>{tiempo.segundos}</b><span>Seg</span></div>
+      </div>
+      {config.lugar && <p className="cuenta-lugar">📍 {config.lugar}</p>}
+    </div>
+  )
+}
+
+function QuizRadgen() {
+  const [paso, setPaso] = useState(0)
+  const [puntos, setPuntos] = useState(0)
+  const [terminado, setTerminado] = useState(false)
+
+  const elegir = (pts) => {
+    vibrar(10)
+    const nuevosPuntos = puntos + pts
+    if (paso + 1 < QUIZ.length) {
+      setPuntos(nuevosPuntos)
+      setPaso(paso + 1)
+    } else {
+      setPuntos(nuevosPuntos)
+      setTerminado(true)
+    }
+  }
+
+  const reiniciar = () => {
+    setPaso(0)
+    setPuntos(0)
+    setTerminado(false)
+  }
+
+  if (terminado) {
+    const resultado = resultadoQuiz(puntos)
+    return (
+      <div className="quiz-card quiz-resultado">
+        <b>{resultado.titulo}</b>
+        <p>{resultado.desc}</p>
+        <a href="#registro" className="btn btn-blue">Quiero unirme</a>
+        <div>
+          <button className="quiz-reiniciar" onClick={reiniciar}>Volver a intentar</button>
+        </div>
+      </div>
+    )
+  }
+
+  const actual = QUIZ[paso]
+
+  return (
+    <div className="quiz-card">
+      <div className="quiz-progreso">
+        {QUIZ.map((_, i) => (
+          <div key={i} className={`quiz-punto${i <= paso ? ' activo' : ''}`} />
+        ))}
+      </div>
+      <h3>{actual.q}</h3>
+      <div className="quiz-opciones">
+        {actual.opciones.map((op) => (
+          <button key={op.texto} className="quiz-opcion" onClick={() => elegir(op.pts)}>
+            {op.texto}
+            <ChevronRight size={16} strokeWidth={2.5} />
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function VisionInteractiva() {
   const [marcados, setMarcados] = useState(() => VISION.map(() => false))
   const total = marcados.filter(Boolean).length
 
   const alternar = (i) => {
+    vibrar(10)
     setMarcados((prev) => prev.map((v, idx) => (idx === i ? !v : v)))
   }
 
@@ -646,6 +937,8 @@ function FormularioRegistro() {
         creado: serverTimestamp(),
       })
       setEnviado(true)
+      lanzarConfeti()
+      vibrar([15, 40, 15])
     } catch (error) {
       console.error(error)
       alert('Hubo un error al enviar tus datos. Intenta de nuevo.')

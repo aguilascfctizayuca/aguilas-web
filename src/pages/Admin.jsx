@@ -3,7 +3,7 @@ import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'
 import { auth, googleProvider, db, storage } from '../firebase'
 import {
   collection, addDoc, updateDoc, deleteDoc, doc,
-  onSnapshot, orderBy, query, serverTimestamp
+  onSnapshot, orderBy, query, serverTimestamp, setDoc
 } from 'firebase/firestore'
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 import imageCompression from 'browser-image-compression'
@@ -841,6 +841,76 @@ function PanelGaleria() {
   )
 }
 
+function PanelProximaReunionRadgen() {
+  const [form, setForm] = useState({ fecha: '', hora: '', lugar: '' })
+  const [cargando, setCargando] = useState(true)
+  const [guardando, setGuardando] = useState(false)
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(db, 'radgenConfig', 'proximaReunion'), (snap) => {
+      if (snap.exists()) {
+        const d = snap.data()
+        setForm({ fecha: d.fecha || '', hora: d.hora || '', lugar: d.lugar || '' })
+      }
+      setCargando(false)
+    })
+    return () => unsubscribe()
+  }, [])
+
+  const guardar = async (e) => {
+    e.preventDefault()
+    setGuardando(true)
+    try {
+      await setDoc(doc(db, 'radgenConfig', 'proximaReunion'), {
+        fecha: form.fecha || null,
+        hora: form.hora || null,
+        lugar: form.lugar || null,
+      })
+    } catch (error) {
+      console.error(error)
+      alert('Hubo un error al guardar.')
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  return (
+    <div style={{ marginBottom: '2.5rem' }}>
+      <h2 style={{ fontFamily: 'Montserrat, sans-serif', color: TEXTO, fontSize: '1.1rem', marginBottom: '1rem' }}>Próxima reunión de RadGen</h2>
+      <p style={{ color: TEXTO_SUAVE, fontSize: '0.85rem', marginTop: '-0.5rem', marginBottom: '1.5rem' }}>
+        Alimenta el contador regresivo que se ve en la página de RadGen.
+      </p>
+      <form onSubmit={guardar} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', backgroundColor: CARD, border: `1px solid ${BORDE}`, borderRadius: '16px', padding: '1.75rem' }}>
+        {cargando ? (
+          <p style={{ color: TEXTO_SUAVE, fontSize: '0.9rem' }}>Cargando...</p>
+        ) : (
+          <>
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              <label style={{ ...labelStyle, flex: '1 1 160px' }}>
+                Fecha
+                <input type="date" value={form.fecha} onChange={e => setForm({ ...form, fecha: e.target.value })} style={{ ...inputStyle, colorScheme: 'dark' }} />
+              </label>
+              <label style={{ ...labelStyle, flex: '1 1 140px' }}>
+                Hora
+                <input type="time" value={form.hora} onChange={e => setForm({ ...form, hora: e.target.value })} style={{ ...inputStyle, colorScheme: 'dark' }} />
+              </label>
+            </div>
+            <label style={labelStyle}>
+              Lugar (opcional)
+              <input type="text" value={form.lugar} onChange={e => setForm({ ...form, lugar: e.target.value })} style={inputStyle} placeholder="Ej. Templo Águilas CFC" />
+            </label>
+            <div>
+              <button type="submit" disabled={guardando} style={{ backgroundColor: guardando ? BORDE : VERDE, color: guardando ? TEXTO_SUAVE : '#000', border: 'none', padding: '0.85rem 1.75rem', borderRadius: '999px', cursor: guardando ? 'default' : 'pointer', fontWeight: '700', fontFamily: 'Montserrat, sans-serif', fontSize: '0.9rem' }}>
+                {guardando ? 'Guardando...' : 'Guardar'}
+              </button>
+            </div>
+          </>
+        )}
+      </form>
+    </div>
+  )
+}
+
 function PanelRadgenRegistros() {
   const [registros, setRegistros] = useState([])
   const [cargando, setCargando] = useState(true)
@@ -871,6 +941,8 @@ function PanelRadgenRegistros() {
 
   return (
     <>
+      <PanelProximaReunionRadgen />
+
       <h2 style={{ fontFamily: 'Montserrat, sans-serif', color: TEXTO, fontSize: '1.1rem', marginBottom: '1rem' }}>Registros RadGen</h2>
       <p style={{ color: TEXTO_SUAVE, fontSize: '0.85rem', marginTop: '-0.5rem', marginBottom: '1.5rem' }}>
         Jóvenes que dejaron sus datos desde la página de RadGen.
