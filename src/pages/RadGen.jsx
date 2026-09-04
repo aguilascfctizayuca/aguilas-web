@@ -19,6 +19,8 @@ import {
   ImageOff,
   Check,
   Clock,
+  Trophy,
+  X,
 } from 'lucide-react'
 import RadGenSplash from '../components/RadGenSplash'
 
@@ -143,9 +145,23 @@ const PILARES = [
 ]
 
 function RadGen() {
+  const [visionCompleta, setVisionCompleta] = useState(false)
+  const [quizCompleto, setQuizCompleto] = useState(false)
+  const [logroVisto, setLogroVisto] = useState(false)
+  const logroDesbloqueado = visionCompleta && quizCompleto
+
+  const celebrarSiListo = (otroYaCompleto) => {
+    if (otroYaCompleto && !logroVisto) {
+      setLogroVisto(true)
+      lanzarConfeti()
+      vibrar([15, 40, 15, 40, 15])
+    }
+  }
+
   return (
     <div className="radgen-nb">
       <RadGenSplash />
+      <LogroToast visible={logroDesbloqueado} />
 
       <style>{`
         .radgen-nb{
@@ -179,7 +195,7 @@ function RadGen() {
           position: relative; z-index: 2;
         }
         .radgen-nb .logo{ display:flex; align-items:center; gap:12px; }
-        .radgen-nb .logo img{ height:36px; width:auto; display:block; }
+        .radgen-nb .logo img{ height:52px; width:auto; display:block; }
         .radgen-nb .nav-links{ display:flex; gap:24px; }
         .radgen-nb .nav-links a{ color:var(--paper); text-decoration:none; font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:0.02em; opacity:0.85; }
         .radgen-nb .nav-links a:hover{ opacity:1; }
@@ -498,6 +514,37 @@ function RadGen() {
           to{ transform: translateY(105vh) rotate(540deg); opacity:0.2; }
         }
 
+        .radgen-nb .logro-toast{
+          position: fixed; left:50%; bottom:24px; transform: translateX(-50%);
+          z-index: 200; display:flex; align-items:center; gap:14px;
+          max-width: min(92vw, 420px);
+          background: var(--blue); border: var(--bw) solid var(--ink); border-radius:18px;
+          padding: 16px 40px 16px 16px; box-shadow: 7px 7px 0 var(--red);
+          animation: logroEntrar 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .radgen-nb .logro-icono{
+          width:44px; height:44px; border-radius:12px; flex-shrink:0;
+          background: var(--paper); border: 2px solid var(--ink); color: var(--ink);
+          display:flex; align-items:center; justify-content:center;
+        }
+        .radgen-nb .logro-toast b{
+          display:block; font-family:'Montserrat',sans-serif; font-weight:900; font-size:13.5px;
+          color: var(--paper); text-transform:uppercase; margin-bottom:4px; line-height:1.2;
+        }
+        .radgen-nb .logro-toast span{ font-size:12px; font-weight:600; color:#EAF0FF; line-height:1.4; }
+        .radgen-nb .logro-cerrar{
+          position:absolute; top:8px; right:8px; width:22px; height:22px; border-radius:50%;
+          background: var(--paper); border: 2px solid var(--ink); color: var(--ink);
+          display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0;
+        }
+        @keyframes logroEntrar{
+          0%{ transform: translateX(-50%) translateY(40px); opacity:0; }
+          100%{ transform: translateX(-50%) translateY(0); opacity:1; }
+        }
+        @media (max-width:480px){
+          .radgen-nb .logro-toast{ bottom:12px; }
+        }
+
         .radgen-nb .footer-cta{
           text-align:center; padding: 80px 5% 50px; border-top: var(--bw) solid var(--paper);
         }
@@ -588,7 +635,7 @@ function RadGen() {
         <div className="vision-grid">
           <div>
             <span className="mini-label">Lo que soñamos</span>
-            <VisionInteractiva />
+            <VisionInteractiva onCompletar={() => { setVisionCompleta(true); celebrarSiListo(quizCompleto) }} />
           </div>
           <div>
             <span className="mini-label">¿Cómo?</span>
@@ -627,7 +674,7 @@ function RadGen() {
           <span className="eyebrow">Solo por diversión</span>
           <h2>¿Qué tan RadGen eres?</h2>
         </div>
-        <QuizRadgen />
+        <QuizRadgen onCompletar={() => { setQuizCompleto(true); celebrarSiListo(visionCompleta) }} />
       </section>
 
       <section id="galeria">
@@ -684,6 +731,24 @@ function RadGen() {
           <span className="footer-brand-copy">© 2026 Águilas Centro Familiar Cristiano Tizayuca</span>
         </div>
       </section>
+    </div>
+  )
+}
+
+function LogroToast({ visible }) {
+  const [cerrado, setCerrado] = useState(false)
+  if (!visible || cerrado) return null
+
+  return (
+    <div className="logro-toast">
+      <button className="logro-cerrar" onClick={() => setCerrado(true)} aria-label="Cerrar">
+        <X size={14} strokeWidth={3} />
+      </button>
+      <div className="logro-icono"><Trophy size={22} strokeWidth={2.25} /></div>
+      <div>
+        <b>¡Desbloqueaste el modo RadGen! 🏆</b>
+        <span>Completaste la Visión y el quiz. Eres pura generación radical.</span>
+      </div>
     </div>
   )
 }
@@ -762,7 +827,7 @@ function ProximaReunion() {
   )
 }
 
-function QuizRadgen() {
+function QuizRadgen({ onCompletar }) {
   const [paso, setPaso] = useState(0)
   const [puntos, setPuntos] = useState(0)
   const [terminado, setTerminado] = useState(false)
@@ -776,6 +841,7 @@ function QuizRadgen() {
     } else {
       setPuntos(nuevosPuntos)
       setTerminado(true)
+      onCompletar?.()
     }
   }
 
@@ -821,13 +887,17 @@ function QuizRadgen() {
   )
 }
 
-function VisionInteractiva() {
+function VisionInteractiva({ onCompletar }) {
   const [marcados, setMarcados] = useState(() => VISION.map(() => false))
   const total = marcados.filter(Boolean).length
 
   const alternar = (i) => {
     vibrar(10)
-    setMarcados((prev) => prev.map((v, idx) => (idx === i ? !v : v)))
+    setMarcados((prev) => {
+      const siguiente = prev.map((v, idx) => (idx === i ? !v : v))
+      if (siguiente.every(Boolean)) onCompletar?.()
+      return siguiente
+    })
   }
 
   return (
