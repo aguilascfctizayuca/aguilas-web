@@ -22,7 +22,9 @@ function useFotosGaleria() {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'galeria'), (snapshot) => {
-      const docs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
+      const docs = snapshot.docs
+        .map((d) => ({ id: d.id, ...d.data() }))
+        .filter((d) => (d.seccion || 'principal') === 'principal')
       docs.sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0))
       setFotosFirestore(docs.map((d) => d.imagenUrl))
     })

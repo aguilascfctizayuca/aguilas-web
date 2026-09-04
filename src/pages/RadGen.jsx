@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useLayoutEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { collection, doc, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase'
@@ -157,6 +157,13 @@ function RadGen() {
       vibrar([15, 40, 15, 40, 15])
     }
   }
+
+  // Al entrar desde un link de otra página (ej. la promo en el sitio
+  // principal), React Router no resetea el scroll — se quedaba en la
+  // posición de la página anterior en vez de abrir arriba.
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
 
   return (
     <div className="radgen-nb">
