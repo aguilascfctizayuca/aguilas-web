@@ -154,12 +154,14 @@ function Admin() {
           <button style={tabStyle(tab === 'eventos')} onClick={() => setTab('eventos')}>Eventos</button>
           <button style={tabStyle(tab === 'servicios')} onClick={() => setTab('servicios')}>Servicios</button>
           <button style={tabStyle(tab === 'galeria')} onClick={() => setTab('galeria')}>Galería</button>
+          <button style={tabStyle(tab === 'radgen')} onClick={() => setTab('radgen')}>Registros RadGen</button>
         </div>
 
         {tab === 'anuncios' && <PanelAnuncios />}
         {tab === 'eventos' && <PanelEventos />}
         {tab === 'servicios' && <PanelServicios />}
         {tab === 'galeria' && <PanelGaleria />}
+        {tab === 'radgen' && <PanelRadgenRegistros />}
       </div>
     </div>
   )
@@ -740,6 +742,7 @@ function PanelGaleria() {
   const [cargando, setCargando] = useState(true)
   const [archivo, setArchivo] = useState(null)
   const [subiendo, setSubiendo] = useState(false)
+  const [seccion, setSeccion] = useState('principal')
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'galeria'), (snapshot) => {
@@ -749,7 +752,8 @@ function PanelGaleria() {
     return () => unsubscribe()
   }, [])
 
-  const fotosOrdenadas = [...fotos].sort((a, b) => ordenValor(a) - ordenValor(b))
+  const fotosSeccion = fotos.filter(f => (f.seccion || 'principal') === seccion)
+  const fotosOrdenadas = [...fotosSeccion].sort((a, b) => ordenValor(a) - ordenValor(b))
 
   const subir = async (e) => {
     e.preventDefault()
@@ -757,7 +761,7 @@ function PanelGaleria() {
     setSubiendo(true)
     try {
       const imagenUrl = await subirImagenComprimida(archivo, 'galeria')
-      await addDoc(collection(db, 'galeria'), { imagenUrl, orden: Date.now(), creado: serverTimestamp() })
+      await addDoc(collection(db, 'galeria'), { imagenUrl, seccion, orden: Date.now(), creado: serverTimestamp() })
       setArchivo(null)
       document.getElementById('input-foto-galeria').value = ''
     } catch (error) {
@@ -790,8 +794,15 @@ function PanelGaleria() {
     <>
       <h2 style={{ fontFamily: 'Montserrat, sans-serif', color: TEXTO, fontSize: '1.1rem', marginBottom: '1rem' }}>Galería</h2>
       <p style={{ color: TEXTO_SUAVE, fontSize: '0.85rem', marginTop: '-0.5rem', marginBottom: '1.5rem' }}>
-        Mientras no subas fotos aquí, el sitio muestra las fotos por defecto.
+        {seccion === 'principal'
+          ? 'Mientras no subas fotos aquí, el sitio muestra las fotos por defecto.'
+          : 'Estas fotos aparecen en la sección de galería de la página de RadGen.'}
       </p>
+
+      <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1.5rem' }}>
+        <button style={tabStyle(seccion === 'principal')} onClick={() => setSeccion('principal')}>Principal</button>
+        <button style={tabStyle(seccion === 'radgen')} onClick={() => setSeccion('radgen')}>RadGen</button>
+      </div>
 
       <form onSubmit={subir} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', backgroundColor: CARD, border: `1px solid ${BORDE}`, borderRadius: '16px', padding: '1.75rem', marginBottom: '2.5rem' }}>
         <label style={labelStyle}>
@@ -818,8 +829,75 @@ function PanelGaleria() {
             <button onClick={() => borrar(f)} style={{ cursor: 'pointer', background: 'none', border: '1px solid #4A1B0C', color: '#F0997B', padding: '0.45rem 0.9rem', borderRadius: '999px', fontSize: '0.8rem', flexShrink: 0 }}>Borrar</button>
           </div>
         ))}
-        {!cargando && fotos.length === 0 && (
-          <p style={{ color: TEXTO_SUAVE, fontSize: '0.9rem' }}>Aún no hay fotos aquí — el sitio está mostrando la galería por defecto.</p>
+        {!cargando && fotosSeccion.length === 0 && (
+          <p style={{ color: TEXTO_SUAVE, fontSize: '0.9rem' }}>
+            {seccion === 'principal'
+              ? 'Aún no hay fotos aquí — el sitio está mostrando la galería por defecto.'
+              : 'Aún no hay fotos aquí — la sección de galería de RadGen se ve vacía.'}
+          </p>
+        )}
+      </div>
+    </>
+  )
+}
+
+function PanelRadgenRegistros() {
+  const [registros, setRegistros] = useState([])
+  const [cargando, setCargando] = useState(true)
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'radgenRegistros'), (snapshot) => {
+      setRegistros(snapshot.docs.map(d => ({ id: d.id, ...d.data() })))
+      setCargando(false)
+    })
+    return () => unsubscribe()
+  }, [])
+
+  const registrosOrdenados = [...registros].sort((a, b) => ordenValor(b) - ordenValor(a))
+
+  const alternarAtendido = async (r) => {
+    await updateDoc(doc(db, 'radgenRegistros', r.id), { atendido: !r.atendido })
+  }
+
+  const borrar = async (r) => {
+    if (!confirm(`¿Borrar el registro de "${r.nombre}"?`)) return
+    await deleteDoc(doc(db, 'radgenRegistros', r.id))
+  }
+
+  const formatearFecha = (r) => {
+    if (!r.creado?.toDate) return ''
+    return r.creado.toDate().toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })
+  }
+
+  return (
+    <>
+      <h2 style={{ fontFamily: 'Montserrat, sans-serif', color: TEXTO, fontSize: '1.1rem', marginBottom: '1rem' }}>Registros RadGen</h2>
+      <p style={{ color: TEXTO_SUAVE, fontSize: '0.85rem', marginTop: '-0.5rem', marginBottom: '1.5rem' }}>
+        Jóvenes que dejaron sus datos desde la página de RadGen.
+      </p>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+        {cargando && <p style={{ color: TEXTO_SUAVE, fontSize: '0.9rem' }}>Cargando registros...</p>}
+        {!cargando && registrosOrdenados.map((r) => (
+          <div key={r.id} style={{ border: `1px solid ${BORDE}`, backgroundColor: CARD, borderRadius: '14px', padding: '1.1rem 1.25rem', opacity: r.atendido ? 0.55 : 1 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
+              <div>
+                <p style={{ color: TEXTO, fontWeight: '700', fontSize: '0.95rem', margin: 0 }}>{r.nombre}</p>
+                <p style={{ color: TEXTO_SUAVE, fontSize: '0.85rem', margin: '0.2rem 0 0' }}>{r.telefono}{r.edad ? ` · ${r.edad} años` : ''}</p>
+                {r.mensaje && <p style={{ color: TEXTO_SUAVE, fontSize: '0.85rem', margin: '0.5rem 0 0', lineHeight: 1.5 }}>{r.mensaje}</p>}
+                <p style={{ color: TEXTO_SUAVE, fontSize: '0.75rem', margin: '0.5rem 0 0', opacity: 0.7 }}>{formatearFecha(r)}</p>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+                <button onClick={() => alternarAtendido(r)} style={{ cursor: 'pointer', background: 'none', border: `1px solid ${r.atendido ? BORDE : VERDE}`, color: r.atendido ? TEXTO_SUAVE : VERDE, padding: '0.45rem 0.9rem', borderRadius: '999px', fontSize: '0.8rem' }}>
+                  {r.atendido ? 'Marcar pendiente' : 'Marcar atendido'}
+                </button>
+                <button onClick={() => borrar(r)} style={{ cursor: 'pointer', background: 'none', border: '1px solid #4A1B0C', color: '#F0997B', padding: '0.45rem 0.9rem', borderRadius: '999px', fontSize: '0.8rem' }}>Borrar</button>
+              </div>
+            </div>
+          </div>
+        ))}
+        {!cargando && registros.length === 0 && (
+          <p style={{ color: TEXTO_SUAVE, fontSize: '0.9rem' }}>Aún no hay registros.</p>
         )}
       </div>
     </>

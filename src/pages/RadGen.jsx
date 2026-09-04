@@ -1,234 +1,682 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { collection, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore'
+import { db } from '../firebase'
+import {
+  ArrowLeft,
+  Crown,
+  HeartPulse,
+  Sparkles,
+  Flame,
+  BookOpen,
+  ShieldCheck,
+  Users,
+  HandHeart,
+  Megaphone,
+  GraduationCap,
+  ChevronDown,
+  ImageOff,
+  Check,
+} from 'lucide-react'
 import RadGenSplash from '../components/RadGenSplash'
 
-const BARRAS = [40, 70, 45, 90, 55, 75, 35, 65, 50, 80, 42, 60]
+function IconoInstagram(props) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" {...props}>
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+    </svg>
+  )
+}
+
+const FAQS = [
+  { q: '¿Necesito ser parte de Águilas CFC para venir?', a: 'No. Cualquier adolescente o joven es bienvenido, seas parte de la iglesia o sea tu primera vez.' },
+  { q: '¿Puedo invitar a un amigo?', a: 'Claro, entre más mejor. Solo tráelo cualquier sábado de reunión.' },
+  { q: '¿Tiene algún costo?', a: 'No, las reuniones son completamente gratuitas.' },
+  { q: '¿Qué debo llevar?', a: 'Solo tus ganas de conocer a Dios. Si tienes biblia, tráela; si no, en la reunión te apoyamos.' },
+]
+
+const PROPOSITO = [
+  { icon: Crown, titulo: 'Identidad del reino', color: 'b' },
+  { icon: HeartPulse, titulo: 'Carácter saludable', color: 'r' },
+  { icon: Sparkles, titulo: 'Dones y ministerio', color: 'p' },
+  { icon: Flame, titulo: 'Pasión por las almas', color: 'b' },
+]
+
+const VISION = [
+  'Que amen a Dios por sobretodo',
+  'Sirvan apasionadamente',
+  'Influyan en su entorno',
+  'Hagan discípulos',
+]
+
+const COMO = [
+  'Dirección de Dios',
+  'Reuniones relevantes (3 sábados por mes)',
+  'Discipulado',
+  'Fraternidad genuina',
+  'Servicio dentro y fuera de la iglesia',
+  'Seguimiento puntual con cada uno',
+]
+
+const PILARES = [
+  { icon: BookOpen, titulo: 'Conocer a Dios', desc: 'Oración, biblia y adoración', color: 'g' },
+  { icon: ShieldCheck, titulo: 'Identidad', desc: 'Sanidad del alma, pureza y propósito', color: 'b' },
+  { icon: Users, titulo: 'Comunidad', desc: 'Amistad, integración y relaciones sanas', color: 'gray' },
+  { icon: HandHeart, titulo: 'Servicio', desc: 'Aplicación de los dones e involucrar en actividades de la iglesia', color: 'g' },
+  { icon: Megaphone, titulo: 'Multiplicación', desc: 'Evangelismo, invita a un amigo y ayuda a un hermano', color: 'r' },
+]
 
 function RadGen() {
   return (
-    <div style={{
-      position: 'relative',
-      minHeight: '100vh',
-      overflow: 'hidden',
-      color: '#F5F3EE',
-      fontFamily: 'Inter, sans-serif',
-      background: '#0F0F12',
-    }}>
+    <div className="radgen-nb">
       <RadGenSplash />
 
       <style>{`
-        @keyframes radgenLiveDot {
-          0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(58,123,255,0.5); }
-          50% { opacity: 0.5; box-shadow: 0 0 0 4px rgba(58,123,255,0); }
+        .radgen-nb{
+          --ink: #0F0F12;
+          --paper: #F5F3EE;
+          --blue: #3a7bff;
+          --blue-light: #8fb4ff;
+          --red: #FF3B3B;
+          --bg: #101014;
+          --bw: 3px;
+          background-color: var(--bg);
+          background-image: radial-gradient(rgba(245,243,238,0.07) 1.5px, transparent 1.5px);
+          background-size: 24px 24px;
+          color: var(--ink);
+          font-family: 'Inter', sans-serif;
+          line-height: 1.55;
+          min-height: 100vh;
         }
-        @keyframes radgenBarra {
-          0%, 100% { transform: scaleY(0.4); }
-          50% { transform: scaleY(1); }
+        .radgen-nb h1, .radgen-nb h2, .radgen-nb h3{
+          font-family: 'Montserrat', sans-serif;
+          font-weight: 900;
+          text-transform: uppercase;
+          letter-spacing: -0.01em;
+          color: var(--paper);
         }
-        .radgen-barra {
-          animation: radgenBarra 1.4s ease-in-out infinite;
-          transform-origin: bottom;
+        .radgen-nb .wrap{ max-width: 1180px; margin: 0 auto; padding: 0 5%; }
+
+        .radgen-nb nav{
+          display:flex; align-items:center; justify-content:space-between;
+          padding: 20px 5%; border-bottom: var(--bw) solid var(--paper);
+          position: relative; z-index: 2;
+        }
+        .radgen-nb .logo{ display:flex; align-items:center; gap:12px; }
+        .radgen-nb .logo img{ height:36px; width:auto; display:block; }
+        .radgen-nb .nav-links{ display:flex; gap:24px; }
+        .radgen-nb .nav-links a{ color:var(--paper); text-decoration:none; font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:0.02em; opacity:0.85; }
+        .radgen-nb .nav-links a:hover{ opacity:1; }
+        .radgen-nb .nav-actions{ display:flex; align-items:center; gap:10px; }
+
+        .radgen-nb .btn{
+          display:inline-flex; align-items:center; gap:8px;
+          font-family:'Montserrat',sans-serif; font-weight:900; text-transform:uppercase;
+          border: var(--bw) solid var(--ink); border-radius:12px; cursor:pointer;
+          font-size:13px; padding:11px 20px; text-decoration:none; transition: transform 0.12s ease, box-shadow 0.12s ease;
+        }
+        .radgen-nb .btn-blue{ background: var(--blue); color:var(--paper); border-color: var(--paper); box-shadow: 5px 5px 0 var(--paper); }
+        .radgen-nb .btn-blue:hover, .radgen-nb .btn-blue:active{ transform:translate(3px,3px); box-shadow:2px 2px 0 var(--paper); }
+        .radgen-nb .btn-outline{ background: var(--ink); color:var(--paper); border-color: var(--paper); box-shadow: 5px 5px 0 var(--blue); }
+        .radgen-nb .btn-outline:hover, .radgen-nb .btn-outline:active{ transform:translate(3px,3px); box-shadow:2px 2px 0 var(--blue); }
+
+        .radgen-nb .hero{
+          display:flex; align-items:center; gap:56px; flex-wrap:wrap;
+          padding: 64px 5% 80px; position: relative; z-index: 1;
+        }
+        .radgen-nb .hero-copy{ flex:1 1 440px; min-width:300px; }
+        .radgen-nb .tag-pill{
+          display:inline-block; background:var(--red); color:var(--paper);
+          border: var(--bw) solid var(--ink); border-radius:999px; padding:8px 18px;
+          font-weight:800; font-size:12px; text-transform:uppercase; letter-spacing:0.03em;
+          box-shadow:4px 4px 0 var(--paper); margin-bottom:24px; font-family:'Montserrat',sans-serif;
+          transform: rotate(-2deg);
+        }
+        .radgen-nb .hero-copy h1{ font-size: clamp(32px,4.4vw,54px); margin-bottom:20px; line-height: 1.05; }
+        .radgen-nb .hero-copy h1 span{ color: var(--blue-light); }
+        .radgen-nb .hero-copy p{ color:#C9C8C4; font-size:16px; max-width:440px; font-weight:500; margin-bottom:30px; }
+        .radgen-nb .hero-actions{ display:flex; gap:14px; flex-wrap:wrap; }
+
+        .radgen-nb .hero-visual{ flex:1 1 340px; min-width:280px; position:relative; display:flex; justify-content:center; }
+        .radgen-nb .mascot-card{
+          background: var(--paper); border: var(--bw) solid var(--ink); border-radius:26px;
+          box-shadow: 14px 14px 0 var(--blue);
+          padding: 18px 24px 0; width:100%; max-width:320px; position:relative;
+          display:flex; align-items:flex-end; justify-content:center; overflow:visible;
+        }
+        .radgen-nb .mascot-card img{ width:100%; max-width: 250px; display:block; }
+        .radgen-nb .float-badge{
+          position:absolute; background: var(--paper); border: var(--bw) solid var(--ink);
+          border-radius:12px; padding:10px 14px; font-weight:800; font-size:13px;
+          box-shadow: 5px 5px 0 var(--ink); font-family:'Montserrat',sans-serif; white-space: nowrap;
+        }
+        .radgen-nb .badge-1{ top:-20px; left:-24px; background: var(--red); color: var(--paper); transform: rotate(-4deg); }
+        .radgen-nb .badge-2{ top:26px; right:-22px; background: var(--blue); color: var(--paper); transform: rotate(4deg); }
+
+        .radgen-nb section{ padding: 60px 5%; position: relative; z-index: 1; }
+        .radgen-nb .section-head{ max-width:640px; margin:0 auto 40px; }
+        .radgen-nb .section-head h2{ font-size: clamp(24px,3.2vw,34px); margin-bottom:10px; }
+        .radgen-nb .section-head p{ color:#C9C8C4; font-size:15px; font-weight:500; }
+        .radgen-nb .eyebrow{
+          display:inline-block; font-family:'Montserrat',sans-serif; font-weight:800; font-size:12px;
+          text-transform:uppercase; letter-spacing:0.08em; color: var(--blue-light); margin-bottom:10px;
+        }
+
+        .radgen-nb .chip-row{ display:flex; flex-wrap:wrap; gap:14px; justify-content:center; }
+        .radgen-nb .chip{
+          display:inline-flex; align-items:center; gap:10px;
+          border: var(--bw) solid var(--ink); border-radius:999px; padding:10px 20px 10px 10px;
+          box-shadow: 5px 5px 0 var(--paper);
+          font-family:'Montserrat',sans-serif; font-weight:800; font-size:13.5px; text-transform:uppercase;
+          transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .radgen-nb .chip:hover{ transform: translate(-2px,-2px); box-shadow: 7px 7px 0 var(--paper); }
+        .radgen-nb .chip.b{ background: var(--blue); color: var(--paper); }
+        .radgen-nb .chip.r{ background: var(--red); color: var(--paper); }
+        .radgen-nb .chip.p{ background: var(--paper); color: var(--ink); }
+        .radgen-nb .chip-icon{
+          width:32px; height:32px; border-radius:999px; background:var(--paper);
+          border: 2px solid var(--ink); display:flex; align-items:center; justify-content:center;
+          color: var(--ink); flex-shrink:0;
+        }
+        .radgen-nb .chip.p .chip-icon{ background: var(--blue); color: var(--paper); }
+
+        .radgen-nb .vision-grid{ display:grid; grid-template-columns:1fr 1fr; gap:40px; max-width:920px; margin:0 auto; align-items:start; }
+        .radgen-nb .mini-label{
+          display:block; font-family:'Montserrat',sans-serif; font-weight:800; font-size:12px;
+          text-transform:uppercase; letter-spacing:0.05em; color: var(--paper); opacity:0.6; margin-bottom:12px;
+        }
+        .radgen-nb .check-list{ display:flex; flex-direction:column; gap:14px; list-style:none; }
+        .radgen-nb .check-list li{ display:flex; gap:12px; align-items:center; }
+        .radgen-nb .check-list b{
+          width:26px; height:26px; border-radius:7px; background:var(--blue);
+          border: 2.5px solid var(--paper); display:flex; align-items:center; justify-content:center;
+          font-size:13px; flex-shrink:0; color: var(--paper);
+        }
+        .radgen-nb .check-list span{ color: var(--paper); font-size:14.5px; font-weight:600; }
+
+        .radgen-nb .path-card{
+          flex:1 1 340px; min-width:280px; max-width:400px; margin:0 auto;
+          background: var(--paper); border: var(--bw) solid var(--ink); border-radius:22px;
+          padding: 20px; box-shadow: 10px 10px 0 var(--blue);
+        }
+        .radgen-nb .row-item{
+          width:100%; display:flex; align-items:center; gap:12px; border: 2.5px solid var(--ink);
+          border-radius:12px; padding:12px; margin-bottom:12px; background:var(--paper);
+          cursor:pointer; font-family:'Inter',sans-serif; text-align:left;
+          transition: background-color 0.2s ease, transform 0.12s ease, box-shadow 0.15s ease;
+        }
+        .radgen-nb .row-item:last-child{ margin-bottom:0; }
+        .radgen-nb .row-item:hover{ transform: translate(-2px,-2px); box-shadow: 3px 3px 0 var(--blue); }
+        .radgen-nb .row-item.marcado{ background:#EAF0FF; box-shadow: 3px 3px 0 var(--red); }
+        .radgen-nb .row-num{
+          width:32px; height:32px; border-radius:9px; border:2.5px solid var(--ink);
+          display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0;
+          background: var(--blue); color: var(--paper); font-family:'Montserrat',sans-serif; font-weight:900;
+          transition: background-color 0.2s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .radgen-nb .row-item.marcado .row-num{ background: var(--red); transform: scale(1.12) rotate(-6deg); }
+        .radgen-nb .row-item span{ font-size:13.5px; font-weight:700; color: var(--ink); }
+        .radgen-nb .vision-hint{ font-size:11.5px; font-weight:600; color:#7c7a76; text-align:center; margin-top:10px; }
+
+        .radgen-nb .pilares-head{ text-align:center; max-width:520px; margin:0 auto 44px; }
+        .radgen-nb .pilar-tag{
+          display:inline-block; background: var(--red); color: var(--paper); border: 2.5px solid var(--ink);
+          border-radius:999px; padding:6px 16px; font-weight:800; font-size:12px; text-transform:uppercase;
+          font-family:'Montserrat',sans-serif; margin-bottom:16px;
+        }
+        .radgen-nb .pilar-list{ display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:760px; margin:0 auto; }
+        .radgen-nb .pilar-row{
+          display:flex; align-items:center; gap:12px; border: 2.5px solid var(--ink); border-radius:14px;
+          padding: 12px 14px; background: var(--paper);
+          transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 0 0 var(--blue);
+        }
+        .radgen-nb .pilar-row:hover{ transform: translate(-2px,-2px); box-shadow: 4px 4px 0 var(--blue); }
+        .radgen-nb .pilar-icon{
+          width:38px; height:38px; border-radius:10px; border: 2px solid var(--ink);
+          display:flex; align-items:center; justify-content:center; flex-shrink:0;
+        }
+        .radgen-nb .pilar-icon.g{ background:#DCE8FF; color: var(--ink); }
+        .radgen-nb .pilar-icon.b{ background:var(--blue); color:var(--paper); }
+        .radgen-nb .pilar-icon.r{ background:var(--red); color:var(--paper); }
+        .radgen-nb .pilar-icon.gray{ background:#DAD9D2; color: var(--ink); }
+        .radgen-nb .pilar-row b{ display:block; font-size:13px; color: var(--ink); font-family:'Montserrat',sans-serif; text-transform:uppercase; }
+        .radgen-nb .pilar-row span{ font-size:11.5px; font-weight:600; color:#4c4c4c; line-height:1.3; }
+
+        .radgen-nb .edu-card{
+          max-width: 900px; margin: 0 auto; position: relative;
+          background: var(--blue); border: var(--bw) solid var(--paper); border-radius: 28px;
+          box-shadow: 12px 12px 0 var(--red);
+          padding: 48px 5% 40px; text-align:center; overflow: hidden;
+        }
+        .radgen-nb .edu-card::before{
+          content:''; position:absolute; inset:0;
+          background-image: radial-gradient(rgba(245,243,238,0.14) 1.5px, transparent 1.5px);
+          background-size: 18px 18px; pointer-events:none;
+        }
+        .radgen-nb .edu-badge{
+          position: relative; display:inline-flex; align-items:center; gap:8px;
+          background: var(--red); color:var(--paper); border: 2.5px solid var(--paper);
+          border-radius:999px; padding:7px 16px; font-weight:800; font-size:12px;
+          text-transform:uppercase; letter-spacing:0.04em; font-family:'Montserrat',sans-serif;
+          margin-bottom:20px; transform: rotate(-2deg);
+        }
+        .radgen-nb .edu-icon{
+          position: relative; width:60px; height:60px; border-radius:16px; margin:0 auto 20px;
+          background: var(--paper); border: var(--bw) solid var(--ink); color: var(--ink);
+          display:flex; align-items:center; justify-content:center;
+        }
+        .radgen-nb .edu-card h2{ position: relative; font-size: clamp(26px,3.4vw,38px); margin-bottom:14px; }
+        .radgen-nb .edu-card p{ position: relative; color:#EAF0FF; max-width:480px; margin:0 auto 26px; font-size:15px; font-weight:600; }
+
+        .radgen-nb .galeria-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
+        .radgen-nb .galeria-frame{
+          background: var(--paper); border: var(--bw) solid var(--ink); border-radius:14px;
+          padding: 8px 8px 22px; box-shadow: 6px 6px 0 var(--blue);
+          transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .radgen-nb .galeria-frame:nth-child(3n+1){ transform: rotate(-2deg); }
+        .radgen-nb .galeria-frame:nth-child(3n+2){ transform: rotate(1.5deg); }
+        .radgen-nb .galeria-frame:nth-child(3n){ transform: rotate(-1deg); }
+        .radgen-nb .galeria-frame:hover{ transform: rotate(0deg) translateY(-4px); box-shadow: 9px 9px 0 var(--blue); }
+        .radgen-nb .galeria-frame img{ width:100%; aspect-ratio: 1/1; object-fit:cover; border-radius:6px; display:block; }
+        .radgen-nb .galeria-empty{
+          max-width:520px; margin:0 auto; text-align:center; border: var(--bw) dashed var(--paper);
+          border-radius:20px; padding:40px 24px; color:#C9C8C4;
+        }
+        .radgen-nb .galeria-empty svg{ color: var(--blue-light); margin-bottom:14px; }
+        .radgen-nb .galeria-empty p{ font-size:14.5px; font-weight:600; }
+
+        .radgen-nb .faq-list{ display:flex; flex-direction:column; gap:14px; max-width:720px; margin:0 auto; }
+        .radgen-nb .faq-item{
+          border: var(--bw) solid var(--ink); border-radius:16px; background: var(--paper); overflow:hidden;
+        }
+        .radgen-nb .faq-question{
+          width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px;
+          background:none; border:none; cursor:pointer; padding:18px 22px; text-align:left;
+          font-family:'Montserrat',sans-serif; font-weight:800; font-size:14.5px; color:var(--ink);
+          text-transform: uppercase;
+        }
+        .radgen-nb .faq-question svg{ flex-shrink:0; transition: transform 0.2s ease; color: var(--blue); }
+        .radgen-nb .faq-item.open .faq-question svg{ transform: rotate(180deg); }
+        .radgen-nb .faq-answer{ max-height:0; overflow:hidden; transition: max-height 0.25s ease; }
+        .radgen-nb .faq-item.open .faq-answer{ max-height:200px; }
+        .radgen-nb .faq-answer p{ padding: 0 22px 20px; font-size:14px; font-weight:500; color:#4c4c4c; }
+
+        .radgen-nb .insta-strip{
+          max-width:520px; margin:32px auto 0;
+          background: var(--paper); border: 2.5px solid var(--ink); border-radius:20px;
+          padding: 16px 16px 16px 20px; box-shadow: 5px 5px 0 var(--red);
+        }
+        .radgen-nb .insta-strip-top{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:12px; }
+        .radgen-nb .insta-strip-top span{
+          display:inline-flex; align-items:center; gap:8px; color: var(--ink);
+          font-family:'Montserrat',sans-serif; font-weight:800; font-size:13.5px;
+        }
+        .radgen-nb .insta-strip .btn{ padding:9px 18px; font-size:12px; }
+        .radgen-nb .insta-tags{ display:flex; gap:8px; flex-wrap:wrap; }
+        .radgen-nb .insta-tag{
+          border: 2px solid var(--ink); border-radius:999px; padding:5px 12px; font-size:11px;
+          font-weight:800; font-family:'Montserrat',sans-serif; text-transform:uppercase; color: var(--ink); background: #fff;
+        }
+
+        .radgen-nb .registro-card{
+          max-width: 560px; margin:0 auto;
+          background: var(--paper); border: var(--bw) solid var(--ink); border-radius:24px;
+          padding: 36px 5%; box-shadow: 10px 10px 0 var(--blue);
+        }
+        .radgen-nb .registro-card h2{ color: var(--ink); text-align:center; font-size: clamp(22px,3vw,28px); margin-bottom:8px; }
+        .radgen-nb .registro-card > p{ color:#4c4c4c; text-align:center; font-size:14px; font-weight:600; margin-bottom:26px; }
+        .radgen-nb .registro-form{ display:flex; flex-direction:column; gap:16px; }
+        .radgen-nb .registro-form label{
+          display:block; font-family:'Montserrat',sans-serif; font-weight:800; font-size:11.5px;
+          text-transform:uppercase; letter-spacing:0.04em; color: var(--ink); margin-bottom:6px;
+        }
+        .radgen-nb .registro-form input, .radgen-nb .registro-form textarea{
+          width:100%; border: 2.5px solid var(--ink); border-radius:12px; padding:12px 14px;
+          font-family:'Inter',sans-serif; font-size:14.5px; font-weight:600; color:var(--ink);
+          background:#fff; box-sizing:border-box; resize:vertical;
+        }
+        .radgen-nb .registro-form input:focus, .radgen-nb .registro-form textarea:focus{ outline:2.5px solid var(--blue); }
+        .radgen-nb .registro-submit{ width:100%; justify-content:center; margin-top:4px; }
+        .radgen-nb .registro-submit:disabled{ opacity:0.6; cursor:default; }
+        .radgen-nb .registro-ok{ text-align:center; padding: 20px 0; }
+        .radgen-nb .registro-ok b{ display:block; font-family:'Montserrat',sans-serif; font-weight:900; font-size:18px; color:var(--ink); margin-bottom:6px; text-transform:uppercase; }
+        .radgen-nb .registro-ok span{ color:#4c4c4c; font-size:14px; font-weight:600; }
+
+        .radgen-nb .footer-cta{
+          text-align:center; padding: 80px 5% 50px; border-top: var(--bw) solid var(--paper);
+        }
+        .radgen-nb .footer-cta h2{ font-size: clamp(28px,3.8vw,44px); margin-bottom:20px; }
+        .radgen-nb .footer-cta h2 span{ color:var(--blue-light); }
+        .radgen-nb .footer-cta p{ color:#C9C8C4; margin-bottom:30px; font-size:15px; font-weight:500; }
+        .radgen-nb .footer-brand{ margin-top:64px; display:flex; flex-direction:column; align-items:center; gap:10px; }
+        .radgen-nb .footer-brand img{ height:30px; width:auto; opacity:0.9; }
+        .radgen-nb .footer-brand-name{ font-family:'Montserrat',sans-serif; font-weight:900; font-size:15px; color:var(--paper); letter-spacing:0.03em; text-transform:uppercase; }
+        .radgen-nb .footer-brand-copy{ font-size:11.5px; color:#8a8a90; font-weight:700; letter-spacing:0.02em; }
+
+        @media (max-width:760px){
+          .radgen-nb .nav-links{ display:none; }
+          .radgen-nb .galeria-grid{ grid-template-columns:1fr 1fr; }
+          .radgen-nb .vision-grid{ grid-template-columns:1fr; gap:32px; }
+        }
+        @media (max-width:480px){
+          .radgen-nb .nav-back span{ display:none; }
+          .radgen-nb .nav-back{ padding:11px 13px; }
+          .radgen-nb .pilar-list{ grid-template-columns:1fr; }
         }
       `}</style>
 
-      <iframe
-        src="/radgen-fondo.html"
-        title="Fondo RadGen"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          border: 'none',
-          display: 'block',
-          pointerEvents: 'none',
-          zIndex: 0,
-        }}
-      />
-
-      <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-
-        <nav style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr auto 1fr',
-          alignItems: 'center',
-          padding: '1.25rem 1.5rem',
-          background: 'rgba(15,15,18,0.75)',
-          backdropFilter: 'blur(8px)',
-          borderBottom: '1px solid rgba(58,123,255,0.25)',
-        }}>
-          <Link to="/" className="glass radgen-volver">
-            <ArrowLeft size={15} strokeWidth={2} />
+      <nav>
+        <div className="logo">
+          <img src="/radgen-logo.png" alt="Logo RadGen" />
+        </div>
+        <div className="nav-links">
+          <a href="#proposito">Propósito</a>
+          <a href="#vision">Visión</a>
+          <a href="#pilares">Pilares</a>
+          <a href="#galeria">Galería</a>
+          <a href="#faq">FAQ</a>
+        </div>
+        <div className="nav-actions">
+          <Link to="/" className="btn btn-outline nav-back">
+            <ArrowLeft size={15} strokeWidth={2.5} />
             <span>Águilas CFC</span>
           </Link>
+          <a href="#registro" className="btn btn-blue">Únete</a>
+        </div>
+      </nav>
 
-          <img
-            src="/radgen-logo.png"
-            alt="RadGen Mx"
-            style={{
-              height: '42px',
-              width: 'auto',
-              display: 'block',
-              justifySelf: 'center',
-            }}
-          />
-        </nav>
-
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '2rem 1rem',
-        }}>
-          <div style={{
-            position: 'relative',
-            width: 'min(92vw, 640px)',
-            padding: 'clamp(2.25rem, 6vw, 4rem)',
-            borderRadius: '32px',
-            textAlign: 'center',
-            background: 'radial-gradient(130% 100% at 20% -10%, rgba(143,180,255,0.16), transparent 55%), rgba(15,15,18,0.55)',
-            border: '1px solid rgba(58,123,255,0.32)',
-            backdropFilter: 'blur(24px) saturate(190%)',
-            WebkitBackdropFilter: 'blur(24px) saturate(190%)',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), inset 0 0 0 1px rgba(255,255,255,0.03), 0 40px 90px -24px rgba(58,123,255,0.4), 0 0 0 1px rgba(58,123,255,0.08)',
-          }}>
-
-            {/* Ecualizador decorativo */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: '4px', height: '28px', marginBottom: '1.5rem' }}>
-              {BARRAS.map((h, i) => (
-                <span
-                  key={i}
-                  className="radgen-barra"
-                  style={{
-                    display: 'block',
-                    width: '3px',
-                    height: `${h}%`,
-                    borderRadius: '2px',
-                    background: 'linear-gradient(180deg, #8fb4ff, #3a7bff)',
-                    animationDelay: `${i * 0.09}s`,
-                  }}
-                />
-              ))}
-            </div>
-
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              color: '#8fb4ff',
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 600,
-              fontSize: '0.7rem',
-              letterSpacing: '0.35em',
-              textTransform: 'uppercase',
-              padding: '0.5rem 1.25rem',
-              borderRadius: '999px',
-              border: '1px solid rgba(58,123,255,0.35)',
-              backgroundColor: 'rgba(58,123,255,0.08)',
-              marginBottom: '1.75rem',
-            }}>
-              <span style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: '#8fb4ff',
-                animation: 'radgenLiveDot 1.8s ease-in-out infinite',
-              }} />
-              Señal en camino
-            </span>
-
-            <h1 style={{
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 800,
-              fontSize: 'clamp(2.1rem, 5.5vw, 3.2rem)',
-              letterSpacing: '-0.02em',
-              lineHeight: 1.08,
-              marginBottom: '1.5rem',
-            }}>
-              Algo grande{' '}
-              <span style={{
-                background: 'linear-gradient(90deg, #8fb4ff, #3a7bff)',
-                WebkitBackgroundClip: 'text',
-                backgroundClip: 'text',
-                color: 'transparent',
-                fontStyle: 'italic',
-              }}>
-                está por llegar.
-              </span>
-            </h1>
-
-            <div style={{
-              width: '48px',
-              height: '3px',
-              borderRadius: '999px',
-              background: 'linear-gradient(90deg, #3a7bff, #8fb4ff)',
-              margin: '0 auto 1.5rem auto',
-            }} />
-
-            <p style={{
-              fontFamily: 'Inter, sans-serif',
-              fontSize: 'clamp(0.95rem, 2vw, 1.1rem)',
-              color: 'rgba(245,243,238,0.65)',
-              lineHeight: 1.8,
-              marginBottom: 0,
-            }}>
-              Estamos preparando{' '}
-              <strong style={{
-                display: 'inline-block',
-                whiteSpace: 'nowrap',
-                background: 'linear-gradient(90deg, #F5F3EE, #8fb4ff)',
-                WebkitBackgroundClip: 'text',
-                backgroundClip: 'text',
-                color: 'transparent',
-                fontWeight: 700,
-              }}>
-                RadGen Education
-              </strong>
-              {' '}— vuelve pronto.
-            </p>
-
-            <div style={{
-              marginTop: '2.25rem',
-              paddingTop: '2rem',
-              borderTop: '1px solid rgba(58,123,255,0.2)',
-            }}>
-              <p style={{
-                fontFamily: 'Inter, sans-serif',
-                fontWeight: 600,
-                fontSize: 'clamp(0.95rem, 2vw, 1.05rem)',
-                color: '#F5F3EE',
-                marginBottom: '1.25rem',
-              }}>
-                Únete a esta generación{' '}
-                <span style={{
-                  background: 'linear-gradient(90deg, #8fb4ff, #3a7bff)',
-                  WebkitBackgroundClip: 'text',
-                  backgroundClip: 'text',
-                  color: 'transparent',
-                  fontStyle: 'italic',
-                }}>
-                  apasionada por Dios
-                </span>
-              </p>
-
-              <a
-                href="https://www.instagram.com/radgen.mx/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="radgen-cta"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
-                </svg>
-                Síguenos en Instagram
-              </a>
-            </div>
+      <section className="hero">
+        <div className="hero-copy">
+          <span className="tag-pill">🔥 Ministerio de jóvenes</span>
+          <h1>Una generación con <span>identidad</span> y propósito.</h1>
+          <p>RadGen es tu lugar: fe real, amigos de verdad y un propósito que vale la pena.</p>
+          <div className="hero-actions">
+            <a href="#registro" className="btn btn-blue">Ya quiero ir</a>
+            <a href="#proposito" className="btn btn-outline">Conoce el ministerio</a>
           </div>
         </div>
 
-      </div>
+        <div className="hero-visual">
+          <div className="mascot-card">
+            <img src="/sky-mascota.png" alt="Sky, mascota de RadGen" />
+            <div className="float-badge badge-1">¡Soy Sky! 🦅</div>
+            <div className="float-badge badge-2">RADGEN MX</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="proposito">
+        <div className="section-head">
+          <span className="eyebrow">Nuestro propósito</span>
+          <h2>Esto queremos formar en ti</h2>
+        </div>
+        <div className="chip-row">
+          {PROPOSITO.map(({ icon: Icon, titulo, color }) => (
+            <div key={titulo} className={`chip ${color}`}>
+              <div className="chip-icon"><Icon size={16} strokeWidth={2.5} /></div>
+              {titulo}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id="vision">
+        <div className="section-head">
+          <span className="eyebrow">Visión</span>
+          <h2>Así nos gustaría verte</h2>
+          <p>No buscamos solo llenar sillas, buscamos vidas que le den la vuelta a todo.</p>
+        </div>
+        <div className="vision-grid">
+          <div>
+            <span className="mini-label">Lo que soñamos</span>
+            <VisionInteractiva />
+          </div>
+          <div>
+            <span className="mini-label">¿Cómo?</span>
+            <ul className="check-list">
+              {COMO.map((item) => (
+                <li key={item}>
+                  <b>✓</b>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="pilares">
+        <div className="pilares-head">
+          <span className="pilar-tag">En esto nos ponemos las pilas</span>
+          <h2>Nuestros pilares</h2>
+        </div>
+        <div className="pilar-list">
+          {PILARES.map(({ icon: Icon, titulo, desc, color }) => (
+            <div key={titulo} className="pilar-row">
+              <div className={`pilar-icon ${color}`}><Icon size={18} strokeWidth={2.25} /></div>
+              <div>
+                <b>{titulo}</b>
+                <span>{desc}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id="galeria">
+        <div className="section-head">
+          <span className="eyebrow">Nuestra gente</span>
+          <h2>Así se ve esto 📸</h2>
+        </div>
+        <GaleriaRadgen />
+        <div className="insta-strip">
+          <div className="insta-strip-top">
+            <span><IconoInstagram size={16} /> @radgen.mx</span>
+            <a href="https://www.instagram.com/radgen.mx/" target="_blank" rel="noopener noreferrer" className="btn btn-blue">Seguir</a>
+          </div>
+          <div className="insta-tags">
+            <span className="insta-tag">Reels</span>
+            <span className="insta-tag">Historias</span>
+            <span className="insta-tag">Detrás de cámaras</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="registro">
+        <div className="registro-card">
+          <h2>Únete a RadGen</h2>
+          <p>Déjanos tus datos y el equipo te contacta para que vengas a la próxima reunión.</p>
+          <FormularioRegistro />
+        </div>
+      </section>
+
+      <section id="faq">
+        <div className="section-head">
+          <span className="eyebrow">Preguntas frecuentes</span>
+          <h2>Lo que más nos preguntan</h2>
+        </div>
+        <FaqAcordeon />
+      </section>
+
+      <section id="educacion">
+        <div className="edu-card">
+          <span className="edu-badge">⏳ Ya casi</span>
+          <div className="edu-icon"><GraduationCap size={28} strokeWidth={2.25} /></div>
+          <h2>RadGen Education</h2>
+          <p>Una plataforma para crecer en tu fe a tu ritmo. Se viene pronto.</p>
+        </div>
+      </section>
+
+      <section className="footer-cta">
+        <h2>Tu lugar en esta <span>generación</span></h2>
+        <p>Ven un sábado. Así de fácil.</p>
+        <a href="#registro" className="btn btn-blue">Quiero unirme</a>
+        <div className="footer-brand">
+          <img src="/radgen-logo.png" alt="Logo RadGen" />
+          <span className="footer-brand-name">Radical Generation México</span>
+          <span className="footer-brand-copy">© 2026 Águilas Centro Familiar Cristiano Tizayuca</span>
+        </div>
+      </section>
     </div>
+  )
+}
+
+function VisionInteractiva() {
+  const [marcados, setMarcados] = useState(() => VISION.map(() => false))
+  const total = marcados.filter(Boolean).length
+
+  const alternar = (i) => {
+    setMarcados((prev) => prev.map((v, idx) => (idx === i ? !v : v)))
+  }
+
+  return (
+    <div>
+      <div className="path-card">
+        {VISION.map((item, i) => (
+          <button
+            key={item}
+            type="button"
+            className={`row-item${marcados[i] ? ' marcado' : ''}`}
+            onClick={() => alternar(i)}
+            aria-pressed={marcados[i]}
+          >
+            <div className="row-num">{marcados[i] ? <Check size={15} strokeWidth={3} /> : i + 1}</div>
+            <span>{item}</span>
+          </button>
+        ))}
+      </div>
+      <p className="vision-hint">
+        {total === 0 && 'Toca las que ya vives 👆'}
+        {total > 0 && total < VISION.length && `Vas viviendo ${total} de ${VISION.length} 🔥`}
+        {total === VISION.length && '¡Las vives todas! Eso es RadGen 🙌'}
+      </p>
+    </div>
+  )
+}
+
+function GaleriaRadgen() {
+  const [fotos, setFotos] = useState([])
+  const [cargando, setCargando] = useState(true)
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, 'galeria'),
+      (snapshot) => {
+        const docs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
+        const deRadgen = docs.filter((d) => d.seccion === 'radgen')
+        deRadgen.sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0))
+        setFotos(deRadgen)
+        setCargando(false)
+      },
+      () => setCargando(false)
+    )
+    return () => unsubscribe()
+  }, [])
+
+  if (cargando) return null
+
+  if (fotos.length === 0) {
+    return (
+      <div className="galeria-empty">
+        <ImageOff size={32} strokeWidth={1.75} />
+        <p>Muy pronto compartiremos aquí fotos de nuestras reuniones.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="galeria-grid">
+      {fotos.map((f, i) => (
+        <div key={f.id} className="galeria-frame">
+          <img src={f.imagenUrl} alt={`Momento RadGen ${i + 1}`} loading="lazy" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function FaqAcordeon() {
+  const [abierta, setAbierta] = useState(0)
+
+  return (
+    <div className="faq-list">
+      {FAQS.map((item, i) => (
+        <div key={item.q} className={`faq-item ${abierta === i ? 'open' : ''}`}>
+          <button className="faq-question" onClick={() => setAbierta(abierta === i ? -1 : i)}>
+            {item.q}
+            <ChevronDown size={18} strokeWidth={2.5} />
+          </button>
+          <div className="faq-answer">
+            <p>{item.a}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function FormularioRegistro() {
+  const [form, setForm] = useState({ nombre: '', telefono: '', edad: '', mensaje: '' })
+  const [enviando, setEnviando] = useState(false)
+  const [enviado, setEnviado] = useState(false)
+
+  const cambiar = (campo) => (e) => setForm((f) => ({ ...f, [campo]: e.target.value }))
+
+  const enviar = async (e) => {
+    e.preventDefault()
+    if (!form.nombre.trim() || !form.telefono.trim()) return
+    setEnviando(true)
+    try {
+      await addDoc(collection(db, 'radgenRegistros'), {
+        nombre: form.nombre.trim(),
+        telefono: form.telefono.trim(),
+        edad: form.edad.trim() || null,
+        mensaje: form.mensaje.trim() || null,
+        atendido: false,
+        creado: serverTimestamp(),
+      })
+      setEnviado(true)
+    } catch (error) {
+      console.error(error)
+      alert('Hubo un error al enviar tus datos. Intenta de nuevo.')
+    } finally {
+      setEnviando(false)
+    }
+  }
+
+  if (enviado) {
+    return (
+      <div className="registro-ok">
+        <b>¡Listo! 🎉</b>
+        <span>Ya tenemos tus datos, el equipo de RadGen te va a contactar pronto.</span>
+      </div>
+    )
+  }
+
+  return (
+    <form className="registro-form" onSubmit={enviar}>
+      <div>
+        <label htmlFor="rg-nombre">Nombre</label>
+        <input id="rg-nombre" type="text" required value={form.nombre} onChange={cambiar('nombre')} placeholder="Tu nombre" />
+      </div>
+      <div>
+        <label htmlFor="rg-telefono">Teléfono / WhatsApp</label>
+        <input id="rg-telefono" type="tel" required value={form.telefono} onChange={cambiar('telefono')} placeholder="771 123 4567" />
+      </div>
+      <div>
+        <label htmlFor="rg-edad">Edad (opcional)</label>
+        <input id="rg-edad" type="number" min="10" max="30" value={form.edad} onChange={cambiar('edad')} placeholder="16" />
+      </div>
+      <div>
+        <label htmlFor="rg-mensaje">Mensaje (opcional)</label>
+        <textarea id="rg-mensaje" rows={3} value={form.mensaje} onChange={cambiar('mensaje')} placeholder="Cuéntanos algo, o pregúntanos lo que quieras" />
+      </div>
+      <button type="submit" className="btn btn-blue registro-submit" disabled={enviando}>
+        {enviando ? 'Enviando...' : 'Quiero unirme'}
+      </button>
+    </form>
   )
 }
 

@@ -6,6 +6,7 @@ import Anuncios from '../components/Anuncios'
 import Servicios from '../components/Servicios'
 import Nosotros from '../components/Nosotros'
 import Valores from '../components/Valores'
+import RadGenPromo from '../components/RadGenPromo'
 import Galeria from '../components/Galeria'
 import Contacto from '../components/Contacto'
 import Footer from '../components/Footer'
@@ -36,6 +37,7 @@ function PaginaPrincipal() {
       <Servicios />
       <Nosotros />
       <Valores />
+      <RadGenPromo />
       <Galeria />
       <Contacto />
       <RedesSociales />

@@ -40,7 +40,7 @@ function Valores() {
           textTransform: 'uppercase',
           marginBottom: '1rem',
         }}>
-          Lo que nos define
+          En lo que creemos
         </p>
         <h2 style={{
           fontFamily: 'Montserrat, sans-serif',
