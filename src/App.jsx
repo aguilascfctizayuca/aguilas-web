@@ -1,6 +1,7 @@
 import { Routes, Route, Outlet } from 'react-router-dom'
 import PaginaPrincipal from './pages/PaginaPrincipal'
 import RadGen from './pages/RadGen'
+import Bienvenida from './pages/Bienvenida'
 import Admin from './pages/Admin'
 import { PortalAuthProvider } from './portal/PortalAuthContext'
 import PortalLogin from './portal/PortalLogin'
@@ -28,6 +29,7 @@ function App() {
     <Routes>
       <Route path="/" element={<PaginaPrincipal />} />
       <Route path="/radgen" element={<RadGen />} />
+      <Route path="/bienvenida" element={<Bienvenida />} />
       <Route path="/admin" element={<Admin />} />
 
       <Route path="/lideres" element={<PortalLayout />}>
